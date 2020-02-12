@@ -1,18 +1,18 @@
 /* eslint-disable no-param-reassign */
-import _ from 'lodash';
-import validator from 'validator';
-import crypto from 'crypto';
-import { promisify } from 'util';
-import nodemailer from 'nodemailer';
-import utils from '../services/utility';
-import {
+const _ =  require('lodash');
+const validator = require('validator');
+const crypto = require('crypto');
+const { promisify } = require('util');
+const nodemailer = require('nodemailer');
+const utils = require('../services/utility');
+const {
   errorResponse,
   validationError,
   successResponse,
   unauthorizedResponse,
   successResponseWithData,
-} from '../services/apiResponse';
-import { adminRole, allRoles } from '../services/const';
+} = require('../services/apiResponse');
+const { adminRole, allRoles } = require('../services/const');
 
 
 const randomBytesAsync = promisify(crypto.randomBytes);
@@ -23,7 +23,7 @@ const UserSchema = require('../models').userSchema;
   Perform login and return JWT token
 */
 
-export function signIn(req, res) {
+exports.signIn = (req, res) => {
   return successResponseWithData(res, 'Sign in successfull', {
     token: utils.tokenForUser(req.user),
     email: req.user.email,
@@ -34,8 +34,10 @@ export function signIn(req, res) {
   Perform signup operation with email and password
 */
 
-export function signUp(req, res, next) {
-  const { email, password } = req.body;
+exports.signUp = (req, res, next) => {
+  const { email, password, role, name, confirmPassword } = req.body;
+  if (password !== confirmPassword) return validationError(res, 'Passwords do not match');
+  if (!allRoles.includes(role)) return validationError(res, 'Role is invalid');
   if (!validator.isEmail(email)) return validationError(res, 'Email is invalid');
   if (!validator.isLength(password, { min: 6 })) return validationError(res, 'Password length must be >= 6');
 
@@ -45,12 +47,15 @@ export function signUp(req, res, next) {
     const user = new UserSchema({
       email: validator.normalizeEmail(email, { gmail_remove_dots: false }),
       password,
+      role,
+      name,
     });
     return user.save((saveErr) => {
       if (saveErr) next(saveErr);
       return successResponseWithData(res, 'Sign up successfull', {
-        token: utils.tokenForUser(req.user),
-        email: req.user.email,
+        token: utils.tokenForUser(user),
+        email: user.email,
+        role: user.role,
       });
     });
   });
@@ -60,8 +65,9 @@ export function signUp(req, res, next) {
   Perform signup operation with email and password for 3rd person and send invite link
 */
 
-export function signUpForRegularUser(req, res, next) {
-  const { email } = req.body;
+exports.signUpForRegularUser = (req, res, next) => {
+  const { email, role, name } = req.body;
+  if (!allRoles.includes(role)) return validationError(res, 'Role is invalid');
   if (!validator.isEmail(email)) return validationError(res, 'Email is invalid');
 
   const password = utils.generatePassword();
@@ -75,6 +81,8 @@ export function signUpForRegularUser(req, res, next) {
       password,
       passwordResetToken: token,
       passwordResetExpires: Date.now() + 3600000, // 1 hour
+      role,
+      name,
     });
     newUser.save();
     return newUser;
@@ -116,7 +124,7 @@ export function signUpForRegularUser(req, res, next) {
  * Update profile information.
  */
 exports.postUpdateProfile = (req, res, next) => {
-  let { email } = req.body;
+  let { email, name } = req.body;
   if (!validator.isEmail(email)) return validationError(res, 'Email is invalid');
   email = validator.normalizeEmail(email, { gmail_remove_dots: false });
 
@@ -124,8 +132,7 @@ exports.postUpdateProfile = (req, res, next) => {
     if (err) { return next(err); }
     if (user.email !== email) user.emailVerified = false;
     user.email = email || '';
-    user.profile.name = req.body.name || '';
-    user.profile.bio = req.body.bio || '';
+    user.name = name || '';
     return user.save((saveErr) => {
       if (saveErr) {
         if (saveErr.code === 11000) {
@@ -144,7 +151,7 @@ exports.postUpdateProfile = (req, res, next) => {
  */
 exports.postUpdateUnownedProfile = (req, res, next) => {
   const {
-    id, name, bio, role,
+    id, name, role,
   } = req.body;
   let { email } = req.body;
   if (id == null) return validationError(res, 'Account id is invalid');
@@ -156,10 +163,9 @@ exports.postUpdateUnownedProfile = (req, res, next) => {
     if (err) { return next(err); }
     if (!adminRole.includes(user.role)) return unauthorizedResponse(res, 'You cannot update admins\'s account!');
     if (user.email !== email) user.emailVerified = false;
-    user.role = role || 'user';
+    user.role = role || 'client';
     user.email = email || '';
-    user.profile.name = name || '';
-    user.profile.bio = bio || '';
+    user.name = name || '';
     return user.save((saveErr) => {
       if (saveErr) {
         if (saveErr.code === 11000) {
@@ -202,35 +208,6 @@ exports.postDeleteAccount = (req, res, next) => {
   });
 };
 
-/**
- * GET /account/unlink/:provider
- * Unlink OAuth provider.
- */
-exports.getOauthUnlink = (req, res, next) => {
-  const { provider } = req.params;
-  UserSchema.findById(req.user.id, (err, user) => {
-    if (err) { return next(err); }
-    user[provider.toLowerCase()] = undefined;
-    const tokensWithoutProviderToUnlink = user.tokens.filter(
-      (token) => token.kind !== provider.toLowerCase(),
-    );
-    // Some auth providers do not provide an email address in the user profile.
-    // As a result, we need to verify that unlinking the provider is safe by ensuring
-    // that another login method exists.
-    if (
-      !(user.email && user.password)
-      && tokensWithoutProviderToUnlink.length === 0
-    ) {
-      return errorResponse(res, `The ${_.startCase(_.toLower(provider))} account cannot be unlinked without another form of login enabled.`
-      + ' Please link another account or add an email address and password.');
-    }
-    user.tokens = tokensWithoutProviderToUnlink;
-    return user.save((saveErr) => {
-      if (saveErr) { return next(saveErr); }
-      return successResponse(res, `${_.startCase(_.toLower(provider))} account has been unlinked.`);
-    });
-  });
-};
 
 /**
  * POST /forgot
@@ -340,80 +317,3 @@ exports.postReset = (req, res, next) => {
     .catch((err) => next(err));
 };
 
-/**
- * GET /account/verify/:token
- * Verify email address
- */
-exports.getVerifyEmailToken = (req, res) => {
-  if (req.user.emailVerified) return validationError(res, 'Email has already been verified');
-  const { token } = req.params.token;
-  if (token && (!validator.isHexadecimal(token))) return validationError(res, 'Invalid token, please try again');
-
-  if (token === req.user.emailVerificationToken) {
-    return UserSchema
-      .findOne({ email: req.user.email })
-      .then((user) => {
-        if (!user) {
-          req.flash('errors', { msg: 'There was an error in loading your profile.' });
-          return res.redirect('back');
-        }
-        user.emailVerificationToken = '';
-        user.emailVerified = true;
-        user = user.save();
-        return successResponse(res, 'Emails has been successfully verified');
-      })
-      .catch(() => errorResponse(res, 'There was an error when updating your profile.  Please try again later.'));
-  }
-  return validationError(res, 'Invalid token, please try again');
-};
-
-/**
- * GET /account/verify
- * Verify email address
- */
-exports.getVerifyEmail = (req, res, next) => {
-  if (req.user.emailVerified) return validationError(res, 'Email has already been verified');
-  const { email } = req.body;
-  if (!validator.isEmail(email)) return validationError(res, 'Email is invalid');
-
-  const createRandomToken = randomBytesAsync(16)
-    .then((buf) => buf.toString('hex'));
-
-  const setRandomToken = (token) => {
-    UserSchema
-      .findOne({ email: req.user.email })
-      .then((user) => {
-        user.emailVerificationToken = token;
-        user = user.save();
-      });
-    return token;
-  };
-
-  const sendVerifyEmail = (token) => {
-    const transporter = nodemailer.createTransport({
-      service: 'SendGrid',
-      auth: {
-        user: process.env.SENDGRID_USER,
-        pass: process.env.SENDGRID_PASSWORD,
-      },
-    });
-    const mailOptions = {
-      to: req.user.email,
-      from: 'no-reply@irakli.com',
-      subject: 'Please verify your email address on Hackathon Starter',
-      text: `Thank you for registering with hackathon-starter.\n\n
-        This verify your email address please click on the following link, or paste this into your browser:\n\n
-        http://${req.headers.host}/account/verify/${token}\n\n
-        \n\n
-        Thank you!`,
-    };
-    return transporter.sendMail(mailOptions)
-      .then(() => successResponse(res, `An e-mail has been sent to ${req.user.email} with further instructions.`))
-      .catch(() => errorResponse(res, 'Token has been generated but could not send an email'));
-  };
-
-  return createRandomToken
-    .then(setRandomToken)
-    .then(sendVerifyEmail)
-    .catch(next);
-};

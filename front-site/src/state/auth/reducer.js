@@ -1,9 +1,12 @@
 import { SET_USER_AUTH_INFO } from 'state/auth/types';
 
 const initialState = {
-  username: null,
-  authenticated: true,
-  role: null,
+  auth: {
+    username: null,
+    authenticated: false,
+    role: null,
+  },
+  error: null,
 };
 
 const reducer = (state = initialState, action = {}) => {

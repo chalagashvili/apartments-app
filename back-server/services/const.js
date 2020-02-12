@@ -1,4 +1,4 @@
-export const allRoles = ['regular', 'manager', 'admin'];
-export const regularRole = ['regular', 'manager', 'admin'];
-export const managerRole = ['manager', 'admin'];
-export const adminRole = ['admin'];
+exports.allRoles = ['client', 'realtor', 'admin'];
+exports.clientRole = ['client', 'realtor', 'admin'];
+exports.realtorRole = ['realtor', 'admin'];
+exports.adminRole = ['admin'];

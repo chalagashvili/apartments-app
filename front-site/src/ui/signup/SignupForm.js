@@ -23,7 +23,7 @@ class SignupForm extends React.Component {
   compareToFirstPassword = (rule, value, callback) => {
     const { form, intl } = this.props;
     if (value && value !== form.getFieldValue('password')) {
-      callback(intl.formatMessage({ id: 'app.passwordsDontMatch' }));
+      callback('app.passwordsDontMatch');
     } else {
       callback();
     }
@@ -34,6 +34,7 @@ class SignupForm extends React.Component {
     this.props.form.validateFields((err, values) => {
       if (!err) {
         console.log('Received values of form: ', values);
+        this.props.onSubmit(values);
       }
     });
   };
@@ -127,7 +128,7 @@ class SignupForm extends React.Component {
           <Form.Item
             label={intl.formatMessage({ id: 'app.fullname' })}
           >
-            {getFieldDecorator('fullname', {
+            {getFieldDecorator('name', {
             rules: [{ required: false, whitespace: false }],
           })(<Input type="name" />)}
           </Form.Item>
@@ -161,6 +162,7 @@ SignupForm.propTypes = {
     isFieldTouched: PropTypes.func.isRequired,
     getFieldError: PropTypes.func.isRequired,
   }).isRequired,
+  onSubmit: PropTypes.func.isRequired,
 };
 
 export default Form.create({ name: 'normal_signup' })(injectIntl(SignupForm));

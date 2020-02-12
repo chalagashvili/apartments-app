@@ -2,7 +2,6 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Layout } from 'antd';
 import MenuContainer from 'ui/menu/MenuContainer';
-import LanguageSelectContainer from 'ui/common/LanguageSelect/LanguageSelectContainer';
 
 const { Header, Content, Footer } = Layout;
 
@@ -11,7 +10,7 @@ const InternalPage = ({ className, children, menuItems }) => (
   <Layout className={['layout', 'InternalPage', className].join(' ').trim()}>
     <Header>
       <div className="logo" />
-      <LanguageSelectContainer />
+      
       <MenuContainer menuItems={menuItems} />
     </Header>
     <Content className="InternalPage__content">

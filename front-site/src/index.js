@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 import { Router } from 'react-router-dom';
 import { history } from 'app-init/router';
+import 'app-init/auth';
 import store from 'state/store';
 import 'app-init/locale';
 import App from 'ui/app/App';

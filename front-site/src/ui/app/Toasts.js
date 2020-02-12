@@ -1,12 +1,19 @@
-import React, { Component } from 'react';
+import React from 'react';
+import PropTypes from 'prop-types';
+import { message } from 'antd';
 
-// eslint-disable-next-line react/prefer-stateless-function
-export default class Toasts extends Component {
-  render() {
-    return (
-      <div>
-        Here are the toasts!!!
-      </div>
-    );
-  }
-}
+const Toasts = ({ error }) => (
+  <React.Fragment>
+    { error && message.error(error)}
+  </React.Fragment>
+)
+
+Toasts.propTypes = {
+  error: PropTypes.string,
+};
+
+Toasts.defaultProps = {
+  error: null,
+};
+
+export default Toasts;
