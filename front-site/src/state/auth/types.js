@@ -1,0 +1,1 @@
+export const SET_USER_AUTH_INFO = 'auth/set-user-auth-info';

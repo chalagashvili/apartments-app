@@ -1,0 +1,18 @@
+.LanguageSelect {
+  text-align: right;
+  float: right;
+  &__button {
+    outline: none;
+  }
+  &__icon {
+    cursor: pointer;
+    width: 20px;
+    height: 20px;
+    margin-right: 10px;
+
+    &--active {
+      width: 30px;
+      height: 30px;
+    }
+  }
+}

@@ -1,0 +1,33 @@
+.LoginPage {
+  height: 100vh;
+
+  &__welcome{
+    text-align: center;
+    margin-top: 30px;
+  }
+
+  &__prelude{
+    text-align: center;
+  }
+
+  &__title {
+    text-align: center;
+  }
+}
+
+.LoginFormWrapper {
+  margin-top: 1em;
+  display: flex;
+  justify-content: center;
+  .login-form {
+    max-width: 300px;
+  }
+  
+  .login-form-forgot {
+    align-self: center;
+  }
+  
+  .login-form-button {
+    width: 100%;
+  }
+}
