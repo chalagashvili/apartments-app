@@ -1,4 +1,3 @@
-const _ = require('lodash');
 const passport = require('passport');
 const LocalStrategy = require('passport-local');
 const { Strategy: JwtStrategy, ExtractJwt } = require('passport-jwt');
@@ -12,14 +11,14 @@ const localLogin = new LocalStrategy(localOptions, (email, password, done) => {
       return done(err);
     }
     if (!user) {
-      return done(null, false);
+      return done(null, false, { message: 'Email or password is incorrect.' });
     }
     return user.comparePassword(password, (cmpErr, isMatch) => {
       if (cmpErr) {
         return done(cmpErr);
       }
       if (!isMatch) {
-        return done(null, false);
+        return done(null, false, { message: 'Email or password is incorrect.' });
       }
       return done(null, user);
     });
@@ -37,7 +36,7 @@ const jwtLogin = new JwtStrategy(jwtOptions, (payload, done) => {
     if (user) {
       return done(null, user);
     }
-    return done(null, false);
+    return done(null, false, { message: 'Auth token is invalid' });
   });
 });
 

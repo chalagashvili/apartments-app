@@ -1,7 +1,7 @@
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
 
-import Menu from 'ui/menu/Menu';
+import Menu from 'ui/common/Menu/Menu';
 import { getAuthInfo } from 'state/auth/selectors';
 
 const mapStateToProps = (state, { history }) => ({

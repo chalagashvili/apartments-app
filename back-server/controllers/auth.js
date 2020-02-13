@@ -1,5 +1,4 @@
 /* eslint-disable no-param-reassign */
-const _ =  require('lodash');
 const validator = require('validator');
 const crypto = require('crypto');
 const { promisify } = require('util');
@@ -23,19 +22,20 @@ const UserSchema = require('../models').userSchema;
   Perform login and return JWT token
 */
 
-exports.signIn = (req, res) => {
-  return successResponseWithData(res, 'Sign in successfull', {
-    token: utils.tokenForUser(req.user),
-    email: req.user.email,
-  });
-}
+exports.signIn = (req, res) => successResponseWithData(res, 'Sign in successfull', {
+  token: utils.tokenForUser(req.user),
+  email: req.user.email,
+  role: req.user.role,
+});
 
 /*
   Perform signup operation with email and password
 */
 
 exports.signUp = (req, res, next) => {
-  const { email, password, role, name, confirmPassword } = req.body;
+  const {
+    email, password, role, name, confirmPassword,
+  } = req.body;
   if (password !== confirmPassword) return validationError(res, 'Passwords do not match');
   if (!allRoles.includes(role)) return validationError(res, 'Role is invalid');
   if (!validator.isEmail(email)) return validationError(res, 'Email is invalid');
@@ -59,7 +59,7 @@ exports.signUp = (req, res, next) => {
       });
     });
   });
-}
+};
 
 /*
   Perform signup operation with email and password for 3rd person and send invite link
@@ -94,8 +94,7 @@ exports.signUpForRegularUser = (req, res, next) => {
     const transporter = nodemailer.createTransport({
       service: 'SendGrid',
       auth: {
-        user: process.env.SENDGRID_USER,
-        pass: process.env.SENDGRID_PASSWORD,
+        api_key: process.env.SENDGRID_API_KEY,
       },
     });
     const mailOptions = {
@@ -117,14 +116,15 @@ exports.signUpForRegularUser = (req, res, next) => {
     .then(createNewUser)
     .then(sendForgotPasswordEmail)
     .catch(next);
-}
+};
 
 /**
  * POST
  * Update profile information.
  */
 exports.postUpdateProfile = (req, res, next) => {
-  let { email, name } = req.body;
+  const { name } = req.body;
+  let { email } = req.body;
   if (!validator.isEmail(email)) return validationError(res, 'Email is invalid');
   email = validator.normalizeEmail(email, { gmail_remove_dots: false });
 
@@ -240,8 +240,7 @@ exports.postForgot = (req, res, next) => {
     const transporter = nodemailer.createTransport({
       service: 'SendGrid',
       auth: {
-        user: process.env.SENDGRID_USER,
-        pass: process.env.SENDGRID_PASSWORD,
+        api_key: process.env.SENDGRID_API_KEY,
       },
     });
     const mailOptions = {
@@ -297,8 +296,7 @@ exports.postReset = (req, res, next) => {
     const transporter = nodemailer.createTransport({
       service: 'SendGrid',
       auth: {
-        user: process.env.SENDGRID_USER,
-        pass: process.env.SENDGRID_PASSWORD,
+        api_key: process.env.SENDGRID_API_KEY,
       },
     });
     const mailOptions = {
@@ -316,4 +314,3 @@ exports.postReset = (req, res, next) => {
     .then(sendResetPasswordEmail)
     .catch((err) => next(err));
 };
-
