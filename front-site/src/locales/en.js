@@ -28,5 +28,11 @@ export default {
     'app.provideRole': 'Please select role!',
     'app.client': 'Client',
     'app.realtor': 'Realtor',
+    'app.submit': 'Submit',
+    'app.forgotPasswordTitle': 'Please enter your email address to send reset password link',
+    'app.enterNewPassword': 'Enter New Password',
+    'app.resetPassword': 'Reset Password',
+    'app.setNewPassword': 'Set new password',
+    'app.users': 'Users',
   },
 };

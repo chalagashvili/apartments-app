@@ -28,5 +28,11 @@ export default {
     'app.provideRole': 'Odaberite ulogu!',
     'app.client': 'Klijent',
     'app.realtor': 'Agent za nekretnine',
+    'app.submit': 'Podnijeti',
+    'app.forgotPasswordTitle': 'Unesite svoju adresu e-pošte da biste poslali vezu za resetiranje zaporke',
+    'app.enterNewPassword': 'Unesite novu lozinku',
+    'app.resetPassword': 'Resetiranje lozinke',
+    'app.setNewPassword': 'Postavite novu lozinku',
+    'app.users': 'Korisnici',
   },
 };
