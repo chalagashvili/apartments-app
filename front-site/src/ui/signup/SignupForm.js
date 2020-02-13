@@ -16,14 +16,10 @@ class SignupForm extends React.Component {
     this.props.form.validateFields();
   }
 
-  onRememberMeClicked = (e) => {
-    console.log('Remember me was clicked', e);
-  }
-
   compareToFirstPassword = (rule, value, callback) => {
-    const { form, intl } = this.props;
+    const { form } = this.props;
     if (value && value !== form.getFieldValue('password')) {
-      callback(intl.formatMessage({ id: 'app.passwordsDontMatch' }));
+      callback('app.passwordsDontMatch');
     } else {
       callback();
     }
@@ -33,13 +29,13 @@ class SignupForm extends React.Component {
     e.preventDefault();
     this.props.form.validateFields((err, values) => {
       if (!err) {
-        console.log('Received values of form: ', values);
+        this.props.onSubmit(values);
       }
     });
   };
 
   render() {
-    const { intl, form } = this.props;
+    const { intl, form, loading } = this.props;
     const {
       getFieldDecorator, getFieldsError,
       isFieldTouched, getFieldError,
@@ -127,7 +123,7 @@ class SignupForm extends React.Component {
           <Form.Item
             label={intl.formatMessage({ id: 'app.fullname' })}
           >
-            {getFieldDecorator('fullname', {
+            {getFieldDecorator('name', {
             rules: [{ required: false, whitespace: false }],
           })(<Input type="name" />)}
           </Form.Item>
@@ -135,6 +131,7 @@ class SignupForm extends React.Component {
             <Button
               type="primary"
               htmlType="submit"
+              loading={loading}
               className="login-form-button"
               disabled={hasErrors(getFieldsError())}
             >
@@ -161,6 +158,12 @@ SignupForm.propTypes = {
     isFieldTouched: PropTypes.func.isRequired,
     getFieldError: PropTypes.func.isRequired,
   }).isRequired,
+  onSubmit: PropTypes.func.isRequired,
+  loading: PropTypes.bool,
+};
+
+SignupForm.defaultProps = {
+  loading: false,
 };
 
 export default Form.create({ name: 'normal_signup' })(injectIntl(SignupForm));

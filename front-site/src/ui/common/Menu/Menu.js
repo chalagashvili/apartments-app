@@ -3,15 +3,20 @@ import PropTypes from 'prop-types';
 import { Menu } from 'antd';
 import { FormattedMessage } from 'react-intl';
 import { history, ROUTE_HOME } from 'app-init/router';
+import LanguageSelectContainer from 'ui/common/LanguageSelect/LanguageSelectContainer';
 
-const HorizontalMenu = ({ menuItems, currentRoute }) => (
-  <Menu
-    theme="dark"
-    mode="horizontal"
-    defaultSelectedKeys={[currentRoute]}
-    style={{ lineHeight: '64px' }}
-  >
+const HorizontalMenu = ({ menuItems, currentRoute, auth: { authenticated } }) => (
+  <React.Fragment>
+    {!authenticated && <LanguageSelectContainer />}
     {
+    !authenticated &&
+    <Menu
+      theme="dark"
+      mode="horizontal"
+      defaultSelectedKeys={[currentRoute]}
+      style={{ lineHeight: '64px' }}
+    >
+      {
       menuItems.map(item => (
         <Menu.Item
           key={item.path}
@@ -21,7 +26,9 @@ const HorizontalMenu = ({ menuItems, currentRoute }) => (
         </Menu.Item>
       ))
     }
-  </Menu>
+    </Menu>
+    }
+  </React.Fragment>
 );
 
 HorizontalMenu.propTypes = {
@@ -30,6 +37,9 @@ HorizontalMenu.propTypes = {
     path: PropTypes.string,
   })),
   currentRoute: PropTypes.string,
+  auth: PropTypes.shape({
+    authenticated: PropTypes.bool,
+  }),
 };
 
 HorizontalMenu.defaultProps = {
@@ -40,6 +50,9 @@ HorizontalMenu.defaultProps = {
     },
   ],
   currentRoute: 'home',
+  auth: {
+    authenticated: false,
+  },
 };
 
 export default HorizontalMenu;

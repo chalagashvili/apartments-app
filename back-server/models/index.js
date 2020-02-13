@@ -1,7 +1,5 @@
-import userSchema from './user';
-import assetSchema from './asset';
+const userSchema = require('./user');
 
 module.exports = {
   userSchema,
-  assetSchema
 };

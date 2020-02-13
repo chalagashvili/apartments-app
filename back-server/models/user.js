@@ -1,7 +1,6 @@
-import mongoose from 'mongoose';
-import bcrypt from 'bcrypt-nodejs';
-import moment from 'moment';
-import mongoosePaginate from 'mongoose-paginate';
+const mongoose = require('mongoose');
+const bcrypt = require('bcrypt-nodejs');
+const mongoosePaginate = require('mongoose-paginate');
 
 const { Schema } = mongoose;
 
@@ -14,24 +13,11 @@ const { Schema } = mongoose;
 
 const userSchema = new Schema({
   email: { type: String, unique: true },
-  role: { type: String, default: 'regular' },
+  role: { type: String, default: 'client' },
   password: String,
   passwordResetToken: String,
   passwordResetExpires: Date,
-  emailVerificationToken: String,
-  emailVerified: Boolean,
-  createdAt: { type: Date, default: moment() },
-
-  facebook: String,
-  google: String,
-  github: String,
-  tokens: Array,
-
-  profile: {
-    name: String,
-    bio: String,
-    picture: String,
-  },
+  name: String,
 }, { timestamps: true });
 
 // Pre-save hook for hashing + salting with password

@@ -1,4 +1,4 @@
-import jwt from 'jwt-simple';
+const jwt = require('jwt-simple');
 
 exports.tokenForUser = (user) => {
   const timestamp = new Date().getTime();

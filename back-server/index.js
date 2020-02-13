@@ -1,19 +1,16 @@
 /* eslint-disable no-console */
-import express from 'express';
-
-import cors from 'cors';
-import bodyParser from 'body-parser';
-import morgan from 'morgan';
-import mongoose from 'mongoose';
-import passport from 'passport';
-
-import chalk from 'chalk';
-import rateLimit from 'express-rate-limit';
-import router from './routes';
-
-import { errorResponse } from './services/apiResponse';
-
 require('dotenv').config();
+const express = require('express');
+const cors = require('cors');
+const bodyParser = require('body-parser');
+const morgan = require('morgan');
+const mongoose = require('mongoose');
+const passport = require('passport');
+const chalk = require('chalk');
+const rateLimit = require('express-rate-limit');
+const router = require('./routes/index.js');
+
+const { errorResponse } = require('./services/apiResponse');
 
 const app = express();
 mongoose.connect(process.env.DATABASE_URL, { useNewUrlParser: true });

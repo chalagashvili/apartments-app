@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Crypto Portfolio Management App for Advanced users",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "test": "jest",
     "coverage": "jest --coverage",

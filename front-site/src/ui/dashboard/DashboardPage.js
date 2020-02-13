@@ -1,7 +1,12 @@
-import React, { Component } from 'react'
+import React, { Component } from 'react';
+import InternalPage from 'ui/InternalPage';
 
 export default class DashboardPage extends Component {
   render() {
-    return <div>Say hi to dashboard!</div>
+    return (
+      <InternalPage>
+        Say hi to dashboard!
+      </InternalPage>
+    );
   }
 }

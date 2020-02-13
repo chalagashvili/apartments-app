@@ -23,9 +23,16 @@ const CityList = props => (
           />
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }} >
-            <div style={{ fontSize: 19, color: 'black' }} >{item.title}</div>
+            <div style={{ display: 'flex', justifyContent: 'space-between' }} >
+              <div style={{ fontSize: 19, color: 'black' }} >{item.title}</div>
+              <div style={{
+                fontSize: 13, backgroundColor: '#F7F7F7', borderRadius: 10, padding: '0 10px', fontWeight: 'bold', color: 'black',
+              }}
+              >ⓒ John Lennon
+              </div>
+            </div>
             <div style={{
-              fontSize: 13, paddingBottom: 10, paddingRight: 20,
+              fontSize: 13, paddingBottom: 10, paddingRight: 0,
             }}
             >Very light flat. Available only for the customers who don't have any kind of pet. Smoking is not allowed. Some other descriptions please see below.
             </div>
@@ -35,15 +42,25 @@ const CityList = props => (
               <div style={{ fontSize: 14, color: 'black' }} >3 Rooms</div>
 
             </div>
-            <div style={{ fontSize: 14 }} >Added: 13 Feb 2020</div>
+            <div style={{ fontSize: 12 }} >13 Feb 2020</div>
             <div style={{ display: 'flex', justifyContent: 'space-between' }} >
               <div style={{
-                fontSize: 13, backgroundColor: '#F7F7F7', borderRadius: 10, padding: '0 10px', fontWeight: 'bold', color: 'black',
+                cursor: 'pointer',
+                border: '1px solid black',
+                color: 'rgb(34, 34, 34)',
+                padding: '5px 20px',
+                borderRadius: 5,
+                display: 'flex',
+                alignItems: 'center',
               }}
-              >ⓒ John Lennon
+              >Rent Now
               </div>
               <div style={{
-                fontSize: 17, fontWeight: 'bold', display: 'flex', color: 'black',
+                fontSize: 17,
+                fontWeight: 'bold',
+                display: 'flex',
+                color: 'black',
+
               }}
               >$80{'  '} <div style={{ fontWeight: 'normal' }} >&nbsp; / &nbsp; month</div>
               </div>

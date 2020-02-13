@@ -20,13 +20,13 @@ class LoginForm extends React.Component {
     e.preventDefault();
     this.props.form.validateFields((err, values) => {
       if (!err) {
-        console.log('Received values of form: ', values);
+        this.props.onSubmit(values);
       }
     });
   };
 
   render() {
-    const { intl, form } = this.props;
+    const { intl, form, loading } = this.props;
     const {
       getFieldDecorator, getFieldsError,
       isFieldTouched, getFieldError,
@@ -64,6 +64,7 @@ class LoginForm extends React.Component {
             <Button
               type="primary"
               htmlType="submit"
+              loading={loading}
               className="login-form-button"
               disabled={hasErrors(getFieldsError())}
             >
@@ -91,6 +92,12 @@ LoginForm.propTypes = {
     isFieldTouched: PropTypes.func.isRequired,
     getFieldError: PropTypes.func.isRequired,
   }).isRequired,
+  onSubmit: PropTypes.func.isRequired,
+  loading: PropTypes.bool,
+};
+
+LoginForm.defaultProps = {
+  loading: false,
 };
 
 export default Form.create({ name: 'normal_login' })(injectIntl(LoginForm));
