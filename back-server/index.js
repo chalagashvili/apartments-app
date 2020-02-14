@@ -10,10 +10,10 @@ const chalk = require('chalk');
 const rateLimit = require('express-rate-limit');
 const router = require('./routes/index.js');
 
-const { errorResponse } = require('./services/apiResponse');
+const { errorResponse, notFoundResponse } = require('./services/apiResponse');
 
 const app = express();
-mongoose.connect(process.env.DATABASE_URL, { useNewUrlParser: true });
+mongoose.connect(process.env.DATABASE_URL, { useNewUrlParser: true, useUnifiedTopology: true });
 mongoose.set('useNewUrlParser', true);
 mongoose.set('useFindAndModify', false);
 mongoose.set('useCreateIndex', true);
@@ -24,7 +24,7 @@ mongoose.connection.on('error', (err) => {
 });
 app.use(morgan('combined'));
 app.use(cors());
-app.use((_, res, next) => {
+app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
   res.header(
     'Access-Control-Allow-Headers',
@@ -43,9 +43,16 @@ app.use(jsonParser);
 app.use(passport.initialize());
 router(app);
 app.disable('x-powered-by');
-app.use((err, _, res) => {
-  console.log(err);
-  errorResponse(res, 'Internal Server Error Has Occured! What a Shame...');
+/* Handle Application Errors */
+// eslint-disable-next-line no-unused-vars
+app.use((err, req, res, _next) => {
+  console.error(err.stack);
+  errorResponse(res, 'Something went wrong, try again!');
+});
+/* Handle 404 errors */
+// eslint-disable-next-line no-unused-vars
+app.use((req, res, next) => {
+  notFoundResponse(res, 'No route found for you');
 });
 
 app.listen(4000);
