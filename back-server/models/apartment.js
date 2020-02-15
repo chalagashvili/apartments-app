@@ -1,19 +1,36 @@
-const moment = require('moment');
 const mongoose = require('mongoose');
-const mongoosePaginate = require('mongoose-paginate');
+const mongoosePaginate = require('mongoose-paginate-v2');
+
+const customLabels = {
+  totalDocs: 'totalItems',
+  docs: 'data',
+  limit: 'pageSize',
+  page: 'page',
+  nextPage: 'next',
+  prevPage: 'prev',
+  totalPages: 'lastPage',
+  pagingCounter: 'slNo',
+  meta: 'metadata',
+};
+
+mongoosePaginate.paginate.options = {
+  lean: true,
+  leanWithId: false,
+  customLabels,
+};
 
 const { Schema } = mongoose;
 
 const apartmentSchema = new Schema({
   owner: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-  available: { type: Boolean, required: true },
-  dateAdded: { type: Date, default: moment() },
+  isAvailable: { type: Boolean, default: true },
   name: { type: String, required: true },
   description: { type: String, required: true },
   floorAreaSize: { type: Number, required: true },
   pricePerMonth: { type: Number, required: true },
   numberOfRooms: { type: Number, required: true },
-  location: {
+  imageUrl: { type: String },
+  loc: {
     type: {
       type: String,
       enum: ['Point'],

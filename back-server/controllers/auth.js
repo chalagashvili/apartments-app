@@ -2,7 +2,6 @@
 const validator = require('validator');
 const crypto = require('crypto');
 const { promisify } = require('util');
-const nodemailer = require('nodemailer');
 const utils = require('../services/utility');
 const {
   errorResponse,
@@ -10,7 +9,7 @@ const {
   successResponse,
   successResponseWithData,
 } = require('../services/apiResponse');
-const { allRoles } = require('../services/const');
+const { allRoles, adminRole } = require('../services/const');
 
 
 const randomBytesAsync = promisify(crypto.randomBytes);
@@ -18,6 +17,7 @@ const randomBytesAsync = promisify(crypto.randomBytes);
 const UserSchema = require('../models').userSchema;
 
 /*
+  POST /auth/signIn
   Perform login and return JWT token
 */
 
@@ -28,6 +28,7 @@ exports.signIn = (req, res) => successResponseWithData(res, 'Sign in successfull
 });
 
 /*
+  POST /auth/signUp
   Perform signup operation with email and password
 */
 
@@ -37,6 +38,7 @@ exports.signUp = (req, res, next) => {
   } = req.body;
   if (password !== confirmPassword) return validationError(res, 'Passwords do not match');
   if (!allRoles.includes(role)) return validationError(res, 'Role is invalid');
+  if (adminRole.includes(role)) return validationError(res, 'You cannot sign up as admin');
   if (!validator.isEmail(email)) return validationError(res, 'Email is invalid');
   if (!validator.isLength(password, { min: 6 })) return validationError(res, 'Password length must be >= 6');
 
@@ -61,7 +63,7 @@ exports.signUp = (req, res, next) => {
 };
 
 /**
- * POST /forgot
+ * POST /auth/forgotPassword
  * Generate a random token, then the send user an email with a reset link.
  */
 exports.forgotPassword = (req, res, next) => {
@@ -88,23 +90,18 @@ exports.forgotPassword = (req, res, next) => {
   const sendForgotPasswordEmail = (user) => {
     if (!user) { return; }
     const token = user.passwordResetToken;
-    const transporter = nodemailer.createTransport({
-      service: 'SendGrid',
-      auth: {
-        api_key: process.env.SENDGRID_API_KEY,
-      },
-    });
     const mailOptions = {
       to: user.email,
-      from: 'no-reply@irakli.com',
+      fromEmail: 'no-reply@irakli.com',
+      fromName: 'Estate Company',
       subject: 'Reset your password on Iraklis Assignment',
       text: `You are receiving this email because you (or someone else) have requested the reset of the password for your account.\n\n
         Please click on the following link, or paste this into your browser to complete the process:\n\n
-        http://${req.headers.host}/reset/${token}\n\n
+        http://${process.env.APP_URL}/reset/${token}\n\n
         If you did not request this, please ignore this email and your password will remain unchanged.\n`,
     };
     // eslint-disable-next-line consistent-return
-    return transporter.sendMail(mailOptions)
+    return utils.sendEmail(mailOptions)
       .then(() => successResponse(res, `An e-mail has been sent to ${user.email} with further instructions.`))
       .catch(() => errorResponse(res, 'Password reset token has been generated but could not send an email'));
   };
@@ -116,7 +113,7 @@ exports.forgotPassword = (req, res, next) => {
 };
 
 /**
- * POST /reset/:token
+ * POST /auth/resetPassword/:token
  * Process the reset password request.
  */
 exports.resetPassword = (req, res, next) => {
@@ -144,19 +141,14 @@ exports.resetPassword = (req, res, next) => {
 
   const sendResetPasswordEmail = (user) => {
     if (!user) { return; }
-    const transporter = nodemailer.createTransport({
-      service: 'SendGrid',
-      auth: {
-        api_key: process.env.SENDGRID_API_KEY,
-      },
-    });
     const mailOptions = {
       to: user.email,
-      from: 'no-reply@irakli.com',
+      fromEmail: 'no-reply@irakli.com',
+      fromName: 'Estate Company',
       subject: 'Your Iraklis Assignment password has been changed',
       text: `Hello,\n\nThis is a confirmation that the password for your account ${user.email} has just been changed.\n`,
     };
-    transporter.sendMail(mailOptions)
+    utils.sendMail(mailOptions)
       .then(() => successResponse(res, 'Password has been successfully reset!'))
       .catch(() => {});
   };
@@ -164,4 +156,21 @@ exports.resetPassword = (req, res, next) => {
   return resetPassword()
     .then(sendResetPasswordEmail)
     .catch((err) => next(err));
+};
+
+/*
+ * GET /auth/me
+ * Fetch personal info for a user
+ */
+
+exports.getPersonalInfo = (req, res) => {
+  const {
+    name, role, email, createdAt,
+  } = req.user;
+  return successResponseWithData(res, 'User personal info fetched successfully', {
+    data: [{
+      name, role, email, createdAt,
+    },
+    ],
+  });
 };

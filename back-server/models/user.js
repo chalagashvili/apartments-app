@@ -1,7 +1,25 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt-nodejs');
-const mongoosePaginate = require('mongoose-paginate');
+const mongoosePaginate = require('mongoose-paginate-v2');
 const Apartment = require('./apartment');
+
+const customLabels = {
+  totalDocs: 'totalItems',
+  docs: 'data',
+  limit: 'pageSize',
+  page: 'page',
+  nextPage: 'next',
+  prevPage: 'prev',
+  totalPages: 'lastPage',
+  pagingCounter: 'slNo',
+  meta: 'metadata',
+};
+
+mongoosePaginate.paginate.options = {
+  lean: true,
+  leanWithId: false,
+  customLabels,
+};
 
 const { Schema } = mongoose;
 
@@ -12,7 +30,7 @@ const userSchema = new Schema({
   passwordResetToken: String,
   passwordResetExpires: Date,
   name: String,
-  rentedApartments: [{ type: Schema.Types.ObjectId, ref: 'Apartment' }],
+  bookings: [{ type: Schema.Types.ObjectId, ref: 'Apartment' }],
   ownedApartments: [{ type: Schema.Types.ObjectId, ref: 'Apartment' }],
 }, { timestamps: true });
 
@@ -47,15 +65,12 @@ userSchema.methods.comparePassword = function (candidatePassword, callback) {
 
 function removeLinkedDocuments(doc) {
   if (doc.role === 'realtor') {
-    console.log(doc, 'removing all realtor apartments');
     Apartment.deleteMany({ _id: { $in: doc.ownedApartments } });
   } else if (doc.role === 'client') {
-    console.log(doc, 'freeing up all apartments taken by this client');
     Apartment.updateMany({ _id: { $in: doc.ownedApartments } }, { $set: { available: true } });
   }
 }
 
-userSchema.post('remove', removeLinkedDocuments);
 userSchema.post('deleteOne', { document: true, query: false }, removeLinkedDocuments);
 
 userSchema.plugin(mongoosePaginate);

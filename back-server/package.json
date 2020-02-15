@@ -15,6 +15,7 @@
   "author": "Irakli Chalagashvili",
   "license": "ISC",
   "dependencies": {
+    "@sendgrid/mail": "^6.5.2",
     "bcrypt-nodejs": "0.0.3",
     "body-parser": "^1.19.0",
     "chalk": "^3.0.0",
@@ -27,7 +28,7 @@
     "lodash": "^4.17.15",
     "moment": "^2.24.0",
     "mongoose": "^5.9.0",
-    "mongoose-paginate": "^5.0.3",
+    "mongoose-paginate-v2": "^1.3.6",
     "morgan": "^1.9.1",
     "multer": "^1.4.2",
     "nodemailer": "^6.4.2",

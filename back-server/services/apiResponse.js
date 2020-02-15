@@ -50,7 +50,7 @@ exports.validationErrorWithData = (res, msg, data) => {
 
 exports.unauthorizedResponse = (res, msg) => {
   const data = {
-    status: 0,
+    ok: 0,
     error: msg,
   };
   return res.status(401).json(data);
