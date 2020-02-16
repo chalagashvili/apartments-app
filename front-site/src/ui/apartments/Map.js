@@ -1,59 +1,8 @@
-// import React, { PureComponent } from 'react';
-// import GoogleMapReact, { InfoWindow } from 'google-map-react';
-
-// const AnyReactComponent = ({ text }: any) => <div>{text}</div>;
-
-// export class MapContainer extends PureComponent {
-//   render() {
-//     const { google } = window;
-//     const { data } = this.props;
-//     const { center } = this.props;
-
-//     return (
-//       <div style={{ height: '100vh', width: '100%' }} >
-//         <GoogleMapReact
-//           containerStyle={{
-//             position: 'fixed',
-//           }}
-//         // google={this.props.google}
-//         // className="map"
-//         // zoom={this.props.zoom}
-//         // initialCenter={this.props.center}
-//         >
-//           {/* {data.map(item => (
-//             <AnyReactComponent
-//               lat={11.0168}
-//               lng={76.9558}
-//               text="My Marker"
-//             />
-//           ))}
-
-//           <InfoWindow
-//             visible
-//             position={{
-//               lat: this.props.selectedItem.lat,
-//               lng: this.props.selectedItem.lng,
-//             }}
-//           >
-//             <div>
-//               <h1>{this.props.selectedItem.title}</h1>
-//             </div>
-//           </InfoWindow> */}
-//         </GoogleMapReact>
-//       </div>
-//     );
-//   }
-// }
-
-// export default MapContainer;
-
-import React, { Component } from 'react';
-import GoogleMapReact, { InfoWindow } from 'google-map-react';
+import React, { PureComponent } from 'react';
+import GoogleMapReact from 'google-map-react';
 import Marker from './Marker';
 
-// const AnyReactComponent = ({ text }) => <div>{text}</div>;
-
-class SimpleMap extends Component {
+class SimpleMap extends PureComponent {
   static defaultProps = {
     center: {
       lat: -37.9722342,
@@ -63,11 +12,16 @@ class SimpleMap extends Component {
   };
 
   render() {
-    const { selectedItem } = this.props;
+    const { selectedItem, mapView } = this.props;
 
     return (
       // Important! Always set the container height explicitly
-      <div style={{ height: '100vh', width: '50%' }}>
+      <div
+        className={mapView ? 'mapView' : 'map'}
+        style={{
+          height: '100vh', flex: 1, position: 'sticky', right: 0, top: 0,
+        }}
+      >
         <GoogleMapReact
           bootstrapURLKeys={{ key: 'AIzaSyCbTP4oavyejp7WPxkkjuS2H0eX0mKhya0' }}
           defaultCenter={this.props.center}

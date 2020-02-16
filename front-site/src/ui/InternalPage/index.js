@@ -7,7 +7,7 @@ import SideMenuContainer from 'ui/common/SideMenu/SideMenuContainer';
 const { Header, Content, Footer } = Layout;
 
 
-const InternalPage = ({ className, children }) => (
+const InternalPage = ({ className, children, footerDisabled }) => (
   <Layout style={{ minHeight: '100vh' }}>
     <SideMenuContainer />
     <Layout className={['layout', 'InternalPage', className].join(' ').trim()}>
@@ -17,11 +17,11 @@ const InternalPage = ({ className, children }) => (
       <Content className="InternalPage__content">
         {children}
       </Content>
-      <Footer
+      {footerDisabled ? null : <Footer
         className="footer"
         style={{ textAlign: 'center' }}
       >Toptal Assignment ©2020 Created by Irakli Chalagashvili
-      </Footer>
+      </Footer>}
     </Layout>
   </Layout>
 );

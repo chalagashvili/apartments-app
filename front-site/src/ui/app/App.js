@@ -29,7 +29,9 @@ import LoginPage from 'ui/login/LoginPage';
 import UsersPage from 'ui/users/UsersPage';
 import ResetPasswordPage from 'ui/resetPassword/ResetPasswordPage';
 import ForgotPasswordPage from 'ui/forgotPassword/ForgotPasswordPage';
+import RentedApartments from 'ui/rentedApartments/RentedApartmentsPage';
 import Apartments from 'ui/apartments/ApartmentsForm';
+import AddApartmentPage from 'ui/addApartment/AddApartmentPage';
 // import ToastsContainer from 'ui/app/ToastsContainer';
 import SignupPage from 'ui/signup/SignupPage';
 import LogoutContainer from 'ui/logout/LogoutContainer';
@@ -42,6 +44,7 @@ const Admin = withAuthorization(adminRole);
 const dashboard = Client(withAuthentication(DashboardPage));
 const profile = Client(withAuthentication(ProfilePage));
 const myRentedApartments = Client(withAuthentication(DashboardPage));
+const rentedApartments = Client(withAuthentication(RentedApartments));
 
 // Realtor components
 const addApartment = Realtor(withAuthentication(DashboardPage));
@@ -63,6 +66,12 @@ const App = () => (
       <Route exact path={RESET_PASSWORD} component={ResetPasswordPage} />
       <Route exact path={USERS} component={UsersPage} />
       <Route exact path={APARTMENTS} component={Apartments} />
+      <Route exact path="/app" component={RentedApartments} />
+      <Route exact path="/addApartment" component={AddApartmentPage} />
+      <Route exact path="/editApartment" component={addApartment} />
+      <Route exact path="/addUser" component={addApartment} />
+      <Route exact path="/editUser" component={addApartment} />
+      <Route exact path="/editProfile" component={addApartment} />
       {/* <Route exact path={RESET_PASSWORD} component={ResetPasswordPage} /> */}
       <Route path={ROUTE_DASHBOARD} component={dashboard} />
       <Route path={ROUTE_PROFILE} component={profile} />
@@ -71,9 +80,6 @@ const App = () => (
       <Route exact path={ROUTE_SIGN_UP} component={signup} />
       {/* Add password gen and reset pages */}
       {/* Private (Client) */}
-      <Route exact path={ROUTE_DASHBOARD} component={dashboard} />
-      <Route exact path={ROUTE_PROFILE} component={profile} />
-      <Route exact path={ROUTE_MY_RENTED_APARTMENTS_AS_CLIENT} component={myRentedApartments} />
       {/* Private (Realtor) */}
       <Route exact path={ROUTE_ADD_APARTMENT} component={addApartment} />
       <Route path={ROUTE_EDIT_APARTMENT} component={editApartment} />

@@ -18,38 +18,40 @@ class SideMenu extends Component {
   render() {
     const { auth, intl, currentRoute } = this.props;
     let routes = [];
-    switch (auth.role) {
-      case 'client':
-        routes = clientRoutes;
-        break;
-      case 'realtor':
-        routes = realtorRoutes;
-        break;
-      case 'admin':
-        routes = adminRoutes;
-        break;
-      default:
-        console.error('DID NOT HAVE TO COME HERE...', auth);
-        routes = clientRoutes;
-        break;
-    }
+    routes = clientRoutes;
+    // return;
+    // switch (auth.role) {
+    //   case 'client':
+    //     routes = clientRoutes;
+    //     break;
+    //   case 'realtor':
+    //     routes = realtorRoutes;
+    //     break;
+    //   case 'admin':
+    //     routes = adminRoutes;
+    //     break;
+    //   default:
+    //     console.error('DID NOT HAVE TO COME HERE...', auth);
+    //     routes = clientRoutes;
+    //     break;
+    // }
     return (
-      auth && auth.authenticated ? (
-        <Sider collapsible collapsed={this.state.collapsed} onCollapse={this.onCollapse}>
-          <div className="logo">Logo</div>
-          <Menu theme="dark" defaultSelectedKeys={[currentRoute]} mode="inline">
-            {
-              routes.map(route => (
-                <Menu.Item key={route.path}>
-                  <Icon type={route.icon} />
-                  <span>
-                    {intl.formatMessage({ id: `menu.${route.id}` })}
-                  </span>
-                </Menu.Item>
-              ))
-            }
-          </Menu>
-        </Sider>) : null
+
+      <Sider collapsible collapsed={this.state.collapsed} onCollapse={this.onCollapse}>
+        <div className="logo">Logo</div>
+        <Menu theme="dark" defaultSelectedKeys={[currentRoute]} mode="inline">
+          {
+            routes.map(route => (
+              <Menu.Item key={route.path}>
+                <Icon type={route.icon} />
+                <span>
+                  {intl.formatMessage({ id: `menu.${route.id}` })}
+                </span>
+              </Menu.Item>
+            ))
+          }
+        </Menu>
+      </Sider>
     );
   }
 }

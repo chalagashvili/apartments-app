@@ -1,80 +1,62 @@
 import React from 'react';
 import { Pagination } from 'antd';
+import Filter from './Filter';
 
-const CityList = props => (
-  <div style={{ width: '50%', padding: 30 }} >
-    <div>
-      {props.items.map((item, index) => (
+
+const ApartmentsList = props => (
+  <div className={props.mapView ? 'hideApartments' : 'apartmentsList'}>
+    <Filter searchByMap={props.searchByMap} searchByMapToggle={props.searchByMapToggle} />
+    <div className="apartmentsWrapper" >
+      {props.items.map(apartment => (
         <div
-          style={{
-            borderTop: '1px solid #EBEBEB',
-            padding: 20,
-            display: 'flex',
-          }}
-          key={index}
-          onMouseOver={e => props.onHover({ ...item, clicked: false })}
+          className="apartment"
+          key={apartment.lng + apartment.lat}
+          onFocus={() => props.onHover({ ...apartment, clicked: false })}
+          onMouseOver={() => props.onHover({ ...apartment, clicked: false })}
+          tabIndex={-1}
         >
-          <div ><img
-            style={{ borderRadius: 10, marginRight: 20 }}
-            width={300}
-            height={200}
-            src="https://www.welcome-hotels.com/site/assets/files/30116/welcome_hotel_marburg_superior_1k.600x600.jpg"
-            alt="Logo"
-          />
+          <div>
+            <img
+              className="apartment__image"
+              width={300}
+              height={200}
+              src={apartment.image}
+              alt={apartment.name}
+            />
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }} >
-            <div style={{ display: 'flex', justifyContent: 'space-between' }} >
-              <div style={{ fontSize: 19, color: 'black' }} >{item.title}</div>
-              <div style={{
-                fontSize: 13, backgroundColor: '#F7F7F7', borderRadius: 10, padding: '0 10px', fontWeight: 'bold', color: 'black',
-              }}
-              >ⓒ John Lennon
+          <div className="apartment__infoWrapper" >
+            <div className="apartment__infoWrapper-firstSection" >
+              <div className="apartment__name">{apartment.title}</div>
+              <div className="apartmen__postDate" >{apartment.date.toLocaleDateString()}</div>
+            </div>
+            <div className="apartment__description">
+              {apartment.description}
+            </div>
+            <div className="apartment__infoWrapper-secondSection">
+              <div className="apartment__details" >
+                <div>{apartment.size} m² </div>
+                <div> &nbsp;• &nbsp;</div>
+                <div>{apartment.rooms} {apartment.rooms > 1 ? 'Rooms' : 'Room'}</div>
+              </div>
+              <div className="apartment__price">${apartment.price}<div style={{ fontWeight: 'normal' }} > / mo</div>
               </div>
             </div>
-            <div style={{
-              fontSize: 13, paddingBottom: 10, paddingRight: 0,
-            }}
-            >Very light flat. Available only for the customers who don't have any kind of pet. Smoking is not allowed. Some other descriptions please see below.
-            </div>
-            <div style={{ display: 'flex' }} >
-              <div style={{ fontSize: 14, color: 'black' }} >56 m² </div>
-              <div style={{ color: 'black' }} > &nbsp;• &nbsp;</div>
-              <div style={{ fontSize: 14, color: 'black' }} >3 Rooms</div>
-
-            </div>
-            <div style={{ fontSize: 12 }} >13 Feb 2020</div>
-            <div style={{ display: 'flex', justifyContent: 'space-between' }} >
-              <div style={{
-                cursor: 'pointer',
-                border: '1px solid black',
-                color: 'rgb(34, 34, 34)',
-                padding: '5px 20px',
-                borderRadius: 5,
-                display: 'flex',
-                alignItems: 'center',
-              }}
-              >Rent Now
+            <div className="apartment__infoWrapper-thirdSection" >
+              <div className="apartment__realtor">
+                ⓒ {apartment.realtor}
               </div>
-              <div style={{
-                fontSize: 17,
-                fontWeight: 'bold',
-                display: 'flex',
-                color: 'black',
-
-              }}
-              >$80{'  '} <div style={{ fontWeight: 'normal' }} >&nbsp; / &nbsp; month</div>
-              </div>
+              <div className="apartment__rentButton">Rent Now</div>
             </div>
           </div>
         </div>
       ))}
-      <div style={{}} >
-        <Pagination defaultCurrent={1} total={50} />
-
+      <div className="apartment__pagination" >
+        <Pagination defaultCurrent={1} total={3} />
       </div>
     </div>
   </div>
 );
 
-export default CityList;
+
+export default ApartmentsList;
 

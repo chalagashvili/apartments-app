@@ -75,4 +75,4 @@ LoginForm.propTypes = {
   }).isRequired,
 };
 
-export default Form.create({ name: 'normal_login' })(injectIntl(LoginForm));
+export default Form.create({ name: 'forgot_password' })(injectIntl(LoginForm));
