@@ -14,6 +14,7 @@ exports.getAvailableApartments = async (req, res, next) => {
     floorAreaSizeFrom, floorAreaSizeTo,
     pricePerMonthFrom, pricePerMonthTo,
     numberOfRoomsFrom, numberOfRoomsTo,
+    longitude, latitude, radius,
   } = req.query;
   const filterQuery = {};
   if (floorAreaSizeFrom || floorAreaSizeTo) {
@@ -32,6 +33,11 @@ exports.getAvailableApartments = async (req, res, next) => {
     filterQuery.numberOfRooms = {
       ...(numberOfRoomsFrom && { $gte: numberOfRoomsFrom }),
       ...(numberOfRoomsTo && { $lte: numberOfRoomsTo }),
+    };
+  }
+  if (longitude && latitude && radius) {
+    filterQuery.loc = {
+      $geoWithin: { $centerSphere: [[longitude, latitude], radius] },
     };
   }
   const options = {

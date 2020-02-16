@@ -44,7 +44,7 @@ const apartmentSchema = new Schema({
   },
 });
 
-apartmentSchema.index({ location: '2dsphere' });
+apartmentSchema.index({ loc: '2dsphere' });
 
 apartmentSchema.plugin(mongoosePaginate);
 const apartment = mongoose.model('Apartment', apartmentSchema);

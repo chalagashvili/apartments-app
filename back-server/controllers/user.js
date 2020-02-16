@@ -140,7 +140,9 @@ exports.editUser = async (req, res, next) => {
   if (role) {
     if (!allRoles.includes(role)) return validationError(res, 'Role is invalid');
     /* Check if the person we are updating is Admin already - if yes, it is prohobitied then */
-    if (adminRole.includes(user.role)) return unauthorizedResponse(res, 'You don\'t have enough permissions');
+    if (adminRole.includes(user.role)) return unauthorizedResponse(res, 'You don\'t have enough permissions to update another admin');
+    // Make sure admin is making role change, otherwise return
+    if (!adminRole.includes(req.user.role)) return unauthorizedResponse(res, 'You don\'t have enough permissions, you are not admin');
     /* Do some cleanup depending the old role of the user */
     cleanUpAfterRoleChange(user);
     if (nonAdminRole.includes(user.role)) {
