@@ -25,6 +25,7 @@ exports.signIn = (req, res) => successResponseWithData(res, 'Sign in successfull
   token: utils.tokenForUser(req.user),
   email: req.user.email,
   role: req.user.role,
+  id: req.user_id,
 });
 
 /*
@@ -57,6 +58,7 @@ exports.signUp = (req, res, next) => {
         token: utils.tokenForUser(user),
         email: user.email,
         role: user.role,
+        id: req.user_id,
       });
     });
   });
@@ -66,50 +68,43 @@ exports.signUp = (req, res, next) => {
  * POST /auth/forgotPassword
  * Generate a random token, then the send user an email with a reset link.
  */
-exports.forgotPassword = (req, res, next) => {
+exports.forgotPassword = async (req, res, next) => {
   let { email } = req.body;
   if (!validator.isEmail(email)) return validationError(res, 'Please provide valid email address');
   email = validator.normalizeEmail(req.body.email, { gmail_remove_dots: false });
 
-  const createRandomToken = randomBytesAsync(16)
-    .then((buf) => buf.toString('hex'));
+  try {
+    const createRandomToken = await randomBytesAsync(16);
+    const token = createRandomToken.toString('hex');
 
-  const setRandomToken = (token) => UserSchema
-    .findOne({ email: req.body.email })
-    .then((user) => {
-      if (!user) {
-        return validationError(res, 'No user found associated with the given email');
-      }
-      user.passwordResetToken = token;
-      user.passwordResetExpires = Date.now() + 3600000; // 1 hour
-      user = user.save();
-
-      return user;
-    });
-
-  const sendForgotPasswordEmail = (user) => {
-    if (!user) { return; }
-    const token = user.passwordResetToken;
-    const mailOptions = {
-      to: user.email,
-      fromEmail: 'no-reply@irakli.com',
-      fromName: 'Estate Company',
-      subject: 'Reset your password on Iraklis Assignment',
-      text: `You are receiving this email because you (or someone else) have requested the reset of the password for your account.\n\n
-        Please click on the following link, or paste this into your browser to complete the process:\n\n
-        http://${process.env.APP_URL}/reset/${token}\n\n
-        If you did not request this, please ignore this email and your password will remain unchanged.\n`,
-    };
-    // eslint-disable-next-line consistent-return
-    return utils.sendEmail(mailOptions)
-      .then(() => successResponse(res, `An e-mail has been sent to ${user.email} with further instructions.`))
-      .catch(() => errorResponse(res, 'Password reset token has been generated but could not send an email'));
-  };
-
-  return createRandomToken
-    .then(setRandomToken)
-    .then(sendForgotPasswordEmail)
-    .catch(next);
+    return UserSchema
+      .findOne({ email: req.body.email })
+      .then((user) => {
+        if (!user) {
+          return validationError(res, 'No user found associated with the given email');
+        }
+        user.passwordResetToken = token;
+        user.passwordResetExpires = Date.now() + 3600000; // 1 hour
+        return user.save((err) => {
+          if (err) return next(err);
+          const mailOptions = {
+            to: user.email,
+            fromEmail: 'no-reply@irakli.com',
+            fromName: 'Estate Company',
+            subject: 'Reset your password on Iraklis Assignment',
+            text: `You are receiving this email because you (or someone else) have requested the reset of the password for your account.\n\n
+              Please click on the following link, or paste this into your browser to complete the process:\n\n
+              http://${process.env.APP_URL}/reset/${token}\n\n
+              If you did not request this, please ignore this email and your password will remain unchanged.\n`,
+          };
+          return utils.sendEmail(mailOptions)
+            .then(() => successResponse(res, `An e-mail has been sent to ${user.email} with further instructions.`))
+            .catch(() => errorResponse(res, 'Password reset token has been generated but could not send an email'));
+        });
+      });
+  } catch (error) {
+    return next(error);
+  }
 };
 
 /**
@@ -123,7 +118,7 @@ exports.resetPassword = (req, res, next) => {
   if (password !== confirmPassword) return validationError(res, 'Passwords do not match');
   if (!validator.isHexadecimal(token)) return validationError(res, 'Invalid token, please retry');
 
-  const resetPassword = () => UserSchema
+  return UserSchema
     .findOne({ passwordResetToken: req.params.token })
     .where('passwordResetExpires').gt(Date.now())
     .then((user) => {
@@ -131,31 +126,20 @@ exports.resetPassword = (req, res, next) => {
       user.password = req.body.password;
       user.passwordResetToken = undefined;
       user.passwordResetExpires = undefined;
-      return user.save().then(() => new Promise((resolve, reject) => {
-        req.logIn(user, (err) => {
-          if (err) { return reject(err); }
-          return resolve(user);
-        });
-      }));
+      return user.save((err) => {
+        if (err) return next(err);
+        const mailOptions = {
+          to: user.email,
+          fromEmail: 'no-reply@irakli.com',
+          fromName: 'Estate Company',
+          subject: 'Your Iraklis Assignment password has been changed',
+          text: `Hello,\n\nThis is a confirmation that the password for your account ${user.email} has just been changed.\n`,
+        };
+        return utils.sendEmail(mailOptions)
+          .then(() => successResponse(res, 'Password has been successfully reset!'))
+          .catch(() => successResponse(res, 'Password has been reset, but confirmation email was not send.'));
+      });
     });
-
-  const sendResetPasswordEmail = (user) => {
-    if (!user) { return; }
-    const mailOptions = {
-      to: user.email,
-      fromEmail: 'no-reply@irakli.com',
-      fromName: 'Estate Company',
-      subject: 'Your Iraklis Assignment password has been changed',
-      text: `Hello,\n\nThis is a confirmation that the password for your account ${user.email} has just been changed.\n`,
-    };
-    utils.sendMail(mailOptions)
-      .then(() => successResponse(res, 'Password has been successfully reset!'))
-      .catch(() => {});
-  };
-
-  return resetPassword()
-    .then(sendResetPasswordEmail)
-    .catch((err) => next(err));
 };
 
 /*

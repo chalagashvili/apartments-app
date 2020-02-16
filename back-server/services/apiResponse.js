@@ -53,5 +53,5 @@ exports.unauthorizedResponse = (res, msg) => {
     ok: 0,
     error: msg,
   };
-  return res.status(401).json(data);
+  return res.status(403).json(data);
 };

@@ -32,7 +32,6 @@ exports.validateObjectID = (id) => ObjectId.isValid(id);
 exports.sendEmail = ({
   to, fromEmail, subject, text, fromName,
 }) => {
-  console.log(to, fromEmail, subject, text, fromName);
   const message = {
     to,
     from: { email: fromEmail, name: fromName },
@@ -43,6 +42,6 @@ exports.sendEmail = ({
   return new Promise((resolve, reject) => {
     SGmail.send(message)
       .then(() => resolve())
-      .catch((err) => console.log('err', err) || reject(err));
+      .catch((err) => reject(err));
   });
 };

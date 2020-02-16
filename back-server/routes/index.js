@@ -20,12 +20,11 @@ module.exports = (app) => {
   app.put('/users/:id', requireAuth, userControl.editUser);
   app.delete('/users/:id', requireAuth, userControl.deleteUser);
 
-  app.get('/users/:id/bookings', requireAuth, () => {});
-  app.post('/users/:id/bookings', requireAuth, userControl.bookApartment);
-  app.put('/users/:id/bookings/:apartmentId', requireAuth, () => {});
-  app.delete('/users/:id/bookings/:apartmentId', requireAuth, () => {});
+  app.get('/users/:id/bookings', requireAuth, userControl.getBookings);
+  app.post('/users/:id/bookings/:apartmentId', requireAuth, userControl.bookApartment);
+  app.delete('/users/:id/bookings/:apartmentId', requireAuth, userControl.unbookApartment);
 
-  app.get('/apartments', requireAuth, () => {});
+  app.get('/apartments', requireAuth, apartmentControl.getAvailableApartments);
 
   /* Realtor routes */
   app.get('/users/:id/apartments', requireAuth, userControl.getOwnedApartments);

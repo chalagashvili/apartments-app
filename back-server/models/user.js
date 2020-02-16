@@ -66,10 +66,25 @@ userSchema.methods.comparePassword = function (candidatePassword, callback) {
 function removeLinkedDocuments(doc) {
   if (doc.role === 'realtor') {
     Apartment.deleteMany({ _id: { $in: doc.ownedApartments } });
+    // eslint-disable-next-line no-plusplus
+    for (let i = 0; i < doc.ownedApartments.length; i++) {
+      const apartmentId = doc.ownedApartments[i];
+      Apartment.findById({ _id: apartmentId }, (err, apart) => {
+        if (!err) {
+          if (!apart.isAvailable && apart.bookedBy) {
+            userSchema.findByIdAndUpdate(
+              { _id: apart.bookedBy }, { $pull: { bookings: apartmentId } },
+            );
+          }
+        }
+      });
+    }
   } else if (doc.role === 'client') {
-    Apartment.updateMany({ _id: { $in: doc.ownedApartments } }, { $set: { available: true } });
+    Apartment.updateMany({ _id: { $in: doc.bookings } }, { $set: { available: true } });
   }
 }
+
+exports.cleanUpAfterRoleChange = (doc) => removeLinkedDocuments(doc);
 
 userSchema.post('deleteOne', { document: true, query: false }, removeLinkedDocuments);
 
