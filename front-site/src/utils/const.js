@@ -1,11 +1,13 @@
-import { ROUTE_DASHBOARD,
+import {
+  ROUTE_DASHBOARD,
   ROUTE_PROFILE,
   ROUTE_MY_RENTED_APARTMENTS_AS_CLIENT,
   ROUTE_ADD_APARTMENT,
   ROUTE_APARTMENTS_I_RENT_AS_REALTOR,
   ROUTE_ADD_USER,
   ROUTE_USERS,
-  ROUTE_LOGOUT } from 'app-init/router';
+  ROUTE_LOGOUT,
+} from 'app-init/router';
 
 export const lastRoutes = [
   {
@@ -80,3 +82,4 @@ export const adminRole = ['admin'];
 
 // eslint-disable-next-line no-useless-escape
 export const emailRegexPattern = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+export const coordinatesRegexPatter = /^[-+]?([1-8]?\d(\.\d+)?|90(\.0+)?),\s*[-+]?(180(\.0+)?|((1[0-7]\d)|([1-9]?\d))(\.\d+)?)$/;

@@ -2,11 +2,15 @@
 
   .ant-layout-content , &__content {
     background-color: #fff;
-    padding: 24px;
-    padding: 0 50px;
+    // padding: 24px;
+    // padding: 0 50px;
     height: 100%;
     min-height: calc(100vh - 130px);
   }
+}
+
+.ant-layout.ant-layout-has-sider > .ant-layout, .ant-layout.ant-layout-has-sider > .ant-layout-content {
+  overflow: visible !important;
 }
 
 .logo {
