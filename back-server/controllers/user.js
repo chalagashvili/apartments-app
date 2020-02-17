@@ -33,7 +33,7 @@ exports.deleteUser = async (req, res, next) => {
   // Check that id is passed correctly and its a valid mongo ID
   if (!userId || !utils.validateObjectID(req.params.id)) return validationError(res, 'ID is not a valid mongo ObjectId');
   // Check if 3rd person's bookings are accessed
-  if (userId !== callerId) {
+  if (userId !== callerId.toString()) {
     // Check if Admin is performing booking for user, otherwise return error
     if (!adminRole.includes(req.user.role)) return unauthorizedResponse(res, 'You don\'t have enough permissions');
   }
@@ -109,7 +109,7 @@ exports.editUser = async (req, res, next) => {
   // Check that id is passed correctly and its a valid mongo ID
   if (!userId || !utils.validateObjectID(req.params.id)) return validationError(res, 'ID is not a valid mongo ObjectId');
   // Check if 3rd person's bookings are accessed
-  if (userId !== callerId) {
+  if (userId !== callerId.toString()) {
     // Check if Admin is performing booking for user, otherwise return error
     if (!adminRole.includes(req.user.role)) return unauthorizedResponse(res, 'You don\'t have enough permissions');
     try {
@@ -237,7 +237,7 @@ exports.getBookings = (req, res, next) => {
   // Check that id is passed correctly and its a valid mongo ID
   if (!userId || !utils.validateObjectID(req.params.id)) return validationError(res, 'user ID is not a valid mongo ObjectId');
   // Check if 3rd person's bookings are accessed
-  if (userId !== callerId) {
+  if (userId !== callerId.toString()) {
     // Check if Admin is performing booking for user, otherwise return error
     if (!adminRole.includes(req.user.role)) return unauthorizedResponse(res, 'You don\'t have enough permissions');
   }
@@ -271,7 +271,7 @@ exports.bookApartment = (req, res, next) => {
   // Check that id is passed correctly and its a valid mongo ID
   if (!userId || !utils.validateObjectID(req.params.id)) return validationError(res, 'user ID is not a valid mongo ObjectId');
   // Check if 3rd person's bookings are accessed
-  if (userId !== callerId) {
+  if (userId !== callerId.toString()) {
     // Check if Admin is performing booking for user, otherwise return error
     if (!adminRole.includes(req.user.role)) return unauthorizedResponse(res, 'You don\'t have enough permissions');
   }
@@ -318,7 +318,7 @@ exports.unbookApartment = (req, res, next) => {
   // Check that id is passed correctly and its a valid mongo ID
   if (!userId || !utils.validateObjectID(req.params.id)) return validationError(res, 'ID is not a valid mongo ObjectId');
   // Check if 3rd person's bookings are accessed
-  if (userId !== callerId) {
+  if (userId !== callerId.toString()) {
     // Check if Admin is performing operation, otherwise return error
     if (!adminRole.includes(req.user.role)) return unauthorizedResponse(res, 'You don\'t have enough permissions');
   }
@@ -369,7 +369,7 @@ exports.addApartment = async (req, res, next) => {
   // Check that id is passed correctly and its a valid mongo ID
   if (!userId || !utils.validateObjectID(req.params.id)) return validationError(res, 'ID is not a valid mongo ObjectId');
   // Check if 3rd person's bookings are accessed
-  if (userId !== callerId) {
+  if (userId !== callerId.toString()) {
     // Check if Admin is performing operation, otherwise return error
     if (!adminRole.includes(req.user.role)) return unauthorizedResponse(res, 'You don\'t have enough permissions');
   }
@@ -420,14 +420,14 @@ exports.updateApartment = async (req, res, next) => {
   if (!utils.validateObjectID(apartmentId)) return validationError(res, 'ApartmentId is not a valid mongo ObjectId');
   const {
     name, description, floorAreaSize, pricePerMonth, numberOfRooms, location,
-    imageUrl,
+    imageUrl, isAvailable,
   } = req.body;
   const { id: userId } = req.params;
   const { _id: callerId } = req.user;
   // Check that id is passed correctly and its a valid mongo ID
   if (!userId || !utils.validateObjectID(req.params.id)) return validationError(res, 'ID is not a valid mongo ObjectId');
   // Check if 3rd person's bookings are accessed
-  if (userId !== callerId) {
+  if (userId !== callerId.toString()) {
     // Check if Admin is performing operation, otherwise return error
     if (!adminRole.includes(req.user.role)) return unauthorizedResponse(res, 'You don\'t have enough permissions');
   }
@@ -443,6 +443,15 @@ exports.updateApartment = async (req, res, next) => {
     if (numberOfRooms) toUpdate.numberOfRooms = numberOfRooms;
     if (location) toUpdate.loc = location;
     if (imageUrl) toUpdate.imageUrl = imageUrl;
+    // if changing availability of the apartment to TRUE
+    // we should also remove it from clien's bookings, if it exists
+    if (isAvailable && toUpdate.bookedBy) {
+      await UserSchema.findByIdAndUpdate(
+        { _id: toUpdate.bookedBy }, { $pull: { bookings: apartmentId } },
+      );
+      toUpdate.isAvailable = true;
+      toUpdate.bookedBy = null;
+    }
     await toUpdate.save();
     return successResponseWithData(res, ' Apartment has succesfully updated', toUpdate);
   } catch (error) {
@@ -464,7 +473,7 @@ exports.deleteApartment = async (req, res, next) => {
   // Check that id is passed correctly and its a valid mongo ID
   if (!userId || !utils.validateObjectID(req.params.id)) return validationError(res, 'ID is not a valid mongo ObjectId');
   // Check if 3rd person's bookings are accessed
-  if (userId !== callerId) {
+  if (userId !== callerId.toString()) {
     // Check if Admin is performing operation, otherwise return error
     if (!adminRole.includes(req.user.role)) return unauthorizedResponse(res, 'You don\'t have enough permissions');
   }
@@ -497,18 +506,53 @@ exports.getOwnedApartments = async (req, res, next) => {
   // Check that id is passed correctly and its a valid mongo ID
   if (!userId || !utils.validateObjectID(req.params.id)) return validationError(res, 'ID is not a valid mongo ObjectId');
   // Check if 3rd person's bookings are accessed
-  if (userId !== callerId) {
+  if (userId !== callerId.toString()) {
     // Check if Admin is performing operation, otherwise return error
     if (!adminRole.includes(req.user.role)) return unauthorizedResponse(res, 'You don\'t have enough permissions');
   }
-  const { page = 1, pageSize = 10 } = req.query;
+  const {
+    page = 1, pageSize = 10,
+    floorAreaSizeFrom, floorAreaSizeTo,
+    pricePerMonthFrom, pricePerMonthTo,
+    numberOfRoomsFrom, numberOfRoomsTo,
+    longitude, latitude, radius,
+    isAvailable,
+  } = req.query;
+  const filterQuery = { owner: userId };
+  if (floorAreaSizeFrom || floorAreaSizeTo) {
+    filterQuery.floorAreaSize = {
+      ...(floorAreaSizeFrom && { $gte: floorAreaSizeFrom }),
+      ...(floorAreaSizeTo && { $lte: floorAreaSizeTo }),
+    };
+  }
+  if (pricePerMonthFrom || pricePerMonthTo) {
+    filterQuery.pricePerMonth = {
+      ...(pricePerMonthFrom && { $gte: pricePerMonthFrom }),
+      ...(pricePerMonthTo && { $lte: pricePerMonthTo }),
+    };
+  }
+  if (numberOfRoomsFrom || numberOfRoomsTo) {
+    filterQuery.numberOfRooms = {
+      ...(numberOfRoomsFrom && { $gte: numberOfRoomsFrom }),
+      ...(numberOfRoomsTo && { $lte: numberOfRoomsTo }),
+    };
+  }
+  if (longitude && latitude && radius) {
+    filterQuery.loc = {
+      $geoWithin: { $centerSphere: [[longitude, latitude], radius] },
+    };
+  }
+  if (isAvailable != null) {
+    filterQuery.isAvailable = isAvailable;
+  }
   const options = {
     sort: { createdAt: -1 },
+    populate: { path: 'owner', select: 'name email id' },
     page,
     limit: pageSize,
   };
   return ApartmentSchema.paginate(
-    { owner: userId },
+    filterQuery,
     options,
     (err, results) => {
       if (err) return next(err);

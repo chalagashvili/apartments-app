@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { injectIntl, FormattedMessage } from 'react-intl';
 import { Form, Icon, Input, Button } from 'antd';
 import { emailRegexPattern } from 'utils/const';
-import { ROUTE_SIGN_UP, ROUTE_FORGOT_PASSWORD_GENERATOR } from 'app-init/router';
+import { ROUTE_SIGN_UP, ROUTE_FORGOT_PASSWORD } from 'app-init/router';
 
 function hasErrors(fieldsError) {
   return Object.keys(fieldsError).some(field => fieldsError[field]);
@@ -58,7 +58,7 @@ class LoginForm extends React.Component {
             />)}
           </Form.Item>
           <Form.Item>
-            <Link className="login-form-forgot" to={ROUTE_FORGOT_PASSWORD_GENERATOR}>
+            <Link className="login-form-forgot" to={ROUTE_FORGOT_PASSWORD}>
               <FormattedMessage id="app.forgotPassword" />
             </Link>
             <Button

@@ -17,11 +17,12 @@ const InternalPage = ({ className, children, footerDisabled }) => (
       <Content className="InternalPage__content">
         {children}
       </Content>
-      {footerDisabled ? null : <Footer
-        className="footer"
-        style={{ textAlign: 'center' }}
-      >Toptal Assignment ©2020 Created by Irakli Chalagashvili
-      </Footer>}
+      {footerDisabled ? null : (
+        <Footer
+          className="footer"
+          style={{ textAlign: 'center' }}
+        >Toptal Assignment ©2020 Created by Irakli Chalagashvili
+        </Footer>)}
     </Layout>
   </Layout>
 );
@@ -29,11 +30,13 @@ const InternalPage = ({ className, children, footerDisabled }) => (
 InternalPage.propTypes = {
   children: PropTypes.node,
   className: PropTypes.string,
+  footerDisabled: PropTypes.bool,
 };
 
 InternalPage.defaultProps = {
   children: null,
   className: '',
+  footerDisabled: false,
 };
 
 export default InternalPage;

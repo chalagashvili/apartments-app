@@ -3,9 +3,9 @@ import { injectIntl } from 'react-intl';
 import { withRouter } from 'react-router-dom';
 import SignupForm from 'ui/signup/SignupForm';
 import { sendPostSignup } from 'state/auth/actions';
-import { ROUTE_DASHBOARD } from 'app-init/router';
 import { message } from 'antd';
 import { getLoading } from 'state/loading/selectors';
+import { generateDashboardRoute } from 'utils/';
 
 const mapStateToProps = state => ({
   loading: getLoading(state).signup,
@@ -13,9 +13,9 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = (dispatch, { intl, history }) => ({
   onSubmit: values => dispatch(sendPostSignup(values))
-    .then(() => {
+    .then((payload) => {
       message.success(intl.formatMessage({ id: 'app.signupSuccess' }));
-      history.push(ROUTE_DASHBOARD);
+      history.push(generateDashboardRoute(payload.role));
     })
     .catch(err => message.error(err)),
 });

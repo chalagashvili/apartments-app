@@ -9,6 +9,7 @@ module.exports = {
         "react/jsx-filename-extension": [1, { "extensions": [".js", ".jsx"] }],
         "import/no-extraneous-dependencies": "off",
         "jsx-a11y/anchor-is-valid": "off",
+        "no-underscore-dangle": [2, { "allow": ['_id'] }],
         "jsx-a11y/label-has-for": [ 2, {
           "components": [ "Label" ],
           "required": {

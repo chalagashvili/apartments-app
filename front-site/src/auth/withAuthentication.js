@@ -13,11 +13,11 @@ export default function (ComposedComponent) {
     }
 
     componentDidMount() {
-      // this.performCheck();
+      this.performCheck();
     }
 
     componentDidUpdate() {
-      // this.performCheck();
+      this.performCheck();
     }
 
     performCheck() {

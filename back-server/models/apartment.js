@@ -42,7 +42,7 @@ const apartmentSchema = new Schema({
       required: true,
     },
   },
-});
+}, { timestamps: true });
 
 apartmentSchema.index({ loc: '2dsphere' });
 

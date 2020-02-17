@@ -4,6 +4,8 @@ import auth from 'state/auth/reducer';
 import locale from 'state/locale/reducer';
 import pagination from 'state/pagination/reducer';
 import loading from 'state/loading/reducer';
+import apartments from 'state/apartments/reducer';
+import filters from 'state/filters/reducer';
 
 const reducerDef = {
   form,
@@ -11,6 +13,8 @@ const reducerDef = {
   pagination,
   locale,
   loading,
+  apartments,
+  filters,
 };
 
 // app root reducer

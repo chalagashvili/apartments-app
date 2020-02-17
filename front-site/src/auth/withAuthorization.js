@@ -48,7 +48,7 @@ export default function Authorization(allowedRoles) {
 
     WithAuthorization.defaultProps = {
       auth: {
-        role: 'user',
+        role: '',
       },
     };
 

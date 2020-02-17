@@ -1,9 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { history, ROUTE_DASHBOARD } from 'app-init/router';
+import { history } from 'app-init/router';
 import { getAuthInfo } from 'state/auth/selectors';
-
+import { generateDashboardRoute } from 'utils';
 
 export default function (ComposedComponent) {
   class Auth extends React.Component {
@@ -22,7 +22,7 @@ export default function (ComposedComponent) {
 
     performCheck() {
       const { auth } = this.props;
-      if (auth.authenticated) history.push(ROUTE_DASHBOARD);
+      if (auth.authenticated) history.push(generateDashboardRoute(auth.role));
     }
 
     render() {
@@ -34,6 +34,7 @@ export default function (ComposedComponent) {
     auth: PropTypes.shape({
       authenticated: PropTypes.bool,
       email: PropTypes.string,
+      role: PropTypes.string,
     }),
     children: PropTypes.arrayOf(),
   };
@@ -42,6 +43,7 @@ export default function (ComposedComponent) {
     auth: {
       authenticated: false,
       email: '',
+      role: '',
     },
     children: null,
   };

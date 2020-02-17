@@ -16,7 +16,9 @@ exports.getAvailableApartments = async (req, res, next) => {
     numberOfRoomsFrom, numberOfRoomsTo,
     longitude, latitude, radius,
   } = req.query;
-  const filterQuery = {};
+  const filterQuery = {
+    isAvailable: true,
+  };
   if (floorAreaSizeFrom || floorAreaSizeTo) {
     filterQuery.floorAreaSize = {
       ...(floorAreaSizeFrom && { $gte: floorAreaSizeFrom }),
@@ -43,6 +45,7 @@ exports.getAvailableApartments = async (req, res, next) => {
   const options = {
     sort: { createdAt: -1 },
     page,
+    populate: 'owner',
     limit: pageSize,
   };
   return ApartmentSchema.paginate(

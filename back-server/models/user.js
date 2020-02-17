@@ -80,7 +80,9 @@ function removeLinkedDocuments(doc) {
       });
     }
   } else if (doc.role === 'client') {
-    Apartment.updateMany({ _id: { $in: doc.bookings } }, { $set: { available: true } });
+    Apartment.updateMany(
+      { _id: { $in: doc.bookings } }, { $set: { available: true, bookedBy: null } },
+    );
   }
 }
 

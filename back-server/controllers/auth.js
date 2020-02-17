@@ -25,7 +25,8 @@ exports.signIn = (req, res) => successResponseWithData(res, 'Sign in successfull
   token: utils.tokenForUser(req.user),
   email: req.user.email,
   role: req.user.role,
-  id: req.user_id,
+  // eslint-disable-next-line no-underscore-dangle
+  id: req.user._id,
 });
 
 /*
@@ -52,13 +53,14 @@ exports.signUp = (req, res, next) => {
       role,
       name,
     });
-    return user.save((saveErr) => {
+    return user.save((saveErr, savedUser) => {
       if (saveErr) next(saveErr);
       return successResponseWithData(res, 'Sign up successfull', {
         token: utils.tokenForUser(user),
         email: user.email,
         role: user.role,
-        id: req.user_id,
+        // eslint-disable-next-line no-underscore-dangle
+        id: savedUser._id,
       });
     });
   });

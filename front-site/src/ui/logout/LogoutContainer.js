@@ -11,6 +11,7 @@ const mapDispatchToProps = (dispatch, { history }) => ({
     removeCookie('jwtToken');
     removeCookie('role');
     removeCookie('email');
+    removeCookie('id');
     dispatch(clearAuth());
     history.push(ROUTE_HOME);
   },

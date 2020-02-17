@@ -5,6 +5,7 @@ import { setAuth } from 'state/auth/actions';
 const token = Cookies.get('jwtToken');
 const email = Cookies.get('email');
 const role = Cookies.get('role');
+const id = Cookies.get('id');
 
 if (token != null) {
   store.dispatch(setAuth({
@@ -12,5 +13,6 @@ if (token != null) {
     email,
     role,
     token,
+    id,
   }));
 }

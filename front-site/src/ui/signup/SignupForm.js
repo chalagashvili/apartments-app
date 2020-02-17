@@ -11,18 +11,42 @@ function hasErrors(fieldsError) {
 }
 
 class SignupForm extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      confirmDirty: false,
+    };
+    this.compareToFirstPassword = this.compareToFirstPassword.bind(this);
+    this.validateToNextPassword = this.validateToNextPassword.bind(this);
+    this.handleConfirmBlur = this.handleConfirmBlur.bind(this);
+  }
+
+
   componentDidMount() {
     // To disable submit button at the beginning.
     this.props.form.validateFields();
   }
 
-  compareToFirstPassword = (rule, value, callback) => {
+  handleConfirmBlur(e) {
+    const { value } = e.target;
+    this.setState({ confirmDirty: this.state.confirmDirty || !!value });
+  }
+
+  compareToFirstPassword(rule, value, callback) {
     const { form } = this.props;
     if (value && value !== form.getFieldValue('password')) {
       callback('app.passwordsDontMatch');
     } else {
       callback();
     }
+  }
+
+  validateToNextPassword(rule, value, callback) {
+    const { form } = this.props;
+    if (value && this.state.confirmDirty) {
+      form.validateFields(['confirmPassword'], { force: true });
+    }
+    callback();
   }
 
   handleSubmit = (e) => {
@@ -87,14 +111,19 @@ class SignupForm extends React.Component {
               prefix={<Icon type="user" style={{ color: 'rgba(0,0,0,.25)' }} />}
             />)}
           </Form.Item>
-          <Form.Item label={intl.formatMessage({ id: 'app.password' })} validateStatus={passwordError ? 'error' : ''} help={passwordError || ''}>
+          <Form.Item
+            label={intl.formatMessage({ id: 'app.password' })}
+            validateStatus={passwordError ? 'error' : ''}
+            help={passwordError || ''}
+          >
             {getFieldDecorator('password', {
-              rules: [{ required: true, message: 'app.inputPassword' }, {
-                min: 8, message: 'app.minPassword',
-              }],
-            })(<Input
+              rules: [
+                { required: true, message: 'app.inputPassword' },
+                { min: 8, message: 'app.minPassword' },
+                { validator: this.validateToNextPassword },
+              ],
+            })(<Input.Password
               prefix={<Icon type="lock" style={{ color: 'rgba(0,0,0,.25)' }} />}
-              type="password"
             />)}
           </Form.Item>
           <Form.Item
@@ -103,12 +132,12 @@ class SignupForm extends React.Component {
             help={confirmPasswordError || ''}
           >
             {getFieldDecorator('confirmPassword', {
-              rules: [{ required: true, message: 'app.provideConfirmPassword' }, {
-                validator: this.compareToFirstPassword,
-              }],
-            })(<Input
+              rules: [
+                { required: true, message: 'app.provideConfirmPassword' },
+                { validator: this.compareToFirstPassword }],
+            })(<Input.Password
               prefix={<Icon type="lock" style={{ color: 'rgba(0,0,0,.25)' }} />}
-              type="password"
+              onBlur={this.handleConfirmBlur}
             />)}
           </Form.Item>
           <Form.Item label={intl.formatMessage({ id: 'app.role' })} validateStatus={roleError ? 'error' : ''} help={roleError || ''}>

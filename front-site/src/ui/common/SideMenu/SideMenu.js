@@ -2,7 +2,8 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { injectIntl } from 'react-intl';
 import { Layout, Menu, Icon } from 'antd';
-import { clientRoutes, realtorRoutes, adminRoutes } from 'utils/const';
+import { clientRoutes, realtorRoutes, adminRoutes, ClientOnly, RealtorOnly, AdminOnly } from 'utils/const';
+import { ROUTE_LOGOUT } from 'app-init/router';
 
 const { Sider } = Layout;
 
@@ -16,33 +17,36 @@ class SideMenu extends Component {
   };
 
   render() {
-    const { auth, intl, currentRoute } = this.props;
+    const {
+      auth, intl, currentRoute, history,
+    } = this.props;
+    if (!auth || !auth.authenticated) return null;
     let routes = [];
     routes = clientRoutes;
-    // return;
-    // switch (auth.role) {
-    //   case 'client':
-    //     routes = clientRoutes;
-    //     break;
-    //   case 'realtor':
-    //     routes = realtorRoutes;
-    //     break;
-    //   case 'admin':
-    //     routes = adminRoutes;
-    //     break;
-    //   default:
-    //     console.error('DID NOT HAVE TO COME HERE...', auth);
-    //     routes = clientRoutes;
-    //     break;
-    // }
+    switch (auth.role) {
+      case ClientOnly:
+        routes = clientRoutes;
+        break;
+      case RealtorOnly:
+        routes = realtorRoutes;
+        break;
+      case AdminOnly:
+        routes = adminRoutes;
+        break;
+      default:
+        routes = [];
+        // eslint-disable-next-line no-console
+        console.error('You shall not pass... (with Gendalf\'s voice)');
+        history.push(ROUTE_LOGOUT);
+        break;
+    }
     return (
-
       <Sider collapsible collapsed={this.state.collapsed} onCollapse={this.onCollapse}>
         <div className="logo">Logo</div>
         <Menu theme="dark" defaultSelectedKeys={[currentRoute]} mode="inline">
           {
             routes.map(route => (
-              <Menu.Item key={route.path}>
+              <Menu.Item key={route.path} onClick={() => history.push(route.path)}>
                 <Icon type={route.icon} />
                 <span>
                   {intl.formatMessage({ id: `menu.${route.id}` })}
@@ -65,6 +69,9 @@ SideMenu.propTypes = {
     formatMessage: PropTypes.func.isRequired,
   }).isRequired,
   currentRoute: PropTypes.string.isRequired,
+  history: PropTypes.shape({
+    push: PropTypes.func.isRequired,
+  }).isRequired,
 };
 
 SideMenu.defaultProps = {

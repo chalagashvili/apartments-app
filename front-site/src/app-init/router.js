@@ -8,21 +8,18 @@ export const history = createBrowserHistory({
 export const ROUTE_HOME = '/';
 // pre-auth
 export const ROUTE_SIGN_UP = '/sign-up';
-export const ROUTE_FORGOT_PASSWORD_GENERATOR = '/forgot-password';
-export const FORGOT_PASSWORD = '/forgot-password';
-export const RESET_PASSWORD = '/reset-password';
-export const USERS = '/users';
-export const APARTMENTS = '/apartments';
-// export const RESET_PASSWORD = '/reset-password/:resetToken';
+export const ROUTE_FORGOT_PASSWORD = '/forgot-password';
+export const ROUTE_RESET_PASSWORD = '/reset-password/:resetToken';
+export const ROUTE_APARTMENTS = '/apartments';
 // auth needed
 export const ROUTE_DASHBOARD = '/dashboard';
 export const ROUTE_PROFILE = '/profile';
-export const ROUTE_MY_RENTED_APARTMENTS_AS_CLIENT = '/my-rented-apartments';
+export const ROUTE_BOOKINGS = '/bookings';
 
 // realtor
 export const ROUTE_ADD_APARTMENT = '/apartments/add';
 export const ROUTE_EDIT_APARTMENT = '/apartments/edit/:apartmentCode';
-export const ROUTE_APARTMENTS_I_RENT_AS_REALTOR = '/apartments-i-rent';
+export const ROUTE_OWNED_APARTMENTS = '/owned-apartments';
 
 // admin
 export const ROUTE_USERS = '/users';

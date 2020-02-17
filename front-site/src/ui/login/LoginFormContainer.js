@@ -6,7 +6,7 @@ import { message } from 'antd';
 import LoginForm from 'ui/login/LoginForm';
 import { sendPostLogin } from 'state/auth/actions';
 import { getLoading } from 'state/loading/selectors';
-import { ROUTE_DASHBOARD } from 'app-init/router';
+import { generateDashboardRoute } from 'utils/';
 
 const mapStateToProps = state => ({
   loading: getLoading(state).login,
@@ -14,9 +14,9 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = (dispatch, { history, intl }) => ({
   onSubmit: values => dispatch(sendPostLogin(values))
-    .then(() => {
+    .then((payload) => {
       message.success(intl.formatMessage({ id: 'app.loginSuccess' }));
-      history.push(ROUTE_DASHBOARD);
+      history.push(generateDashboardRoute(payload.role));
     })
     .catch(err => message.error(err)),
 });

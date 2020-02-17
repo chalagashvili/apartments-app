@@ -23,22 +23,28 @@ export const sendPostLogin = data => dispatch => new Promise((resolve, reject) =
       }
       return response.json().then((json) => {
         if (response.ok) {
-          const { token, email, role } = json.payload;
+          const {
+            token, email, role, id,
+          } = json.payload;
+          setCookie('jwtToken', token);
+          setCookie('email', email);
+          setCookie('role', role);
+          setCookie('id', id);
           dispatch(setAuth({
             authenticated: true,
             role,
             email,
             token,
+            id,
           }));
-          setCookie('jwtToken', token);
-          setCookie('email', email);
-          setCookie('role', role);
-          return resolve(json.message);
+          return resolve(json.payload);
         }
         return reject(json.error);
       });
     })
-    .catch(() => { });
+    .catch(() => {
+      dispatch(toggleLoading('login'));
+    });
 });
 
 export const sendPostSignup = data => dispatch => new Promise((resolve, reject) => {
@@ -47,22 +53,28 @@ export const sendPostSignup = data => dispatch => new Promise((resolve, reject) 
     .then((response) => {
       response.json().then((json) => {
         if (json.ok) {
-          const { token, email, role } = json.payload;
+          const {
+            token, email, role, id,
+          } = json.payload;
+          setCookie('jwtToken', token);
+          setCookie('email', email);
+          setCookie('role', role);
+          setCookie('id', id);
           dispatch(setAuth({
             authenticated: true,
             role,
             email,
             token,
+            id,
           }));
-          setCookie('jwtToken', token);
-          setCookie('email', email);
-          setCookie('role', role);
-          resolve(json.message);
+          resolve(json.payload);
         } else {
           reject(json.error);
         }
         dispatch(toggleLoading('signup'));
       });
     })
-    .catch(() => { });
+    .catch(() => {
+      dispatch(toggleLoading('signup'));
+    });
 });
