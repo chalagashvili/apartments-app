@@ -1,13 +1,19 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
-import { Icon, InputNumber } from 'antd';
+import { Icon, InputNumber, Button } from 'antd';
 
 class Filter extends React.Component {
   state = { isOpen: false }
 
   render() {
-    const { searchByMapToggle, searchByMap } = this.props;
+    const {
+      searchByMapToggle, searchByMap, onFilterChange, onFilter, filters,
+    } = this.props;
+    const {
+      pricePerMonthFrom, pricePerMonthTo, floorAreaSizeFrom,
+      floorAreaSizeTo, numberOfRoomsFrom, numberOfRoomsTo,
+    } = filters;
     return (
       <div style={{
         display: 'flex',
@@ -67,8 +73,18 @@ class Filter extends React.Component {
           }}
             >
               <div style={{ marginRight: 20 }} ><FormattedMessage id="app.price" />: ($)</div>
+              From:
               <InputNumber
-                defaultValue={100}
+                type="number"
+                value={pricePerMonthFrom}
+                onChange={val => onFilterChange('pricePerMonthFrom', val)}
+                formatter={value => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+              />
+              To:
+              <InputNumber
+                type="number"
+                value={pricePerMonthTo}
+                onChange={val => onFilterChange('pricePerMonthTo', val)}
                 formatter={value => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
               />
             </div>
@@ -77,8 +93,18 @@ class Filter extends React.Component {
           }}
             >
               <div style={{ marginRight: 20 }} ><FormattedMessage id="app.size" />: (m²)</div>
+              From:
               <InputNumber
-                defaultValue={40}
+                type="number"
+                value={floorAreaSizeFrom}
+                onChange={val => onFilterChange('floorAreaSizeFrom', val)}
+                formatter={value => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+              />
+              To:
+              <InputNumber
+                type="number"
+                value={floorAreaSizeTo}
+                onChange={val => onFilterChange('floorAreaSizeTo', val)}
                 formatter={value => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
               />
             </div>
@@ -88,31 +114,23 @@ class Filter extends React.Component {
           }}
             >
               <div style={{ marginRight: 20 }} ><FormattedMessage id="app.rooms" />: </div>
+              From:
               <InputNumber
-                defaultValue={3}
-                min={0}
-                max={100}
+                type="number"
+                value={numberOfRoomsFrom}
+                onChange={val => onFilterChange('numberOfRoomsFrom', val)}
+                formatter={value => `${value}`}
+              />
+              To:
+              <InputNumber
+                type="number"
+                value={numberOfRoomsTo}
+                onChange={val => onFilterChange('numberOfRoomsTo', val)}
                 formatter={value => `${value}`}
               />
             </div>
-            <div
-              style={{
-              marginTop: 30,
-              width: 'max-content',
-              cursor: 'pointer',
-              border: '1px solid black',
-              color: 'rgb(34, 34, 34)',
-              padding: '5px 20px',
-              borderRadius: 5,
-              display: 'flex',
-              alignItems: 'center',
-            }}
-              role="button"
-              tabIndex={-3}
-              onClick={() => this.setState({ isOpen: false })}
-              onKeyDown={() => this.setState({ isOpen: false })}
-            ><FormattedMessage id="app.search" />
-            </div>
+            <Button style={{ marginTop: 20 }} onClick={() => { this.setState({ isOpen: false }); onFilter(); }} type="primary"><FormattedMessage id="app.search" /></Button>
+            <Button style={{ marginTop: 10 }} onClick={() => { this.setState({ isOpen: false }); }}><FormattedMessage id="app.cancel" /></Button>
           </div>) : null}
 
       </div>
@@ -122,7 +140,21 @@ class Filter extends React.Component {
 
 Filter.propTypes = {
   searchByMapToggle: PropTypes.func.isRequired,
+  onFilterChange: PropTypes.func.isRequired,
+  onFilter: PropTypes.func.isRequired,
   searchByMap: PropTypes.bool.isRequired,
+  filters: PropTypes.shape({
+    pricePerMonthFrom: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+    pricePerMonthTo: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+    floorAreaSizeFrom: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+    floorAreaSizeTo: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+    numberOfRoomsFrom: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+    numberOfRoomsTo: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+  }),
+};
+
+Filter.defaultProps = {
+  filters: {},
 };
 
 

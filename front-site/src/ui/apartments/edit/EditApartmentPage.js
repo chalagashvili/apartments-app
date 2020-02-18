@@ -2,17 +2,17 @@ import React from 'react';
 import { Typography } from 'antd';
 import { FormattedMessage } from 'react-intl';
 import InternalPage from 'ui/InternalPage';
-import AddApartmentContainer from 'ui/addApartment/AddApartmentFormContainer';
+import EditApartmentContainer from 'ui/apartments/edit/EditApartmentFormContainer';
 
 const { Title } = Typography;
 
-const LoginPage = () => (
-  <InternalPage>
-    <Title level={3} className="LoginPage__title">
-      <FormattedMessage id="app.login" />
+const AddApartmentPage = () => (
+  <InternalPage className="AddApartmentPage">
+    <Title level={3} className="AddApartmentPage__title">
+      <FormattedMessage id="app.editApartment" />
     </Title>
-    <AddApartmentContainer />
+    <EditApartmentContainer />
   </InternalPage>
 );
 
-export default LoginPage;
+export default AddApartmentPage;

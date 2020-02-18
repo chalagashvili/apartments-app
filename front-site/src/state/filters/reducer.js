@@ -7,7 +7,7 @@ const reducer = (state = {}, action = {}) => {
       const currentFiltersForName = state[name] || {};
       return {
         ...state,
-        currentFiltersForName: Object.assign({}, currentFiltersForName, {
+        [name]: Object.assign({}, currentFiltersForName, {
           [key]: value,
         }),
       };
@@ -15,11 +15,10 @@ const reducer = (state = {}, action = {}) => {
     case REMOVE_FILTER: {
       const { name, key } = action.payload;
       const currentFiltersForName = state[name] || {};
+      const { [key]: ignore, ...filtersWithoutKey } = currentFiltersForName;
       return {
         ...state,
-        currentFiltersForName: Object.assign({}, currentFiltersForName, {
-          [key]: undefined,
-        }),
+        [name]: Object.assign({}, filtersWithoutKey),
       };
     }
     default: return state;

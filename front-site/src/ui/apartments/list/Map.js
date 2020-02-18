@@ -6,9 +6,24 @@ import { mapDefaultCenterCoordinates } from 'utils/const';
 
 const MAP_KEY = process.env.REACT_APP_GOOGLE_MAP_KEY;
 class SimpleMap extends PureComponent {
+  filterWithNewCenter(map) {
+    const { onFilterChange, onFilter, searchByMap } = this.props;
+    const longitude = map.center.lng();
+    const latitude = map.center.lat();
+    if (searchByMap) {
+      onFilterChange('longitude', longitude.toFixed(2));
+      onFilterChange('latitude', latitude.toFixed(2));
+      // Convert radians to kms (so, below is 50km range)
+      onFilterChange('radius', (50 / 6378).toFixed(6));
+      onFilter();
+    }
+  }
+
+
   render() {
     const {
       selectedItem, mapView, items, zoom, center, defaultCenter,
+      auth, onEdit,
     } = this.props;
     return (
       // Important! Always set the container height explicitly
@@ -22,11 +37,14 @@ class SimpleMap extends PureComponent {
           bootstrapURLKeys={{ key: MAP_KEY }}
           zoom={zoom}
           defaultZoom={11}
+          onDragEnd={map => this.filterWithNewCenter(map)}
           defaultCenter={defaultCenter}
           center={center}
         >
           {items.map(item => (
             <Marker
+              auth={auth}
+              onEdit={onEdit}
               key={item._id}
               active={item._id === selectedItem._id}
               lat={item.loc.coordinates[1]}
@@ -44,9 +62,16 @@ class SimpleMap extends PureComponent {
 }
 
 SimpleMap.propTypes = {
+  auth: PropTypes.shape({
+    role: PropTypes.string,
+  }).isRequired,
+  searchByMap: PropTypes.bool,
   center: PropTypes.shape({}).isRequired,
   defaultCenter: PropTypes.shape({}),
   onClick: PropTypes.func.isRequired,
+  onEdit: PropTypes.func.isRequired,
+  onFilterChange: PropTypes.func.isRequired,
+  onFilter: PropTypes.func.isRequired,
   selectedItem: PropTypes.shape({
     _id: PropTypes.string,
   }),
@@ -63,7 +88,7 @@ SimpleMap.defaultProps = {
   selectedItem: {},
   items: [],
   zoom: 11,
-  // zoom: 11,
+  searchByMap: false,
 };
 
 export default SimpleMap;

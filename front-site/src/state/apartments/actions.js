@@ -1,5 +1,5 @@
-import { getOwnedApartments } from 'api/apartments';
-import { SET_AVAILABLE_APARTMENTS, SET_OWNED_APARTMENTS } from 'state/apartments/types';
+import { getOwnedApartments, postApartment, getApartment, putApartment, deleteApartment } from 'api/apartments';
+import { SET_AVAILABLE_APARTMENTS, SET_OWNED_APARTMENTS, SET_EDIT_APARTMENT_LOCATION, SET_EDIT_APARTMENT } from 'state/apartments/types';
 import { toggleLoading } from 'state/loading/actions';
 import { setPage } from 'state/pagination/actions';
 import { generateQueryParams } from 'utils/index';
@@ -16,15 +16,25 @@ export const setAvailableApartments = apartments => ({
   payload: apartments,
 });
 
-export const fetchOwnedApartments = paginationOptions => (dispatch, getState) =>
+export const setEditApartmentsLocation = location => ({
+  type: SET_EDIT_APARTMENT_LOCATION,
+  payload: location,
+});
+
+export const setEditApartment = apartment => ({
+  type: SET_EDIT_APARTMENT,
+  payload: apartment,
+});
+
+export const fetchOwnedApartments = (paginationOptions, userId) => (dispatch, getState) =>
   new Promise((resolve, reject) => {
-    dispatch(toggleLoading('apartments'));
+    dispatch(toggleLoading('ownedApartments'));
     const state = getState();
-    const filters = getFilters(state, 'apartments') || {};
+    const filters = getFilters(state, 'ownedApartments') || {};
     const pagination = paginationOptions || getPagination(state);
     const params = generateQueryParams(filters, pagination);
-    getOwnedApartments(params).then((response) => {
-      dispatch(toggleLoading('apartments'));
+    getOwnedApartments(params, userId).then((response) => {
+      dispatch(toggleLoading('ownedApartments'));
       // eslint-disable-next-line prefer-promise-reject-errors
       if (response.status === 401) return reject('You are not authorized');
       return response.json().then((json) => {
@@ -36,7 +46,84 @@ export const fetchOwnedApartments = paginationOptions => (dispatch, getState) =>
         return reject(json.error);
       });
     }).catch(() => {
-      dispatch(toggleLoading('apartments'));
+      dispatch(toggleLoading('ownedApartments'));
+      reject();
+    });
+  });
+
+export const sendPostApartment = (data, userId) => dispatch =>
+  new Promise((resolve, reject) => {
+    dispatch(toggleLoading('addApartment'));
+    postApartment(data, userId).then((response) => {
+      dispatch(toggleLoading('addApartment'));
+      // eslint-disable-next-line prefer-promise-reject-errors
+      if (response.status === 401) return reject('You are not authorized');
+      return response.json().then((json) => {
+        if (response.ok) {
+          return resolve();
+        }
+        return reject(json.error);
+      });
+    }).catch(() => {
+      dispatch(toggleLoading('addApartment'));
+      reject();
+    });
+  });
+
+export const sendPutApartment = (data, apartmentId, userId) => dispatch =>
+  new Promise((resolve, reject) => {
+    dispatch(toggleLoading('editApartment'));
+    putApartment(data, apartmentId, userId).then((response) => {
+      dispatch(toggleLoading('editApartment'));
+      // eslint-disable-next-line prefer-promise-reject-errors
+      if (response.status === 401) return reject('You are not authorized');
+      return response.json().then((json) => {
+        if (response.ok) {
+          return resolve();
+        }
+        return reject(json.error);
+      });
+    }).catch(() => {
+      dispatch(toggleLoading('editApartment'));
+      reject();
+    });
+  });
+
+export const fetchApartment = (apartmentId, userId) => dispatch =>
+  new Promise((resolve, reject) => {
+    dispatch(toggleLoading('editApartment'));
+    getApartment(apartmentId, userId).then((response) => {
+      dispatch(toggleLoading('editApartment'));
+      // eslint-disable-next-line prefer-promise-reject-errors
+      if (response.status === 401) return reject('You are not authorized');
+      return response.json().then((json) => {
+        if (response.ok) {
+          dispatch(setEditApartment(json.payload));
+          return resolve();
+        }
+        return reject(json.error);
+      });
+    }).catch(() => {
+      dispatch(toggleLoading('editApartment'));
+      reject();
+    });
+  });
+
+export const sendDeleteApartment = (apartmentId, userId) => dispatch =>
+  new Promise((resolve, reject) => {
+    dispatch(toggleLoading('editApartment'));
+    deleteApartment(apartmentId, userId).then((response) => {
+      dispatch(toggleLoading('editApartment'));
+      // eslint-disable-next-line prefer-promise-reject-errors
+      if (response.status === 401) return reject('You are not authorized');
+      return response.json().then((json) => {
+        if (response.ok) {
+          return resolve();
+        }
+        return reject(json.error);
+      });
+    }).catch(() => {
+      dispatch(toggleLoading('editApartment'));
       reject();
     });
   });

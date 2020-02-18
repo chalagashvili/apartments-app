@@ -39,6 +39,5 @@ export const generateQueryParams = (filters, pagination = { page: 1, pageSize: 1
   const filterKeys = Object.keys(allFilters);
   const filterPairs = [];
   filterKeys.map(fk => filterPairs.push(`${fk}=${allFilters[fk]}`));
-  console.log('query', `?${filterPairs.join('&')}`);
   return `?${filterPairs.join('&')}`;
 };

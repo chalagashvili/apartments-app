@@ -39,24 +39,43 @@ class Apartments extends React.PureComponent {
       mapView, selectedItem, searchByMap, centerCoordinates: { longitude, latitude },
     } = this.state;
     const {
-      apartments, pagination, onPageChange, onPaginationChange, loading,
+      apartments, pagination, onPageChange, onPaginationChange, loading, auth, onEdit,
+      onFilterChange, onFilter, filters,
     } = this.props;
     return (
       <Spin spinning={!!loading}>
         <div className="apartmentsForm" >
           <AparmentsList
+            auth={auth}
+            onFilter={onFilter}
+            onEdit={onEdit}
+            filters={filters}
             pagination={pagination}
             onPageChange={onPageChange}
             onPaginationChange={onPaginationChange}
             mapView={mapView}
+            onFilterChange={onFilterChange}
             items={apartments}
             onHover={this.showInfo}
             searchByMap={searchByMap}
             searchByMapToggle={
-            () => this.setState(prevState => ({ searchByMap: !prevState.searchByMap }))}
+            () => {
+              if (this.state.searchByMap) {
+                onFilterChange('longitude');
+                onFilterChange('latitude');
+                onFilterChange('radius');
+              }
+              this.setState(prevState => ({ searchByMap: !prevState.searchByMap }));
+              }
+            }
           />
           <MapContainer
+            auth={auth}
+            onFilter={onFilter}
+            onEdit={onEdit}
             pagination={pagination}
+            searchByMap={searchByMap}
+            onFilterChange={onFilterChange}
             mapView={mapView}
             center={{ lat: latitude, lng: longitude }}
             items={apartments}
@@ -78,17 +97,28 @@ class Apartments extends React.PureComponent {
 }
 
 Apartments.propTypes = {
+  onEdit: PropTypes.func.isRequired,
   apartments: PropTypes.arrayOf(PropTypes.shape({})),
   onDidMount: PropTypes.func.isRequired,
+  onFilterChange: PropTypes.func.isRequired,
   pagination: PropTypes.shape({}).isRequired,
   onPageChange: PropTypes.func.isRequired,
+  onFilter: PropTypes.func.isRequired,
   onPaginationChange: PropTypes.func.isRequired,
   loading: PropTypes.bool,
+  auth: PropTypes.shape({
+    role: PropTypes.string,
+  }),
+  filters: PropTypes.shape({}),
 };
 
 Apartments.defaultProps = {
   apartments: [],
   loading: false,
+  auth: {
+    role: '',
+  },
+  filters: {},
 };
 
 export default Apartments;

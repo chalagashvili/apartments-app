@@ -1,4 +1,4 @@
-import { SET_AVAILABLE_APARTMENTS, SET_OWNED_APARTMENTS } from 'state/apartments/types';
+import { SET_AVAILABLE_APARTMENTS, SET_OWNED_APARTMENTS, SET_EDIT_APARTMENT_LOCATION, SET_EDIT_APARTMENT } from 'state/apartments/types';
 
 const reducer = (state = {}, action = {}) => {
   switch (action.type) {
@@ -12,6 +12,18 @@ const reducer = (state = {}, action = {}) => {
       return {
         ...state,
         ownedApartments: action.payload,
+      };
+    }
+    case SET_EDIT_APARTMENT_LOCATION: {
+      return {
+        ...state,
+        location: action.payload,
+      };
+    }
+    case SET_EDIT_APARTMENT: {
+      return {
+        ...state,
+        editApartment: action.payload,
       };
     }
 

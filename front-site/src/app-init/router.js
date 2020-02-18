@@ -18,7 +18,7 @@ export const ROUTE_BOOKINGS = '/bookings';
 
 // realtor
 export const ROUTE_ADD_APARTMENT = '/apartments/add';
-export const ROUTE_EDIT_APARTMENT = '/apartments/edit/:apartmentCode';
+export const ROUTE_EDIT_APARTMENT = '/apartments/edit/:apartmentId';
 export const ROUTE_OWNED_APARTMENTS = '/owned-apartments';
 
 // admin

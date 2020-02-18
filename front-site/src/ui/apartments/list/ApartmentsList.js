@@ -1,22 +1,29 @@
 import React from 'react';
+import { FormattedMessage } from 'react-intl';
 import PropTypes from 'prop-types';
-import { Pagination } from 'antd';
+import { Pagination, Icon } from 'antd';
 import moment from 'moment';
 import Filter from 'ui/apartments/list/Filter';
-import { defaultApartmentImage } from 'utils/const';
+import { defaultApartmentImage, nonClient } from 'utils/const';
 
 
 const ApartmentsList = ({
   mapView, searchByMap, searchByMapToggle, items, onHover, pagination: { totalItems, page },
-  onPageChange, onPaginationChange, pageSizeOptions,
+  onPageChange, onPaginationChange, pageSizeOptions, auth: { role }, onEdit, onFilterChange,
+  onFilter, filters,
 }) => (
   <div className={mapView ? 'hideApartments' : 'apartmentsList'}>
-    <Filter searchByMap={searchByMap} searchByMapToggle={searchByMapToggle} />
+    <Filter
+      searchByMap={searchByMap}
+      searchByMapToggle={searchByMapToggle}
+      onFilterChange={onFilterChange}
+      onFilter={onFilter}
+      filters={filters}
+    />
     <div className="apartmentsWrapper" >
       {items.map(apartment => (
         <div
           className="apartment"
-          // eslint-disable-next-line no-underscore-dangle
           key={apartment._id}
           onFocus={() => onHover({ ...apartment, clicked: false })}
           onMouseOver={() => onHover({ ...apartment, clicked: false })}
@@ -32,6 +39,17 @@ const ApartmentsList = ({
             />
           </div>
           <div className="apartment__infoWrapper" >
+            {
+            nonClient.includes(role) ? (
+              <button
+                className="apartment-list-edit-button"
+                onClick={() => onEdit(apartment._id)}
+              >
+                <FormattedMessage id="app.edit" />
+                <Icon type="setting" theme="filled" />
+              </button>
+            ) : null
+          }
             <div className="apartment__infoWrapper-firstSection" >
               <div className="apartment__name">{apartment.name}</div>
               <div className="apartmen__postDate" >{moment(apartment.createdAd).toDate().toLocaleDateString()}</div>
@@ -52,7 +70,17 @@ const ApartmentsList = ({
               <div className="apartment__realtor">
                 ⓒ {apartment.owner.name || apartment.owner.email}
               </div>
-              <div className="apartment__rentButton">Rent Now</div>
+              {
+                nonClient.includes(role) ?
+                (
+                  <div className={`apartment__availability apartment__availability--${apartment.isAvailable ? 'free' : 'booked'}`}>
+                    {
+                    apartment.isAvailable ? <FormattedMessage id="app.available" /> : <FormattedMessage id="app.booked" />
+                  }
+                  </div>
+                 ) :
+                (<div className="apartment__rentButton"><FormattedMessage id="app.bookNow" /></div>)
+              }
             </div>
           </div>
         </div>
@@ -73,6 +101,9 @@ const ApartmentsList = ({
 );
 
 ApartmentsList.propTypes = {
+  auth: PropTypes.shape({
+    role: PropTypes.string,
+  }),
   mapView: PropTypes.bool.isRequired,
   items: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
   searchByMap: PropTypes.bool.isRequired,
@@ -84,11 +115,19 @@ ApartmentsList.propTypes = {
   }).isRequired,
   onPageChange: PropTypes.func.isRequired,
   onPaginationChange: PropTypes.func.isRequired,
+  onEdit: PropTypes.func.isRequired,
+  onFilterChange: PropTypes.func.isRequired,
+  onFilter: PropTypes.func.isRequired,
   pageSizeOptions: PropTypes.arrayOf(PropTypes.string),
+  filters: PropTypes.shape({}),
 };
 
 ApartmentsList.defaultProps = {
   pageSizeOptions: ['1', '5', '10', '20'],
+  auth: {
+    role: '',
+  },
+  filters: {},
 };
 
 

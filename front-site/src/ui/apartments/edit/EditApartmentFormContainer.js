@@ -3,22 +3,33 @@ import { injectIntl } from 'react-intl';
 import { withRouter } from 'react-router-dom';
 import { message } from 'antd';
 
-import LoginForm from 'ui/login/LoginForm';
-import { sendPostLogin } from 'state/auth/actions';
+import ApartmentForm from 'ui/apartments/common/ApartmentForm';
 import { getLoading } from 'state/loading/selectors';
-import { ROUTE_DASHBOARD } from 'app-init/router';
+import { ROUTE_OWNED_APARTMENTS } from 'app-init/router';
+import { EDIT_MODE } from 'utils/const';
+import { fetchApartment, sendPutApartment, sendDeleteApartment } from 'state/apartments/actions';
+import { getEditApartment } from 'state/apartments/selectors';
 
 const mapStateToProps = state => ({
-  loading: getLoading(state).login,
+  loading: getLoading(state).editApartment,
+  mode: EDIT_MODE,
+  apartment: getEditApartment(state),
 });
 
 const mapDispatchToProps = (dispatch, { history, intl }) => ({
-  onSubmit: values => dispatch(sendPostLogin(values))
+  onDidMount: (userId, apartmentId) => {
+    dispatch(fetchApartment(apartmentId, userId));
+  },
+  onSubmit: (values, apartmentId) => dispatch(sendPutApartment(values, apartmentId))
     .then(() => {
-      message.success(intl.formatMessage({ id: 'app.loginSuccess' }));
-      history.push(ROUTE_DASHBOARD);
+      message.success(intl.formatMessage({ id: 'app.editApartmenSuccess' }));
+      history.push(ROUTE_OWNED_APARTMENTS);
     })
     .catch(err => message.error(err)),
+  onDelete: (apartmentId) => {
+    dispatch(sendDeleteApartment(apartmentId)); history.push(ROUTE_OWNED_APARTMENTS);
+  },
+  onCancel: () => history.goBack(),
 });
 
-export default withRouter(injectIntl(connect(mapStateToProps, mapDispatchToProps)(LoginForm)));
+export default withRouter(injectIntl(connect(mapStateToProps, mapDispatchToProps)(ApartmentForm)));

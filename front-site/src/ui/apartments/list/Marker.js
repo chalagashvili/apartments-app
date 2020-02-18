@@ -1,13 +1,14 @@
 import React from 'react';
 import moment from 'moment';
+import { Icon } from 'antd';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
-import { defaultApartmentImage } from 'utils/const';
+import { defaultApartmentImage, nonClient } from 'utils/const';
 import 'ui/apartments/list/Marker.css';
 
 const Marker = (props) => {
   const {
-    name, active, onClick, item, selectedItem,
+    name, active, onClick, item, selectedItem, auth: { role }, onEdit,
   } = props;
   return (
     <div
@@ -38,18 +39,26 @@ const Marker = (props) => {
         overflow: 'hidden',
       }}
         >
-          <div
-            // eslint-disable-next-line no-underscore-dangle
-            key={item._id}
-          >
+          <div key={item._id}>
             <img
               style={{ objectFit: 'cover' }}
               width={300}
               height={150}
               src={item.imageUrl || defaultApartmentImage}
-              alt="Logo"
+              alt="Apartment"
             />
             <div style={{ padding: '15px 20px 20px' }} >
+              {
+                nonClient.includes(role) ? (
+                  <button
+                    className="apartment-edit-button"
+                    onClick={() => onEdit(item._id)}
+                  >
+                    <FormattedMessage id="app.edit" />
+                    <Icon type="setting" theme="filled" />
+                  </button>
+                ) : null
+              }
               <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }} >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }} >
                   <div style={{ fontSize: 19, color: 'black' }} >{item.name}</div>
@@ -88,17 +97,32 @@ const Marker = (props) => {
                   >ⓒ {item.owner.name || item.owner.email}
                   </div>
 
-                  <div style={{
-                  cursor: 'pointer',
-                  border: '1px solid black',
-                  color: 'rgb(34, 34, 34)',
-                  padding: '5px 20px',
-                  borderRadius: 5,
-                  display: 'flex',
-                  alignItems: 'center',
-                }}
-                  ><FormattedMessage id="app.bookNow" />
-                  </div>
+
+                  {
+                    nonClient.includes(role) ?
+                    (
+                      <div className={`apartment__availability apartment__availability--${item.isAvailable ? 'free' : 'booked'}`}>
+                        {
+                        item.isAvailable ? <FormattedMessage id="app.available" /> : <FormattedMessage id="app.booked" />
+                      }
+                      </div>
+                    ) :
+                    (
+                      <div className="apartment__rentButton">
+                        <div style={{
+                          cursor: 'pointer',
+                          border: '1px solid black',
+                          color: 'rgb(34, 34, 34)',
+                          padding: '5px 20px',
+                          borderRadius: 5,
+                          display: 'flex',
+                          alignItems: 'center',
+                        }}
+                        >
+                          <FormattedMessage id="app.bookNow" />
+                        </div>
+                      </div>)
+                  }
                 </div>
               </div>
             </div>
@@ -111,6 +135,9 @@ const Marker = (props) => {
 
 Marker.propTypes = {
   active: PropTypes.bool,
+  auth: PropTypes.shape({
+    role: PropTypes.string,
+  }).isRequired,
   selectedItem: PropTypes.shape({
     clicked: PropTypes.bool,
   }),
@@ -123,6 +150,7 @@ Marker.propTypes = {
     numberOfRooms: PropTypes.number.isRequired,
     floorAreaSize: PropTypes.number.isRequired,
     pricePerMonth: PropTypes.number.isRequired,
+    isAvailable: PropTypes.bool.isRequired,
     owner: PropTypes.shape({
       name: PropTypes.string,
       email: PropTypes.string.isRequired,
@@ -132,6 +160,7 @@ Marker.propTypes = {
     }).isRequired,
   }),
   onClick: PropTypes.func.isRequired,
+  onEdit: PropTypes.func.isRequired,
   name: PropTypes.string.isRequired,
 };
 

@@ -28,6 +28,7 @@ module.exports = (app) => {
 
   /* Realtor routes */
   app.get('/users/:id/apartments', requireAuth, userControl.getOwnedApartments);
+  app.get('/users/:id/apartments/:apartmentId', requireAuth, userControl.getSingleApartment);
   app.post('/users/:id/apartments', requireAuth, userControl.addApartment);
   app.put('/users/:id/apartments/:apartmentId', requireAuth, userControl.updateApartment);
   app.delete('/users/:id/apartments/:apartmentId', requireAuth, userControl.deleteApartment);

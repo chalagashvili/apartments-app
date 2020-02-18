@@ -15,7 +15,8 @@ import {
   // USERS,
   // APARTMENTS,
   // ROUTE_MY_RENTED_APARTMENTS_AS_CLIENT,
-  // ROUTE_ADD_APARTMENT,
+  ROUTE_ADD_APARTMENT,
+  ROUTE_EDIT_APARTMENT,
   // ROUTE_EDIT_APARTMENT,
   // ROUTE_APARTMENTS_I_RENT_AS_REALTOR,
   // ROUTE_USERS,
@@ -33,7 +34,8 @@ import ResetPasswordPage from 'ui/resetPassword/ResetPasswordPage';
 import ForgotPasswordPage from 'ui/forgotPassword/ForgotPasswordPage';
 // import BookingsListPage from 'ui/bookings/BookingsListPage';
 // import Apartments from 'ui/apartments/ApartmentsForm';
-// import AddApartmentPage from 'ui/addApartment/AddApartmentPage';
+import AddApartmentPage from 'ui/apartments/add/AddApartmentPage';
+import EditApartmentPage from 'ui/apartments/edit/EditApartmentPage';
 import SignupPage from 'ui/signup/SignupPage';
 import LogoutContainer from 'ui/logout/LogoutContainer';
 import OwnedApartmentsPage from 'ui/ownedApartments/OwnedApartmentsPage';
@@ -49,8 +51,8 @@ const profile = Client(withAuthentication(ProfilePage));
 // const bookings = Client(withAuthentication(BookingsListPage));
 
 // Realtor components
-// const addApartment = Realtor(withAuthentication(DashboardPage));
-// const editApartment = Realtor(withAuthentication(DashboardPage));
+const addApartment = Realtor(withAuthentication(AddApartmentPage));
+const editApartment = Realtor(withAuthentication(EditApartmentPage));
 const ownedApartments = Realtor(withAuthentication(OwnedApartmentsPage));
 
 // Admin components
@@ -82,8 +84,8 @@ const App = () => (
       {/* Add password gen and reset pages */}
       {/* Private (Client) */}
       {/* Private (Realtor) */}
-      {/* <Route exact path={ROUTE_ADD_APARTMENT} component={addApartment} />
-      <Route path={ROUTE_EDIT_APARTMENT} component={editApartment} /> */}
+      <Route exact path={ROUTE_ADD_APARTMENT} component={addApartment} />
+      <Route path={ROUTE_EDIT_APARTMENT} component={editApartment} />
       <Route exact path={ROUTE_OWNED_APARTMENTS} component={ownedApartments} />
       {/* Private (Admin) */}
       {/* <Route exact path={ROUTE_USERS} component={users} />

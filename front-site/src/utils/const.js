@@ -81,6 +81,8 @@ export const clientRole = [ClientOnly, RealtorOnly, AdminOnly];
 export const realtorRole = [RealtorOnly, AdminOnly];
 export const adminRole = [AdminOnly];
 
+export const nonClient = [RealtorOnly, AdminOnly];
+
 // eslint-disable-next-line no-useless-escape
 export const emailRegexPattern = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 export const coordinatesRegexPatter = /^[-+]?([1-8]?\d(\.\d+)?|90(\.0+)?),\s*[-+]?(180(\.0+)?|((1[0-7]\d)|([1-9]?\d))(\.\d+)?)$/;
@@ -91,3 +93,6 @@ export const mapDefaultCenterCoordinates = {
   longitude: 44.783333,
   latitude: 41.716667,
 };
+
+export const ADD_MODE = 'work-mode-add';
+export const EDIT_MODE = 'work-mode-edit';
