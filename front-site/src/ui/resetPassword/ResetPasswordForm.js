@@ -7,7 +7,7 @@ function hasErrors(fieldsError) {
   return Object.keys(fieldsError).some(field => fieldsError[field]);
 }
 
-class LoginForm extends React.Component {
+class ResetPasswordForm extends React.Component {
   componentDidMount() {
     // To disable submit button at the beginning.
     this.props.form.validateFields();
@@ -17,7 +17,8 @@ class LoginForm extends React.Component {
     e.preventDefault();
     this.props.form.validateFields((err, values) => {
       if (!err) {
-        console.log('Received values of form: ', values);
+        const { match: { params = {} } } = this.props;
+        this.props.onSubmit(values, params.resetToken);
       }
     });
   };
@@ -32,11 +33,12 @@ class LoginForm extends React.Component {
   }
 
   render() {
-    const { intl, form } = this.props;
+    const { intl, form, loading } = this.props;
     const {
       getFieldDecorator, getFieldsError,
       isFieldTouched, getFieldError,
     } = form;
+
     // Only show error after a field is touched.
     const passwordError = isFieldTouched('password') && getFieldError('password') && intl.formatMessage({ id: getFieldError('password') });
     const confirmPasswordError = isFieldTouched('confirmPassword') && getFieldError('confirmPassword') && intl.formatMessage({ id: getFieldError('confirmPassword') });
@@ -75,6 +77,7 @@ class LoginForm extends React.Component {
           <Form.Item>
             <Button
               type="primary"
+              loading={loading}
               htmlType="submit"
               className="login-form-button"
               disabled={hasErrors(getFieldsError())}
@@ -89,7 +92,7 @@ class LoginForm extends React.Component {
   }
 }
 
-LoginForm.propTypes = {
+ResetPasswordForm.propTypes = {
   intl: PropTypes.shape({
     formatMessage: PropTypes.func,
   }).isRequired,
@@ -102,6 +105,18 @@ LoginForm.propTypes = {
     isFieldTouched: PropTypes.func.isRequired,
     getFieldError: PropTypes.func.isRequired,
   }).isRequired,
+  loading: PropTypes.bool,
+  onSubmit: PropTypes.func.isRequired,
+  match: PropTypes.shape({
+    params: PropTypes.shape({}),
+  }),
 };
 
-export default Form.create({ name: 'normal_login' })(injectIntl(LoginForm));
+ResetPasswordForm.defaultProps = {
+  loading: false,
+  match: {
+    params: {},
+  },
+};
+
+export default Form.create({ name: 'normal_login' })(injectIntl(ResetPasswordForm));

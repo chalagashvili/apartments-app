@@ -86,11 +86,14 @@ function removeLinkedDocuments(doc) {
   }
 }
 
-exports.cleanUpAfterRoleChange = (doc) => removeLinkedDocuments(doc);
+const cleanUpAfterRoleChange = (doc) => removeLinkedDocuments(doc);
 
 userSchema.post('deleteOne', { document: true, query: false }, removeLinkedDocuments);
 
 userSchema.plugin(mongoosePaginate);
 const user = mongoose.model('User', userSchema);
 
-module.exports = user;
+module.exports = {
+  user,
+  cleanUpAfterRoleChange,
+};

@@ -6,6 +6,8 @@ import pagination from 'state/pagination/reducer';
 import loading from 'state/loading/reducer';
 import apartments from 'state/apartments/reducer';
 import filters from 'state/filters/reducer';
+import profile from 'state/profile/reducer';
+import users from 'state/users/reducer';
 
 const reducerDef = {
   form,
@@ -15,6 +17,8 @@ const reducerDef = {
   loading,
   apartments,
   filters,
+  profile,
+  users,
 };
 
 // app root reducer

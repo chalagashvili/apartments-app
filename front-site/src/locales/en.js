@@ -75,5 +75,10 @@ export default {
     'app.editApartmenSuccess': 'You have successfully updated apartment!',
     'app.editApartment': 'Edit Apartment',
     'app.delete': 'Delete',
+    'app.editProfile': 'Edit Profile',
+    'app.addUser': 'Add User',
+    'menu.apartments': 'Apartments',
+    'app.unbook': 'Unbook',
+    'app.editUser': 'Edit User',
   },
 };

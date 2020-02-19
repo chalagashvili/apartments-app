@@ -74,5 +74,10 @@ export default {
     'app.editApartment': 'Uredi stan',
     'app.editApartmenSuccess': 'Uspješno ste ažurirali apartman!',
     'app.delete': 'Izbrisati',
+    'app.editProfile': 'Uredi profil',
+    'app.addUser': 'Dodajte korisnika',
+    'menu.apartments': 'Apartmani',
+    'app.unbook': 'Unbook',
+    'app.editUser': 'Uređivanje korisnika',
   },
 };

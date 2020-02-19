@@ -271,7 +271,6 @@ class ApartmentForm extends React.Component {
                 <FormattedMessage id="app.save" />
               </Button>
               <Button
-                loading={loading}
                 onClick={onCancel}
                 style={{ marginLeft: 10 }}
               >

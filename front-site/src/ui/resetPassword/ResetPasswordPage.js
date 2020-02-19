@@ -2,7 +2,7 @@ import React from 'react';
 import { Typography } from 'antd';
 import { FormattedMessage } from 'react-intl';
 import InternalPage from 'ui/InternalPage';
-import ResetPasswordFormContainer from './ResetPasswordFormContainer';
+import ResetPasswordFormContainer from 'ui/resetPassword/ResetPasswordFormContainer';
 
 const { Title } = Typography;
 

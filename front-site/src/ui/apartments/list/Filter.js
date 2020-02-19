@@ -78,14 +78,16 @@ class Filter extends React.Component {
                 type="number"
                 value={pricePerMonthFrom}
                 onChange={val => onFilterChange('pricePerMonthFrom', val)}
-                formatter={value => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                formatter={value => `${value}`}
+                min={0}
               />
               To:
               <InputNumber
                 type="number"
                 value={pricePerMonthTo}
                 onChange={val => onFilterChange('pricePerMonthTo', val)}
-                formatter={value => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                formatter={value => `${value}`}
+                min={0}
               />
             </div>
             <div style={{
@@ -98,14 +100,16 @@ class Filter extends React.Component {
                 type="number"
                 value={floorAreaSizeFrom}
                 onChange={val => onFilterChange('floorAreaSizeFrom', val)}
-                formatter={value => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                formatter={value => `${value}`}
+                min={0}
               />
               To:
               <InputNumber
                 type="number"
                 value={floorAreaSizeTo}
                 onChange={val => onFilterChange('floorAreaSizeTo', val)}
-                formatter={value => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                formatter={value => `${value}`}
+                min={0}
               />
             </div>
 
@@ -120,6 +124,7 @@ class Filter extends React.Component {
                 value={numberOfRoomsFrom}
                 onChange={val => onFilterChange('numberOfRoomsFrom', val)}
                 formatter={value => `${value}`}
+                min={0}
               />
               To:
               <InputNumber
@@ -127,9 +132,21 @@ class Filter extends React.Component {
                 value={numberOfRoomsTo}
                 onChange={val => onFilterChange('numberOfRoomsTo', val)}
                 formatter={value => `${value}`}
+                min={0}
               />
             </div>
-            <Button style={{ marginTop: 20 }} onClick={() => { this.setState({ isOpen: false }); onFilter(); }} type="primary"><FormattedMessage id="app.search" /></Button>
+            <Button
+              style={{ marginTop: 20 }}
+              onClick={() => {
+              this.setState({ isOpen: false });
+                onFilterChange('longitude');
+                onFilterChange('latitude');
+                onFilterChange('radius');
+                onFilter();
+              }}
+              type="primary"
+            ><FormattedMessage id="app.search" />
+            </Button>
             <Button style={{ marginTop: 10 }} onClick={() => { this.setState({ isOpen: false }); }}><FormattedMessage id="app.cancel" /></Button>
           </div>) : null}
 

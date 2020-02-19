@@ -40,13 +40,16 @@ class Apartments extends React.PureComponent {
     } = this.state;
     const {
       apartments, pagination, onPageChange, onPaginationChange, loading, auth, onEdit,
-      onFilterChange, onFilter, filters,
+      onFilterChange, onFilter, filters, onBook, groupLoading, onUnBook,
     } = this.props;
     return (
       <Spin spinning={!!loading}>
         <div className="apartmentsForm" >
           <AparmentsList
             auth={auth}
+            onBook={onBook}
+            onUnBook={onUnBook}
+            groupLoading={groupLoading}
             onFilter={onFilter}
             onEdit={onEdit}
             filters={filters}
@@ -71,6 +74,9 @@ class Apartments extends React.PureComponent {
           />
           <MapContainer
             auth={auth}
+            onBook={onBook}
+            onUnBook={onUnBook}
+            groupLoading={groupLoading}
             onFilter={onFilter}
             onEdit={onEdit}
             pagination={pagination}
@@ -97,7 +103,7 @@ class Apartments extends React.PureComponent {
 }
 
 Apartments.propTypes = {
-  onEdit: PropTypes.func.isRequired,
+  onEdit: PropTypes.func,
   apartments: PropTypes.arrayOf(PropTypes.shape({})),
   onDidMount: PropTypes.func.isRequired,
   onFilterChange: PropTypes.func.isRequired,
@@ -110,6 +116,9 @@ Apartments.propTypes = {
     role: PropTypes.string,
   }),
   filters: PropTypes.shape({}),
+  onBook: PropTypes.func,
+  onUnBook: PropTypes.func,
+  groupLoading: PropTypes.shape({}),
 };
 
 Apartments.defaultProps = {
@@ -119,6 +128,10 @@ Apartments.defaultProps = {
     role: '',
   },
   filters: {},
+  onBook: () => {},
+  onUnBook: () => {},
+  groupLoading: {},
+  onEdit: () => {},
 };
 
 export default Apartments;

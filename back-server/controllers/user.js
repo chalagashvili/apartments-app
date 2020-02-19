@@ -13,6 +13,7 @@ const {
   successResponseWithData,
 } = require('../services/apiResponse');
 const { cleanUpAfterRoleChange } = require('../models/user');
+
 const {
   adminRole, nonAdminRole, allRoles, nonRealtorRole,
 } = require('../services/const');
@@ -105,7 +106,7 @@ exports.addUser = async (req, res, next) => {
 exports.editUser = async (req, res, next) => {
   const { id: userId } = req.params;
   const { _id: callerId } = req.user;
-  let user = null;
+  let { user } = req;
   // Check that id is passed correctly and its a valid mongo ID
   if (!userId || !utils.validateObjectID(userId)) return validationError(res, 'ID is not a valid mongo ObjectId');
   // Check if 3rd person's bookings are accessed
@@ -137,7 +138,7 @@ exports.editUser = async (req, res, next) => {
     user.email = email;
   }
   /* Check if changing role */
-  if (role) {
+  if (role && user.role !== role) {
     if (!allRoles.includes(role)) return validationError(res, 'Role is invalid');
     /* Check if the person we are updating is Admin already - if yes, it is prohobitied then */
     if (adminRole.includes(user.role)) return unauthorizedResponse(res, 'You don\'t have enough permissions to update another admin');
@@ -243,14 +244,49 @@ exports.getBookings = (req, res, next) => {
   }
   return UserSchema.findById({ _id: userId }, (error, user) => {
     if (error) return next(error);
-    const { page = 1, pageSize = 10 } = req.query;
+    const {
+      page = 1, pageSize = 10,
+      floorAreaSizeFrom, floorAreaSizeTo,
+      pricePerMonthFrom, pricePerMonthTo,
+      numberOfRoomsFrom, numberOfRoomsTo,
+      longitude, latitude, radius,
+      isAvailable,
+    } = req.query;
+    const filterQuery = { _id: { $in: user.bookings } };
+    if (floorAreaSizeFrom || floorAreaSizeTo) {
+      filterQuery.floorAreaSize = {
+        ...(floorAreaSizeFrom && { $gte: floorAreaSizeFrom }),
+        ...(floorAreaSizeTo && { $lte: floorAreaSizeTo }),
+      };
+    }
+    if (pricePerMonthFrom || pricePerMonthTo) {
+      filterQuery.pricePerMonth = {
+        ...(pricePerMonthFrom && { $gte: pricePerMonthFrom }),
+        ...(pricePerMonthTo && { $lte: pricePerMonthTo }),
+      };
+    }
+    if (numberOfRoomsFrom || numberOfRoomsTo) {
+      filterQuery.numberOfRooms = {
+        ...(numberOfRoomsFrom && { $gte: numberOfRoomsFrom }),
+        ...(numberOfRoomsTo && { $lte: numberOfRoomsTo }),
+      };
+    }
+    if (longitude && latitude && radius) {
+      filterQuery.loc = {
+        $geoWithin: { $centerSphere: [[longitude, latitude], radius] },
+      };
+    }
+    if (isAvailable != null) {
+      filterQuery.isAvailable = isAvailable;
+    }
     const options = {
       sort: { createdAt: -1 },
       page,
+      populate: { path: 'owner', select: 'name email id' },
       limit: pageSize,
     };
     return ApartmentSchema.paginate(
-      { _id: { $in: user.bookings } },
+      filterQuery,
       options,
       (err, results) => {
         if (err) return next(err);
@@ -329,7 +365,7 @@ exports.unbookApartment = (req, res, next) => {
     if (err) return next(err);
     // Check if apartment exists
     if (!apartment) return notFoundResponse(res, 'Apartment with given ID was not found');
-    if (apartment.bookedBy !== userId) return unauthorizedResponse(res, 'The apartment is not booked by the given user');
+    if (apartment.bookedBy.toString() !== userId) return unauthorizedResponse(res, 'The apartment is not booked by the given user');
     apartment.isAvailable = true;
     apartment.bookedBy = null;
     return apartment.save((saveErr) => {
@@ -436,7 +472,6 @@ exports.updateApartment = async (req, res, next) => {
     const toUpdate = await ApartmentSchema.findById({ _id: apartmentId });
     if (!toUpdate) return notFoundResponse(res, 'Apartment was not found');
     // Check if apartment is under ownership of caller, or caller is admin
-    console.log('toUpdate.owner', toUpdate.owner, userId, typeof toUpdate.owner);
     if (toUpdate.owner.toString() !== userId && !adminRole.includes(req.user.role)) return unauthorizedResponse(res, 'Property ownership validation failed');
     if (name) toUpdate.name = name;
     if (description) toUpdate.description = description;

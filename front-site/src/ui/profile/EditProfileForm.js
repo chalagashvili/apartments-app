@@ -1,29 +1,59 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { FormattedMessage, injectIntl } from 'react-intl';
-import { Form, Icon, Input, Button, Select, Spin } from 'antd';
+import { injectIntl, FormattedMessage } from 'react-intl';
+import { Form, Icon, Input, Button, Spin } from 'antd';
 import { emailRegexPattern } from 'utils/const';
-
-const { Option } = Select;
 
 function hasErrors(fieldsError) {
   return Object.keys(fieldsError).some(field => fieldsError[field]);
 }
 
-class UserForm extends React.Component {
+class EditProfileForm extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      confirmDirty: false,
+    };
+    this.compareToFirstPassword = this.compareToFirstPassword.bind(this);
+    this.validateToNextPassword = this.validateToNextPassword.bind(this);
+    this.handleConfirmBlur = this.handleConfirmBlur.bind(this);
+  }
+
+
   componentDidMount() {
-    const { onDidMount, form, match: { params } } = this.props;
-    onDidMount(params.userId, form);
+    const { onDidMount, form } = this.props;
+    onDidMount(form);
     // To disable submit button at the beginning.
     form.validateFields();
   }
 
+  handleConfirmBlur(e) {
+    const { value } = e.target;
+    this.setState({ confirmDirty: this.state.confirmDirty || !!value });
+  }
+
+  compareToFirstPassword(rule, value, callback) {
+    const { form } = this.props;
+    if (value && value !== form.getFieldValue('password')) {
+      callback('app.passwordsDontMatch');
+    } else {
+      callback();
+    }
+  }
+
+  validateToNextPassword(rule, value, callback) {
+    const { form } = this.props;
+    if (value && this.state.confirmDirty) {
+      form.validateFields(['confirmPassword'], { force: true });
+    }
+    callback();
+  }
+
   handleSubmit = (e) => {
     e.preventDefault();
-    const { form, match: { params } } = this.props;
-    form.validateFields((err, values) => {
+    this.props.form.validateFields((err, values) => {
       if (!err) {
-        this.props.onSubmit(values, params.userId);
+        this.props.onSubmit(values);
       }
     });
   };
@@ -61,36 +91,48 @@ class UserForm extends React.Component {
       },
     };
 
-    const selectComponent = (
-      <Select style={{ width: '100%' }}>
-        <Option value="client"><FormattedMessage id="app.client" /></Option>
-        <Option value="realtor"><FormattedMessage id="app.realtor" /></Option>
-      </Select>);
-
     // Only show error after a field is touched.
     const emailError = isFieldTouched('email') && getFieldError('email') && intl.formatMessage({ id: getFieldError('email') });
-    const roleError = isFieldTouched('role') && getFieldError('role') && intl.formatMessage({ id: getFieldError('role') });
-
+    const passwordError = isFieldTouched('password') && getFieldError('password') && intl.formatMessage({ id: getFieldError('password') });
+    const confirmPasswordError = isFieldTouched('confirmPassword') && getFieldError('confirmPassword') && intl.formatMessage({ id: getFieldError('confirmPassword') });
     return (
       <Spin spinning={loading}>
         <div className="SignupFormWrapper">
           <Form {...formItemLayout} onSubmit={this.handleSubmit} className="login-form">
             <Form.Item label={intl.formatMessage({ id: 'app.email' })} validateStatus={emailError ? 'error' : ''} help={emailError || ''}>
               {getFieldDecorator('email', {
-              rules: [{ required: true, message: 'app.inputEmail' },
+              rules: [
             { pattern: emailRegexPattern, message: 'app.validEmail' }],
             })(<Input
               prefix={<Icon type="user" style={{ color: 'rgba(0,0,0,.25)' }} />}
             />)}
             </Form.Item>
-            <Form.Item label={intl.formatMessage({ id: 'app.role' })} validateStatus={roleError ? 'error' : ''} help={roleError || ''}>
-              {
-              getFieldDecorator('role', {
-                  rules: [
-                    { required: true, message: 'app.provideRole' },
-                  ],
-                })(selectComponent)
-              }
+            <Form.Item
+              label={intl.formatMessage({ id: 'app.password' })}
+              validateStatus={passwordError ? 'error' : ''}
+              help={passwordError || ''}
+            >
+              {getFieldDecorator('password', {
+              rules: [
+                { min: 8, message: 'app.minPassword' },
+                { validator: this.validateToNextPassword },
+              ],
+            })(<Input.Password
+              prefix={<Icon type="lock" style={{ color: 'rgba(0,0,0,.25)' }} />}
+            />)}
+            </Form.Item>
+            <Form.Item
+              label={intl.formatMessage({ id: 'app.confirmPassword' })}
+              validateStatus={confirmPasswordError || form.getFieldValue('password') !== form.getFieldValue('confirmPassword') ? 'error' : ''}
+              help={confirmPasswordError || ''}
+            >
+              {getFieldDecorator('confirmPassword', {
+              rules: [
+                { validator: this.compareToFirstPassword }],
+            })(<Input.Password
+              prefix={<Icon type="lock" style={{ color: 'rgba(0,0,0,.25)' }} />}
+              onBlur={this.handleConfirmBlur}
+            />)}
             </Form.Item>
             <Form.Item
               label={intl.formatMessage({ id: 'app.fullname' })}
@@ -123,7 +165,7 @@ class UserForm extends React.Component {
   }
 }
 
-UserForm.propTypes = {
+EditProfileForm.propTypes = {
   intl: PropTypes.shape({
     formatMessage: PropTypes.func,
   }).isRequired,
@@ -139,22 +181,11 @@ UserForm.propTypes = {
   onSubmit: PropTypes.func.isRequired,
   loading: PropTypes.bool,
   onCancel: PropTypes.func.isRequired,
-  user: PropTypes.shape({}),
-  match: PropTypes.shape({
-    params: PropTypes.shape({
-      userId: PropTypes.string,
-    }),
-  }),
-  onDidMount: PropTypes.func,
+  onDidMount: PropTypes.func.isRequired,
 };
 
-UserForm.defaultProps = {
+EditProfileForm.defaultProps = {
   loading: false,
-  user: {},
-  onDidMount: () => {},
-  match: {
-    params: {},
-  },
 };
 
-export default Form.create({ name: 'admin_user_edit' })(injectIntl(UserForm));
+export default Form.create({ name: 'editProfile' })(injectIntl(EditProfileForm));

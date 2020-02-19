@@ -9,17 +9,16 @@ export const ROUTE_HOME = '/';
 // pre-auth
 export const ROUTE_SIGN_UP = '/sign-up';
 export const ROUTE_FORGOT_PASSWORD = '/forgot-password';
-export const ROUTE_RESET_PASSWORD = '/reset-password/:resetToken';
+export const ROUTE_RESET_PASSWORD = '/resetPassword/:resetToken';
 export const ROUTE_APARTMENTS = '/apartments';
 // auth needed
-export const ROUTE_DASHBOARD = '/dashboard';
 export const ROUTE_PROFILE = '/profile';
 export const ROUTE_BOOKINGS = '/bookings';
 
 // realtor
 export const ROUTE_ADD_APARTMENT = '/apartments/add';
 export const ROUTE_EDIT_APARTMENT = '/apartments/edit/:apartmentId';
-export const ROUTE_OWNED_APARTMENTS = '/owned-apartments';
+export const ROUTE_OWNED_APARTMENTS = '/ownedApartments';
 
 // admin
 export const ROUTE_USERS = '/users';

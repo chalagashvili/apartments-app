@@ -73,3 +73,17 @@ export const deleteApartment = (apartmentId, id = Cookies.get('id')) => new Prom
     .then(res => resolve(res))
     .catch(err => reject(err));
 });
+
+export const getAvailableApartments = params => new Promise((resolve, reject) => {
+  fetch(`${api}/apartments/${params}`, {
+    method: 'GET',
+    cache: 'no-cache',
+    headers: {
+      authorization: Cookies.get('jwtToken'),
+      'Content-Type': 'application/json',
+    },
+    referrerPolicy: 'no-referrer',
+  })
+    .then(res => resolve(res))
+    .catch(err => reject(err));
+});

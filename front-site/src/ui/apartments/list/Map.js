@@ -23,7 +23,7 @@ class SimpleMap extends PureComponent {
   render() {
     const {
       selectedItem, mapView, items, zoom, center, defaultCenter,
-      auth, onEdit,
+      auth, onEdit, onBook, groupLoading, onUnBook,
     } = this.props;
     return (
       // Important! Always set the container height explicitly
@@ -49,7 +49,10 @@ class SimpleMap extends PureComponent {
               active={item._id === selectedItem._id}
               lat={item.loc.coordinates[1]}
               lng={item.loc.coordinates[0]}
+              groupLoading={groupLoading}
               name={item.name}
+              onBook={onBook}
+              onUnBook={onUnBook}
               onClick={this.props.onClick}
               item={item}
               selectedItem={selectedItem}
@@ -69,7 +72,7 @@ SimpleMap.propTypes = {
   center: PropTypes.shape({}).isRequired,
   defaultCenter: PropTypes.shape({}),
   onClick: PropTypes.func.isRequired,
-  onEdit: PropTypes.func.isRequired,
+  onEdit: PropTypes.func,
   onFilterChange: PropTypes.func.isRequired,
   onFilter: PropTypes.func.isRequired,
   selectedItem: PropTypes.shape({
@@ -78,6 +81,9 @@ SimpleMap.propTypes = {
   zoom: PropTypes.number,
   items: PropTypes.arrayOf(PropTypes.shape({})),
   mapView: PropTypes.bool.isRequired,
+  onBook: PropTypes.func,
+  onUnBook: PropTypes.func,
+  groupLoading: PropTypes.shape({}),
 };
 
 SimpleMap.defaultProps = {
@@ -88,7 +94,11 @@ SimpleMap.defaultProps = {
   selectedItem: {},
   items: [],
   zoom: 11,
+  onEdit: () => {},
   searchByMap: false,
+  onBook: () => {},
+  onUnBook: () => {},
+  groupLoading: {},
 };
 
 export default SimpleMap;

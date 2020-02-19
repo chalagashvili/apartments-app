@@ -1,6 +1,6 @@
 import React from 'react';
 import InternalPage from 'ui/InternalPage';
-import OwnedApartmentsContainer from './OwnedApartmentsContainer';
+import OwnedApartmentsContainer from 'ui/ownedApartments/OwnedApartmentsContainer';
 
 const OwnedApartmentsPage = () => (
   <InternalPage footerDisabled>

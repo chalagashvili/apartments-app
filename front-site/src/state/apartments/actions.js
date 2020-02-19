@@ -1,5 +1,7 @@
-import { getOwnedApartments, postApartment, getApartment, putApartment, deleteApartment } from 'api/apartments';
-import { SET_AVAILABLE_APARTMENTS, SET_OWNED_APARTMENTS, SET_EDIT_APARTMENT_LOCATION, SET_EDIT_APARTMENT } from 'state/apartments/types';
+import { getOwnedApartments, postApartment, getApartment, putApartment, deleteApartment, getAvailableApartments } from 'api/apartments';
+import { SET_AVAILABLE_APARTMENTS, SET_OWNED_APARTMENTS,
+  SET_EDIT_APARTMENT_LOCATION, SET_EDIT_APARTMENT,
+  SET_BOOKED_APARTMENTS } from 'state/apartments/types';
 import { toggleLoading } from 'state/loading/actions';
 import { setPage } from 'state/pagination/actions';
 import { generateQueryParams } from 'utils/index';
@@ -13,6 +15,11 @@ export const setOwnedApartments = apartments => ({
 
 export const setAvailableApartments = apartments => ({
   type: SET_AVAILABLE_APARTMENTS,
+  payload: apartments,
+});
+
+export const setBookedApartments = apartments => ({
+  type: SET_BOOKED_APARTMENTS,
   payload: apartments,
 });
 
@@ -124,6 +131,31 @@ export const sendDeleteApartment = (apartmentId, userId) => dispatch =>
       });
     }).catch(() => {
       dispatch(toggleLoading('editApartment'));
+      reject();
+    });
+  });
+
+export const fetchAvailableApartments = paginationOptions => (dispatch, getState) =>
+  new Promise((resolve, reject) => {
+    dispatch(toggleLoading('availableApartments'));
+    const state = getState();
+    const filters = getFilters(state, 'availableApartments') || {};
+    const pagination = paginationOptions || getPagination(state);
+    const params = generateQueryParams(filters, pagination);
+    getAvailableApartments(params).then((response) => {
+      dispatch(toggleLoading('availableApartments'));
+      // eslint-disable-next-line prefer-promise-reject-errors
+      if (response.status === 401) return reject('You are not authorized');
+      return response.json().then((json) => {
+        if (response.ok) {
+          dispatch(setAvailableApartments(json.payload.data));
+          dispatch(setPage(json.payload.metadata));
+          return resolve();
+        }
+        return reject(json.error);
+      });
+    }).catch(() => {
+      dispatch(toggleLoading('availableApartments'));
       reject();
     });
   });

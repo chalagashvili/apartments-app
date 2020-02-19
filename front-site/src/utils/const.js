@@ -82,12 +82,14 @@ export const realtorRole = [RealtorOnly, AdminOnly];
 export const adminRole = [AdminOnly];
 
 export const nonClient = [RealtorOnly, AdminOnly];
+export const nonRealtor = [ClientOnly, AdminOnly];
 
 // eslint-disable-next-line no-useless-escape
 export const emailRegexPattern = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 export const coordinatesRegexPatter = /^[-+]?([1-8]?\d(\.\d+)?|90(\.0+)?),\s*[-+]?(180(\.0+)?|((1[0-7]\d)|([1-9]?\d))(\.\d+)?)$/;
 
-export const defaultApartmentImage = 'https://www.welcome-hotels.com/site/assets/files/30116/welcome_hotel_marburg_superior_1k.600x600.jpg';
+// export const defaultApartmentImage = 'https://www.welcome-hotels.com/site/assets/files/30116/welcome_hotel_marburg_superior_1k.600x600.jpg';
+export const defaultApartmentImage = `${process.env.PUBLIC_URL}/assets/apartmentImage.jpg`;
 
 export const mapDefaultCenterCoordinates = {
   longitude: 44.783333,

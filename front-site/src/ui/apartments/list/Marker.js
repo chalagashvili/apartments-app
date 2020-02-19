@@ -1,14 +1,15 @@
 import React from 'react';
 import moment from 'moment';
-import { Icon } from 'antd';
+import { Icon, Button } from 'antd';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
-import { defaultApartmentImage, nonClient } from 'utils/const';
+import { defaultApartmentImage, nonClient, RealtorOnly } from 'utils/const';
 import 'ui/apartments/list/Marker.css';
 
 const Marker = (props) => {
   const {
     name, active, onClick, item, selectedItem, auth: { role }, onEdit,
+    onBook, groupLoading, onUnBook,
   } = props;
   return (
     <div
@@ -99,7 +100,8 @@ const Marker = (props) => {
 
 
                   {
-                    nonClient.includes(role) ?
+                    // eslint-disable-next-line no-nested-ternary
+                    role === RealtorOnly ?
                     (
                       <div className={`apartment__availability apartment__availability--${item.isAvailable ? 'free' : 'booked'}`}>
                         {
@@ -108,8 +110,13 @@ const Marker = (props) => {
                       </div>
                     ) :
                     (
-                      <div className="apartment__rentButton">
-                        <div style={{
+                      item.isAvailable ?
+                        <Button
+                          className="apartment__rentButton"
+                          onClick={() => onBook(item._id)}
+                          loading={groupLoading[item._id]}
+                        >
+                          <div style={{
                           cursor: 'pointer',
                           border: '1px solid black',
                           color: 'rgb(34, 34, 34)',
@@ -118,10 +125,20 @@ const Marker = (props) => {
                           display: 'flex',
                           alignItems: 'center',
                         }}
+                          >
+                            <FormattedMessage id="app.bookNow" />
+                          </div>
+                        </Button>
+                      :
+                        <Button
+                          type="danger"
+                          className="apartment__rentButton"
+                          onClick={() => onUnBook(item._id)}
+                          loading={groupLoading[item._id]}
                         >
-                          <FormattedMessage id="app.bookNow" />
-                        </div>
-                      </div>)
+                          <FormattedMessage id="app.unbook" />
+                        </Button>
+                    )
                   }
                 </div>
               </div>
@@ -162,6 +179,9 @@ Marker.propTypes = {
   onClick: PropTypes.func.isRequired,
   onEdit: PropTypes.func.isRequired,
   name: PropTypes.string.isRequired,
+  onBook: PropTypes.func,
+  onUnBook: PropTypes.func,
+  groupLoading: PropTypes.shape({}),
 };
 
 Marker.defaultProps = {
@@ -170,6 +190,9 @@ Marker.defaultProps = {
     onClick: () => {},
   },
   item: null,
+  onBook: () => {},
+  onUnBook: () => {},
+  groupLoading: {},
 };
 
 export default Marker;

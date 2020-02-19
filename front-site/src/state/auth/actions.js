@@ -1,4 +1,4 @@
-import { postLogin, postSignUp } from 'api/auth';
+import { postLogin, postSignUp, postResetPassword } from 'api/auth';
 import { setCookie } from 'utils';
 import { SET_USER_AUTH_INFO, CLEAR_AUTH_INFO } from 'state/auth/types';
 import { toggleLoading } from 'state/loading/actions';
@@ -78,3 +78,22 @@ export const sendPostSignup = data => dispatch => new Promise((resolve, reject) 
       dispatch(toggleLoading('signup'));
     });
 });
+
+export const sendPostResetPassword = (data, token) => dispatch =>
+  new Promise((resolve, reject) => {
+    dispatch(toggleLoading('resetPassword'));
+    postResetPassword(data, token).then((response) => {
+      dispatch(toggleLoading('resetPassword'));
+      // eslint-disable-next-line prefer-promise-reject-errors
+      if (response.status === 401) return reject('You are not authorized');
+      return response.json().then((json) => {
+        if (response.ok) {
+          return resolve();
+        }
+        return reject(json.error);
+      });
+    }).catch(() => {
+      dispatch(toggleLoading('resetPassword'));
+      reject();
+    });
+  });

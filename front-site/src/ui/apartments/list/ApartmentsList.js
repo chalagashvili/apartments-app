@@ -1,16 +1,16 @@
 import React from 'react';
 import { FormattedMessage } from 'react-intl';
 import PropTypes from 'prop-types';
-import { Pagination, Icon } from 'antd';
+import { Pagination, Icon, Button } from 'antd';
 import moment from 'moment';
 import Filter from 'ui/apartments/list/Filter';
-import { defaultApartmentImage, nonClient } from 'utils/const';
+import { defaultApartmentImage, RealtorOnly, nonClient } from 'utils/const';
 
 
 const ApartmentsList = ({
   mapView, searchByMap, searchByMapToggle, items, onHover, pagination: { totalItems, page },
   onPageChange, onPaginationChange, pageSizeOptions, auth: { role }, onEdit, onFilterChange,
-  onFilter, filters,
+  onFilter, filters, onBook, groupLoading, onUnBook,
 }) => (
   <div className={mapView ? 'hideApartments' : 'apartmentsList'}>
     <Filter
@@ -71,7 +71,8 @@ const ApartmentsList = ({
                 ⓒ {apartment.owner.name || apartment.owner.email}
               </div>
               {
-                nonClient.includes(role) ?
+                // eslint-disable-next-line no-nested-ternary
+                role === RealtorOnly ?
                 (
                   <div className={`apartment__availability apartment__availability--${apartment.isAvailable ? 'free' : 'booked'}`}>
                     {
@@ -79,7 +80,23 @@ const ApartmentsList = ({
                   }
                   </div>
                  ) :
-                (<div className="apartment__rentButton"><FormattedMessage id="app.bookNow" /></div>)
+                (
+                  apartment.isAvailable ?
+                    <Button
+                      onClick={() => onBook(apartment._id)}
+                      loading={groupLoading[apartment._id]}
+                      className="apartment__rentButton"
+                    ><FormattedMessage id="app.bookNow" />
+                    </Button>
+                  :
+                    <Button
+                      type="danger"
+                      onClick={() => onUnBook(apartment._id)}
+                      loading={groupLoading[apartment._id]}
+                      className="apartment__rentButton"
+                    ><FormattedMessage id="app.unbook" />
+                    </Button>
+                  )
               }
             </div>
           </div>
@@ -115,11 +132,14 @@ ApartmentsList.propTypes = {
   }).isRequired,
   onPageChange: PropTypes.func.isRequired,
   onPaginationChange: PropTypes.func.isRequired,
-  onEdit: PropTypes.func.isRequired,
+  onEdit: PropTypes.func,
   onFilterChange: PropTypes.func.isRequired,
   onFilter: PropTypes.func.isRequired,
   pageSizeOptions: PropTypes.arrayOf(PropTypes.string),
   filters: PropTypes.shape({}),
+  onBook: PropTypes.func,
+  onUnBook: PropTypes.func,
+  groupLoading: PropTypes.shape({}),
 };
 
 ApartmentsList.defaultProps = {
@@ -128,6 +148,10 @@ ApartmentsList.defaultProps = {
     role: '',
   },
   filters: {},
+  onBook: () => {},
+  onUnBook: () => {},
+  groupLoading: {},
+  onEdit: () => {},
 };
 
 
