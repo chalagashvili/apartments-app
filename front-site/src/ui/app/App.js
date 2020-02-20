@@ -17,6 +17,10 @@ import {
   ROUTE_ADD_USER,
   ROUTE_RESET_PASSWORD,
   ROUTE_EDIT_USER,
+  ROUTE_ADMIN_OWNED_APARTMENTS,
+  ROUTE_ADMIN_EDIT_APARTMENT,
+  ROUTE_ADMIN_ADD_APARTMENT,
+  ROUTE_ADMIN_BOOKINGS,
 } from 'app-init/router';
 import { clientRole, realtorRole, adminRole } from 'utils/const';
 import ProfilePage from 'ui/profile/ProfilePage';
@@ -75,6 +79,11 @@ const App = () => (
       <Route exact path={ROUTE_USERS} component={users} />
       <Route exact path={ROUTE_ADD_USER} component={addUser} />
       <Route path={ROUTE_EDIT_USER} component={editUser} />
+
+      <Route path={ROUTE_ADMIN_OWNED_APARTMENTS} component={ownedApartments} />
+      <Route path={ROUTE_ADMIN_EDIT_APARTMENT} component={editApartment} />
+      <Route path={ROUTE_ADMIN_ADD_APARTMENT} component={addApartment} />
+      <Route path={ROUTE_ADMIN_BOOKINGS} component={bookings} />
       {/* Logout */}
       <Route exact path={ROUTE_LOGOUT} component={LogoutContainer} />
       {/* 404 */}

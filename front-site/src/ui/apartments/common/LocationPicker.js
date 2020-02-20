@@ -45,13 +45,14 @@ class LocationPicker extends Component {
   }
 
   onMouseUp = (childKey, childProps, mouse) => {
-    const { setCurrentMarkerCoordinates } = this.props;
+    const { setCurrentMarkerCoordinates, onMarkerChange } = this.props;
     this.setState({
       markerCenter: mouse,
       center: mouse,
       draggable: true,
     });
     setCurrentMarkerCoordinates(mouse.lng, mouse.lat);
+    onMarkerChange(mouse.lat, mouse.lng);
   }
 
   render() {
@@ -85,6 +86,7 @@ LocationPicker.propTypes = {
     longitude: PropTypes.number,
     latitude: PropTypes.number,
   }).isRequired,
+  onMarkerChange: PropTypes.func.isRequired,
 };
 
 export default LocationPicker;

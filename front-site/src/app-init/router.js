@@ -24,5 +24,11 @@ export const ROUTE_OWNED_APARTMENTS = '/ownedApartments';
 export const ROUTE_USERS = '/users';
 export const ROUTE_ADD_USER = '/users/add';
 export const ROUTE_EDIT_USER = '/users/edit/:userId';
+// admin for realtor
+export const ROUTE_ADMIN_OWNED_APARTMENTS = '/:userId/ownedApartments';
+export const ROUTE_ADMIN_EDIT_APARTMENT = '/:userId/apartments/edit/:apartmentId';
+export const ROUTE_ADMIN_ADD_APARTMENT = '/:userId/apartments/add/';
+// admin for client
+export const ROUTE_ADMIN_BOOKINGS = '/:userId/bookings';
 // logout
 export const ROUTE_LOGOUT = '/logout';

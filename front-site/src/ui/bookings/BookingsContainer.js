@@ -10,6 +10,7 @@ import { removeFilter, setFilter } from 'state/filters/actions';
 import { getFilters } from 'state/filters/selectors';
 import { fetchBookings, sendDeleteBooking } from 'state/users/actions';
 import { ROUTE_EDIT_APARTMENT } from 'app-init/router';
+import { ClientOnly } from 'utils/const';
 
 const mapStateToProps = state => ({
   apartments: getBookedApartments(state),
@@ -18,16 +19,17 @@ const mapStateToProps = state => ({
   groupLoading: getLoading(state).book,
   auth: getAuthInfo(state),
   filters: getFilters(state, 'bookings'),
+  mode: ClientOnly,
 });
 
-const mapDispatchToProps = (dispatch, { history }) => ({
+const mapDispatchToProps = (dispatch, { history, match: { params: { userId } } }) => ({
   onDidMount: () => {
-    dispatch(fetchBookings());
+    dispatch(fetchBookings(null, userId));
   },
   onPaginationChange: (page, newPageSize) =>
-    dispatch(fetchBookings({ page, pageSize: newPageSize })),
+    dispatch(fetchBookings({ page, pageSize: newPageSize }, userId)),
   onPageChange:
-  (newPage, pageSize) => dispatch(fetchBookings({ page: newPage, pageSize })),
+  (newPage, pageSize) => dispatch(fetchBookings({ page: newPage, pageSize }, userId)),
   onFilterChange: (key, val) => {
     if (!val) {
       dispatch(removeFilter('bookings', key));
@@ -36,11 +38,11 @@ const mapDispatchToProps = (dispatch, { history }) => ({
     }
   },
   onEdit: id => history.push(ROUTE_EDIT_APARTMENT.replace(':apartmentId', id)),
-  onFilter: () => dispatch(fetchBookings()),
+  onFilter: () => dispatch(fetchBookings(null, userId)),
   onUnBook: (apartmentId) => {
-    dispatch(sendDeleteBooking(apartmentId)).then(() => {
-      message.success('Succesfully unbooked an apartment! Go to apartments to book it again');
-      dispatch(fetchBookings());
+    dispatch(sendDeleteBooking(apartmentId, userId)).then(() => {
+      message.success('Succesfully unbooked an apartment!');
+      dispatch(fetchBookings(null, userId));
     }).catch(err => message.error(err));
   },
 });

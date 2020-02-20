@@ -10,6 +10,7 @@ import { getAuthInfo } from 'state/auth/selectors';
 import { removeFilter, setFilter } from 'state/filters/actions';
 import { getFilters } from 'state/filters/selectors';
 import { sendPostBooking } from 'state/users/actions';
+import { ClientOnly } from 'utils/const';
 
 const mapStateToProps = state => ({
   apartments: getAvailableApartments(state),
@@ -18,6 +19,7 @@ const mapStateToProps = state => ({
   groupLoading: getLoading(state).book,
   auth: getAuthInfo(state),
   filters: getFilters(state, 'availableApartments'),
+  mode: ClientOnly,
 });
 
 const mapDispatchToProps = dispatch => ({

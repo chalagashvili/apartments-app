@@ -5,31 +5,39 @@ import { message } from 'antd';
 
 import ApartmentForm from 'ui/apartments/common/ApartmentForm';
 import { getLoading } from 'state/loading/selectors';
-import { ROUTE_OWNED_APARTMENTS } from 'app-init/router';
+import { ROUTE_OWNED_APARTMENTS, ROUTE_ADMIN_OWNED_APARTMENTS } from 'app-init/router';
 import { EDIT_MODE } from 'utils/const';
-import { fetchApartment, sendPutApartment, sendDeleteApartment } from 'state/apartments/actions';
-import { getEditApartment } from 'state/apartments/selectors';
+import { fetchApartment, sendPutApartment, sendDeleteApartment, fetchApartmentAddress, setEditApartmentAddress } from 'state/apartments/actions';
+import { getEditApartment, getEditApartmentAddress } from 'state/apartments/selectors';
 
 const mapStateToProps = state => ({
   loading: getLoading(state).editApartment,
   mode: EDIT_MODE,
   apartment: getEditApartment(state),
+  address: getEditApartmentAddress(state),
 });
 
-const mapDispatchToProps = (dispatch, { history, intl }) => ({
-  onDidMount: (userId, apartmentId) => {
+const mapDispatchToProps = (dispatch, { history, intl, match: { params: { userId } } }) => ({
+  onWillUnmount: () => dispatch(setEditApartmentAddress('')),
+  onDidMount: (id, apartmentId) => {
     dispatch(fetchApartment(apartmentId, userId));
   },
   onSubmit: (values, apartmentId) => dispatch(sendPutApartment(values, apartmentId))
     .then(() => {
       message.success(intl.formatMessage({ id: 'app.editApartmenSuccess' }));
-      history.push(ROUTE_OWNED_APARTMENTS);
+      history.push(userId ? ROUTE_ADMIN_OWNED_APARTMENTS.replace(':userId', userId) : ROUTE_OWNED_APARTMENTS);
     })
     .catch(err => message.error(err)),
   onDelete: (apartmentId) => {
-    dispatch(sendDeleteApartment(apartmentId)); history.push(ROUTE_OWNED_APARTMENTS);
+    dispatch(sendDeleteApartment(apartmentId)).then(() => {
+      message.success(intl.formatMessage({ id: 'app.editApartmenSuccess' }));
+      history.push(userId ? ROUTE_ADMIN_OWNED_APARTMENTS.replace(':userId', userId) : ROUTE_OWNED_APARTMENTS);
+    })
+      .catch(err => message.error(err));
   },
-  onCancel: () => history.goBack(),
+  onCancel: () => history.push(userId ? ROUTE_ADMIN_OWNED_APARTMENTS.replace(':userId', userId) : ROUTE_OWNED_APARTMENTS),
+  onMarkerChange: (lat, lng) => dispatch(fetchApartmentAddress(lat, lng)),
+  onAddressChange: address => dispatch(setEditApartmentAddress(address)),
 });
 
 export default withRouter(injectIntl(connect(mapStateToProps, mapDispatchToProps)(ApartmentForm)));

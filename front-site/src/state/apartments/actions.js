@@ -1,12 +1,13 @@
 import { getOwnedApartments, postApartment, getApartment, putApartment, deleteApartment, getAvailableApartments } from 'api/apartments';
 import { SET_AVAILABLE_APARTMENTS, SET_OWNED_APARTMENTS,
-  SET_EDIT_APARTMENT_LOCATION, SET_EDIT_APARTMENT,
+  SET_EDIT_APARTMENT_LOCATION, SET_EDIT_APARTMENT, SET_EDIT_APARTMENT_ADDRESS,
   SET_BOOKED_APARTMENTS } from 'state/apartments/types';
 import { toggleLoading } from 'state/loading/actions';
 import { setPage } from 'state/pagination/actions';
 import { generateQueryParams } from 'utils/index';
 import { getFilters } from 'state/filters/selectors';
 import { getPagination } from 'state/pagination/selectors';
+import { getAddressByCoordinates } from 'api/services';
 
 export const setOwnedApartments = apartments => ({
   type: SET_OWNED_APARTMENTS,
@@ -30,6 +31,11 @@ export const setEditApartmentsLocation = location => ({
 
 export const setEditApartment = apartment => ({
   type: SET_EDIT_APARTMENT,
+  payload: apartment,
+});
+
+export const setEditApartmentAddress = apartment => ({
+  type: SET_EDIT_APARTMENT_ADDRESS,
   payload: apartment,
 });
 
@@ -159,3 +165,19 @@ export const fetchAvailableApartments = paginationOptions => (dispatch, getState
       reject();
     });
   });
+
+export const fetchApartmentAddress = (lat, long) => dispatch => new Promise((resolve, reject) => {
+  getAddressByCoordinates(lat, long)
+    .then((response) => {
+      response.json().then((json) => {
+        const address = json && json.results &&
+        json.results[0] && json.results[0].formatted_address ?
+          json.results[0].formatted_address : '';
+        dispatch(setEditApartmentAddress(address));
+      });
+    })
+    .catch((err) => {
+      dispatch(setEditApartmentAddress(''));
+      reject(err);
+    });
+});

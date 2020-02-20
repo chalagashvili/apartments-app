@@ -97,6 +97,11 @@ class ApartmentForm extends React.Component {
     }
   }
 
+  componentWillUnmount() {
+    const { onWillUnmount } = this.props;
+    onWillUnmount();
+  }
+
   setCurrentMarkerCoordinates(lng, lat) {
     this.setState({
       currentMarkerCoordinates: {
@@ -132,6 +137,7 @@ class ApartmentForm extends React.Component {
   render() {
     const {
       intl, form, loading, onCancel, apartment: { _id }, onDelete, mode,
+      address, onMarkerChange, onAddressChange,
     } = this.props;
     const {
       getFieldDecorator, getFieldsError,
@@ -200,7 +206,7 @@ class ApartmentForm extends React.Component {
             >
               {getFieldDecorator('floorAreaSize', {
               rules: [{ required: true, message: 'app.inputSize' }],
-            })(<Input type="number" />)}
+            })(<Input type="number" min={0} />)}
             </Form.Item>
             <Form.Item
               label={intl.formatMessage({ id: 'app.numberOfRooms' })}
@@ -209,7 +215,7 @@ class ApartmentForm extends React.Component {
             >
               {getFieldDecorator('numberOfRooms', {
               rules: [{ required: true, message: 'app.inputRooms' }],
-            })(<Input type="number" />)}
+            })(<Input type="number" min={0} />)}
             </Form.Item>
             <Form.Item
               label={intl.formatMessage({ id: 'app.pricePerMonth' })}
@@ -218,7 +224,7 @@ class ApartmentForm extends React.Component {
             >
               {getFieldDecorator('pricePerMonth', {
               rules: [{ required: true, message: 'app.inputPrice' }],
-            })(<Input type="number" />)}
+            })(<Input type="number" min={0} />)}
             </Form.Item>
             <Form.Item
               label={intl.formatMessage({ id: 'app.description' })}
@@ -251,13 +257,17 @@ class ApartmentForm extends React.Component {
               rules: [{ required: true, whitespace: false, message: 'app.inputEmail' },
               { pattern: coordinatesRegexPatter, message: 'app.validCoordinates' }],
             })(<Input />)}
+              <FormattedMessage id="app.geocodingHint" />
               <LocationAutocomplete
                 setCurrentMarkerCoordinates={this.setCurrentMarkerCoordinates}
+                address={address}
+                onAddressChange={onAddressChange}
               />
               <LocationPicker
                 centerCoordinates={this.state.centerCoordinates}
                 currentMarkerCoordinates={this.state.currentMarkerCoordinates}
                 setCurrentMarkerCoordinates={this.setCurrentMarkerCoordinates}
+                onMarkerChange={onMarkerChange}
               />
             </Form.Item>
             <Form.Item {...tailFormItemLayout}>
@@ -324,6 +334,10 @@ ApartmentForm.propTypes = {
     params: PropTypes.shape({}),
   }).isRequired,
   onDelete: PropTypes.func,
+  onMarkerChange: PropTypes.func.isRequired,
+  onWillUnmount: PropTypes.func.isRequired,
+  onAddressChange: PropTypes.func.isRequired,
+  address: PropTypes.string,
 };
 
 ApartmentForm.defaultProps = {
@@ -331,6 +345,7 @@ ApartmentForm.defaultProps = {
   onDidMount: () => {},
   apartment: {},
   onDelete: () => {},
+  address: '',
 };
 
 export default Form.create({ name: 'apartmentForm' })(injectIntl(ApartmentForm));

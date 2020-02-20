@@ -3,10 +3,9 @@ import PropTypes from 'prop-types';
 import usePlacesAutocomplete, { getGeocode, getLatLng } from 'use-places-autocomplete';
 import useOnclickOutside from 'react-cool-onclickoutside';
 
-const PlacesAutocomplete = ({ setCurrentMarkerCoordinates }) => {
+const PlacesAutocomplete = ({ setCurrentMarkerCoordinates, address, onAddressChange }) => {
   const {
     ready,
-    value,
     suggestions: { status, data },
     setValue,
     clearSuggestions,
@@ -22,6 +21,7 @@ const PlacesAutocomplete = ({ setCurrentMarkerCoordinates }) => {
   });
 
   const handleInput = (e) => {
+    onAddressChange(e.target.value);
     // Update the keyword of the input element
     setValue(e.target.value);
   };
@@ -29,6 +29,7 @@ const PlacesAutocomplete = ({ setCurrentMarkerCoordinates }) => {
   const handleSelect = ({ description }) => () => {
     // When user selects a place, we can replace the keyword without request data from API
     // by setting the second parameter as "false"
+    onAddressChange(description);
     setValue(description, false);
     clearSuggestions();
 
@@ -66,7 +67,7 @@ const PlacesAutocomplete = ({ setCurrentMarkerCoordinates }) => {
     <div ref={ref}>
       <input
         style={{ width: '100%' }}
-        value={value}
+        value={address}
         onChange={handleInput}
         disabled={!ready}
         placeholder="Whats is your apartment's address?"
@@ -79,6 +80,8 @@ const PlacesAutocomplete = ({ setCurrentMarkerCoordinates }) => {
 
 PlacesAutocomplete.propTypes = {
   setCurrentMarkerCoordinates: PropTypes.func.isRequired,
+  onAddressChange: PropTypes.func.isRequired,
+  address: PropTypes.string.isRequired,
 };
 
 export default PlacesAutocomplete;

@@ -80,5 +80,7 @@ export default {
     'menu.apartments': 'Apartments',
     'app.unbook': 'Unbook',
     'app.editUser': 'Edit User',
+    'app.addNewApartmentForRealtor': 'Add new apartment for a realtor',
+    'app.geocodingHint': 'Put Lat and Long above OR use GEOCODING below',
   },
 };

@@ -79,5 +79,7 @@ export default {
     'menu.apartments': 'Apartmani',
     'app.unbook': 'Unbook',
     'app.editUser': 'Uređivanje korisnika',
+    'app.addNewApartmentForRealtor': 'Dodajte novi stan za nekretnine',
+    'app.geocodingHint': 'Put Lat and Long above OR use GEOCODING below',
   },
 };

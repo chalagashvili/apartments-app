@@ -401,6 +401,7 @@ exports.addApartment = async (req, res, next) => {
     return validationError(res, 'Please provide all the required fields');
   }
   const { id: userId } = req.params;
+  console.log('req.params', req.params);
   const { _id: callerId } = req.user;
   // Check that id is passed correctly and its a valid mongo ID
   if (!userId || !utils.validateObjectID(userId)) return validationError(res, 'ID is not a valid mongo ObjectId');
@@ -411,8 +412,10 @@ exports.addApartment = async (req, res, next) => {
   }
   // Make sure user has a Client role only
   try {
+    console.log('userId', userId);
     const toUpdate = await UserSchema.findById({ _id: userId });
     if (!toUpdate) return notFoundResponse(res, 'Realtor was not found');
+    console.log('toUpdate', toUpdate);
     if (nonRealtorRole.includes(toUpdate.role)) return validationError(res, 'The person who tried to add apartments is not realtor');
     // Create a new apartment
     const newApartment = new ApartmentSchema({

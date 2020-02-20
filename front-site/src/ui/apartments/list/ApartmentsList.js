@@ -4,13 +4,13 @@ import PropTypes from 'prop-types';
 import { Pagination, Icon, Button } from 'antd';
 import moment from 'moment';
 import Filter from 'ui/apartments/list/Filter';
-import { defaultApartmentImage, RealtorOnly, nonClient } from 'utils/const';
+import { defaultApartmentImage, RealtorOnly, nonClient, AdminOnly } from 'utils/const';
 
 
 const ApartmentsList = ({
   mapView, searchByMap, searchByMapToggle, items, onHover, pagination: { totalItems, page },
   onPageChange, onPaginationChange, pageSizeOptions, auth: { role }, onEdit, onFilterChange,
-  onFilter, filters, onBook, groupLoading, onUnBook,
+  onFilter, filters, onBook, groupLoading, onUnBook, onAdd, mode,
 }) => (
   <div className={mapView ? 'hideApartments' : 'apartmentsList'}>
     <Filter
@@ -21,6 +21,16 @@ const ApartmentsList = ({
       filters={filters}
     />
     <div className="apartmentsWrapper" >
+      {
+      role === AdminOnly && mode === RealtorOnly ?
+      (
+        <div>
+          <Button type="primary" onClick={onAdd} style={{ margin: 20 }}>
+            <FormattedMessage id="app.addNewApartmentForRealtor" />
+          </Button>
+        </div>
+      ) : null
+    }
       {items.map(apartment => (
         <div
           className="apartment"
@@ -72,7 +82,7 @@ const ApartmentsList = ({
               </div>
               {
                 // eslint-disable-next-line no-nested-ternary
-                role === RealtorOnly ?
+                (role === RealtorOnly) || (role === AdminOnly && mode === RealtorOnly) ?
                 (
                   <div className={`apartment__availability apartment__availability--${apartment.isAvailable ? 'free' : 'booked'}`}>
                     {
@@ -139,7 +149,9 @@ ApartmentsList.propTypes = {
   filters: PropTypes.shape({}),
   onBook: PropTypes.func,
   onUnBook: PropTypes.func,
+  onAdd: PropTypes.func,
   groupLoading: PropTypes.shape({}),
+  mode: PropTypes.string.isRequired,
 };
 
 ApartmentsList.defaultProps = {
@@ -152,6 +164,7 @@ ApartmentsList.defaultProps = {
   onUnBook: () => {},
   groupLoading: {},
   onEdit: () => {},
+  onAdd: () => {},
 };
 
 

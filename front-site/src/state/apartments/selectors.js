@@ -3,3 +3,4 @@ export const getAvailableApartments = state => state.apartments.availableApartme
 export const getBookedApartments = state => state.apartments.bookedApartments;
 export const getEditApartmentLocation = state => state.apartments.location;
 export const getEditApartment = state => state.apartments.editApartment;
+export const getEditApartmentAddress = state => state.apartments.editApartmentAddress;

@@ -74,14 +74,14 @@ export const sendDeleteBooking = (apartmentId, userId) => dispatch =>
     });
   });
 
-export const fetchBookings = paginationOptions => (dispatch, getState) =>
+export const fetchBookings = (paginationOptions, userId) => (dispatch, getState) =>
   new Promise((resolve, reject) => {
     dispatch(toggleLoading('bookings'));
     const state = getState();
     const filters = getFilters(state, 'bookings') || {};
     const pagination = paginationOptions || getPagination(state);
     const params = generateQueryParams(filters, pagination);
-    getBookings(params).then((response) => {
+    getBookings(params, userId).then((response) => {
       dispatch(toggleLoading('bookings'));
       // eslint-disable-next-line prefer-promise-reject-errors
       if (response.status === 401) return reject('You are not authorized');

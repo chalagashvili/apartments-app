@@ -40,7 +40,7 @@ class Apartments extends React.PureComponent {
     } = this.state;
     const {
       apartments, pagination, onPageChange, onPaginationChange, loading, auth, onEdit,
-      onFilterChange, onFilter, filters, onBook, groupLoading, onUnBook,
+      onFilterChange, onFilter, filters, onBook, groupLoading, onUnBook, mode, onAdd,
     } = this.props;
     return (
       <Spin spinning={!!loading}>
@@ -52,11 +52,13 @@ class Apartments extends React.PureComponent {
             groupLoading={groupLoading}
             onFilter={onFilter}
             onEdit={onEdit}
+            mode={mode}
             filters={filters}
             pagination={pagination}
             onPageChange={onPageChange}
             onPaginationChange={onPaginationChange}
             mapView={mapView}
+            onAdd={onAdd}
             onFilterChange={onFilterChange}
             items={apartments}
             onHover={this.showInfo}
@@ -118,7 +120,9 @@ Apartments.propTypes = {
   filters: PropTypes.shape({}),
   onBook: PropTypes.func,
   onUnBook: PropTypes.func,
+  onAdd: PropTypes.func,
   groupLoading: PropTypes.shape({}),
+  mode: PropTypes.string.isRequired,
 };
 
 Apartments.defaultProps = {
@@ -132,6 +136,7 @@ Apartments.defaultProps = {
   onUnBook: () => {},
   groupLoading: {},
   onEdit: () => {},
+  onAdd: () => {},
 };
 
 export default Apartments;
