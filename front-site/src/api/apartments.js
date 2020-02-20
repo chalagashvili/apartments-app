@@ -74,7 +74,7 @@ export const deleteApartment = (apartmentId, id = Cookies.get('id')) => new Prom
     .catch(err => reject(err));
 });
 
-export const getAvailableApartments = params => new Promise((resolve, reject) => {
+export const getAvailableApartments = (params = '') => new Promise((resolve, reject) => {
   fetch(`${api}/apartments/${params}`, {
     method: 'GET',
     cache: 'no-cache',

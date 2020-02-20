@@ -31,7 +31,7 @@ export const postBooking = (apartmentId, id = Cookies.get('id')) => new Promise(
     .catch(err => reject(err));
 });
 
-export const getBookings = (params, id = Cookies.get('id')) => new Promise((resolve, reject) => {
+export const getBookings = (params = '', id = Cookies.get('id')) => new Promise((resolve, reject) => {
   fetch(`${api}/users/${id}/bookings/${params}`, {
     method: 'GET',
     cache: 'no-cache',
@@ -59,7 +59,7 @@ export const deleteBooking = (apartmentId, id = Cookies.get('id')) => new Promis
     .catch(err => reject(err));
 });
 
-export const getUsers = params => new Promise((resolve, reject) => {
+export const getUsers = (params = '') => new Promise((resolve, reject) => {
   fetch(`${api}/users/${params}`, {
     method: 'GET',
     cache: 'no-cache',
