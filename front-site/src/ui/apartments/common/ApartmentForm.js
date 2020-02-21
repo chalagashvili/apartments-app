@@ -215,7 +215,7 @@ class ApartmentForm extends React.Component {
             >
               {getFieldDecorator('numberOfRooms', {
               rules: [{ required: true, message: 'app.inputRooms' }],
-            })(<Input type="number" min={0} />)}
+            })(<Input type="number" min={0} precision={0} />)}
             </Form.Item>
             <Form.Item
               label={intl.formatMessage({ id: 'app.pricePerMonth' })}

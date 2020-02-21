@@ -1,3 +1,4 @@
+const Int32 = require('mongoose-int32');
 const mongoose = require('mongoose');
 const mongoosePaginate = require('mongoose-paginate-v2');
 
@@ -27,9 +28,9 @@ const apartmentSchema = new Schema({
   isAvailable: { type: Boolean, default: false },
   name: { type: String, required: true },
   description: { type: String, required: true },
-  floorAreaSize: { type: Number, required: true },
-  pricePerMonth: { type: Number, required: true },
-  numberOfRooms: { type: Number, required: true },
+  floorAreaSize: { type: Number, required: true, min: 0 },
+  pricePerMonth: { type: Number, required: true, min: 0 },
+  numberOfRooms: { type: Int32, required: true, min: 0 },
   imageUrl: { type: String },
   loc: {
     type: {

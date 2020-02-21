@@ -25,6 +25,11 @@ const mapDispatchToProps = (dispatch, { history, match: { params: { userId } } }
   onDidMount: () => {
     dispatch(fetchOwnedApartments(null, userId)).catch(err => message.error(err));
   },
+  onWillUnmount: () => {
+    dispatch(removeFilter('ownedApartments', 'longitude'));
+    dispatch(removeFilter('ownedApartments', 'latitude'));
+    dispatch(removeFilter('ownedApartments', 'radius'));
+  },
   onPaginationChange: (page, newPageSize) =>
     dispatch(fetchOwnedApartments({ page, pageSize: newPageSize }, userId))
       .catch(err => message.error(err)),
@@ -39,13 +44,13 @@ const mapDispatchToProps = (dispatch, { history, match: { params: { userId } } }
   },
   onAdd: () => history.push(ROUTE_ADMIN_ADD_APARTMENT.replace(':userId', userId)),
   onFilterChange: (key, val) => {
-    if (!val) {
+    if (val == null) {
       dispatch(removeFilter('ownedApartments', key));
     } else {
       dispatch(setFilter('ownedApartments', key, val));
     }
   },
-  onFilter: () => dispatch(fetchOwnedApartments(null, userId)),
+  onFilter: () => dispatch(fetchOwnedApartments(null, userId)).catch(err => message.error(err)),
 });
 
 export default withRouter(connect(mapStateToProps, mapDispatchToProps)(Apartments));

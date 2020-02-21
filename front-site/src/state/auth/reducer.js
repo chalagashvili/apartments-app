@@ -2,7 +2,7 @@ import { SET_USER_AUTH_INFO, CLEAR_AUTH_INFO } from 'state/auth/types';
 
 const initialState = {
   auth: {
-    username: null,
+    email: null,
     authenticated: false,
     role: null,
     token: null,

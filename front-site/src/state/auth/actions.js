@@ -16,10 +16,9 @@ export const sendPostLogin = data => dispatch => new Promise((resolve, reject) =
   dispatch(toggleLoading('login'));
   postLogin(data)
     .then((response) => {
-      dispatch(toggleLoading('login'));
       if (response.status === 401) {
-        // eslint-disable-next-line prefer-promise-reject-errors
-        return reject('Email or Password is incorrect');
+        dispatch(toggleLoading('login'));
+        return reject(new Error('Email or Password is incorrect'));
       }
       return response.json().then((json) => {
         if (response.ok) {
@@ -37,13 +36,16 @@ export const sendPostLogin = data => dispatch => new Promise((resolve, reject) =
             token,
             id,
           }));
+          dispatch(toggleLoading('login'));
           return resolve(json.payload);
         }
-        return reject(json.error);
+        dispatch(toggleLoading('login'));
+        return reject(new Error(json.error));
       });
     })
     .catch(() => {
       dispatch(toggleLoading('login'));
+      reject(new Error('Error occured when communicating with server'));
     });
 });
 
@@ -52,7 +54,7 @@ export const sendPostSignup = data => dispatch => new Promise((resolve, reject) 
   postSignUp(data)
     .then((response) => {
       response.json().then((json) => {
-        if (json.ok) {
+        if (response.ok) {
           const {
             token, email, role, id,
           } = json.payload;
@@ -67,33 +69,31 @@ export const sendPostSignup = data => dispatch => new Promise((resolve, reject) 
             token,
             id,
           }));
-          resolve(json.payload);
-        } else {
-          reject(json.error);
+          dispatch(toggleLoading('signup'));
+          return resolve(json.payload);
         }
         dispatch(toggleLoading('signup'));
+        return reject(new Error(json.error));
       });
     })
     .catch(() => {
       dispatch(toggleLoading('signup'));
+      reject(new Error('Error occured when communicating with server'));
     });
 });
 
 export const sendPostResetPassword = (data, token) => dispatch =>
   new Promise((resolve, reject) => {
     dispatch(toggleLoading('resetPassword'));
-    postResetPassword(data, token).then((response) => {
+    postResetPassword(data, token).then(response => response.json().then((json) => {
+      if (response.ok) {
+        dispatch(toggleLoading('resetPassword'));
+        return resolve();
+      }
       dispatch(toggleLoading('resetPassword'));
-      // eslint-disable-next-line prefer-promise-reject-errors
-      if (response.status === 401) return reject('You are not authorized');
-      return response.json().then((json) => {
-        if (response.ok) {
-          return resolve();
-        }
-        return reject(json.error);
-      });
-    }).catch(() => {
+      return reject(new Error(json.error));
+    })).catch(() => {
       dispatch(toggleLoading('resetPassword'));
-      reject();
+      reject(new Error('Error occured when communicating with server'));
     });
   });

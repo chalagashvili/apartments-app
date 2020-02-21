@@ -121,6 +121,7 @@ class Filter extends React.Component {
               From:
               <InputNumber
                 type="number"
+                precision={0}
                 value={numberOfRoomsFrom}
                 onChange={val => onFilterChange('numberOfRoomsFrom', val)}
                 formatter={value => `${value}`}
@@ -130,6 +131,7 @@ class Filter extends React.Component {
               <InputNumber
                 type="number"
                 value={numberOfRoomsTo}
+                precision={0}
                 onChange={val => onFilterChange('numberOfRoomsTo', val)}
                 formatter={value => `${value}`}
                 min={0}
@@ -139,9 +141,6 @@ class Filter extends React.Component {
               style={{ marginTop: 20 }}
               onClick={() => {
               this.setState({ isOpen: false });
-                onFilterChange('longitude');
-                onFilterChange('latitude');
-                onFilterChange('radius');
                 onFilter();
               }}
               type="primary"

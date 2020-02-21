@@ -30,6 +30,11 @@ class Apartments extends React.PureComponent {
     });
   }
 
+  componentWillUnmount() {
+    const { onWillUnmount } = this.props;
+    onWillUnmount();
+  }
+
   showInfo = (selectedItem) => {
     this.setState({ selectedItem });
   }
@@ -121,6 +126,7 @@ Apartments.propTypes = {
   onBook: PropTypes.func,
   onUnBook: PropTypes.func,
   onAdd: PropTypes.func,
+  onWillUnmount: PropTypes.func.isRequired,
   groupLoading: PropTypes.shape({}),
   mode: PropTypes.string.isRequired,
 };

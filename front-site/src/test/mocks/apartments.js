@@ -43,3 +43,20 @@ export const GET_AVAILABLE_APARTMENTS_OK = {
     },
   ],
 };
+
+export const GET_APARTMENT_OK = {
+  data: [
+    {
+      id: 4,
+      name: 'Havana 4',
+      description: 'Sunny and nice place',
+      numberOfRooms: 5,
+      floorAreaSize: 100,
+      pricePerMonth: 2000,
+      location: {
+        latitude: 100,
+        longitude: -120,
+      },
+    },
+  ],
+};

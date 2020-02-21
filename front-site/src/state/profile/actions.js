@@ -10,24 +10,21 @@ export const setProfile = profile => ({
 export const fetchProfile = form => dispatch =>
   new Promise((resolve, reject) => {
     dispatch(toggleLoading('editProfile'));
-    getMe().then((response) => {
+    getMe().then(response => response.json().then((json) => {
+      if (response.ok) {
+        const profile = json.payload.data[0];
+        dispatch(setProfile(profile));
+        form.setFieldsValue({
+          email: profile.email,
+          name: profile.name,
+        });
+        dispatch(toggleLoading('editProfile'));
+        return resolve();
+      }
       dispatch(toggleLoading('editProfile'));
-      // eslint-disable-next-line prefer-promise-reject-errors
-      if (response.status === 401) return reject('You are not authorized');
-      return response.json().then((json) => {
-        if (response.ok) {
-          const profile = json.payload.data[0];
-          dispatch(setProfile(profile));
-          form.setFieldsValue({
-            email: profile.email,
-            name: profile.name,
-          });
-          return resolve();
-        }
-        return reject(json.error);
-      });
-    }).catch(() => {
+      return reject(new Error(json.error));
+    })).catch(() => {
       dispatch(toggleLoading('editProfile'));
-      reject();
+      reject(new Error('Error occured when communicating with server'));
     });
   });

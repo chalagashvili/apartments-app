@@ -19,7 +19,7 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = (dispatch, { history }) => ({
   onDidMount: () => {
-    dispatch(fetchUsers());
+    dispatch(fetchUsers()).catch(err => message.error(err.message));
   },
   onEdit: (userId) => { history.push(ROUTE_EDIT_USER.replace(':userId', userId)); },
   onDelete: (userId) => {
@@ -35,8 +35,9 @@ const mapDispatchToProps = (dispatch, { history }) => ({
     }
   },
   onPaginationChange: (page, newPageSize) =>
-    dispatch(fetchUsers({ page, pageSize: newPageSize })),
-  onPageChange: (newPage, pageSize) => dispatch(fetchUsers({ page: newPage, pageSize })),
+    dispatch(fetchUsers({ page, pageSize: newPageSize })).catch(err => message.error(err)),
+  onPageChange: (newPage, pageSize) => dispatch(fetchUsers({ page: newPage, pageSize }))
+    .catch(err => message.error(err)),
 });
 
 export default withRouter(connect(mapStateToProps, mapDispatchToProps)(UsersListTable));

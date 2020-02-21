@@ -14,7 +14,7 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = (dispatch, { history }) => ({
-  onDidMount: (userId, form) => dispatch(fetchUser(userId, form)),
+  onDidMount: (userId, form) => dispatch(fetchUser(userId, form)).catch(err => message.error(err)),
   onSubmit: (values, userId) => dispatch(sendPutUser(values, userId))
     .then(() => {
       message.success('User has been successfully updated');

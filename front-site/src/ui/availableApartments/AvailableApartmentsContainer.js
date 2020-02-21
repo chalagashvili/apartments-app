@@ -24,24 +24,30 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => ({
   onDidMount: () => {
-    dispatch(fetchAvailableApartments());
+    dispatch(fetchAvailableApartments()).catch(err => message.error(err));
+  },
+  onWillUnmount: () => {
+    dispatch(removeFilter('availableApartments', 'longitude'));
+    dispatch(removeFilter('availableApartments', 'latitude'));
+    dispatch(removeFilter('availableApartments', 'radius'));
   },
   onPaginationChange: (page, newPageSize) =>
     dispatch(fetchAvailableApartments({ page, pageSize: newPageSize })),
   onPageChange:
-  (newPage, pageSize) => dispatch(fetchAvailableApartments({ page: newPage, pageSize })),
+  (newPage, pageSize) => dispatch(fetchAvailableApartments({ page: newPage, pageSize }))
+    .catch(err => message.error(err)),
   onFilterChange: (key, val) => {
-    if (!val) {
+    if (val == null) {
       dispatch(removeFilter('availableApartments', key));
     } else {
       dispatch(setFilter('availableApartments', key, val));
     }
   },
-  onFilter: () => dispatch(fetchAvailableApartments()),
+  onFilter: () => dispatch(fetchAvailableApartments()).catch(err => message.error(err)),
   onBook: (apartmentId) => {
     dispatch(sendPostBooking(apartmentId)).then(() => {
       message.success('Succesfully booked an apartment! Go to bookings to check it out');
-      dispatch(fetchAvailableApartments());
+      dispatch(fetchAvailableApartments()).catch(err => message.error(err));
     }).catch(err => message.error(err));
   },
 });

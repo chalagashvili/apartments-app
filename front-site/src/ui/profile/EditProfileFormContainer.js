@@ -13,7 +13,7 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = (dispatch, { history }) => ({
-  onDidMount: form => dispatch(fetchProfile(form)),
+  onDidMount: form => dispatch(fetchProfile(form)).catch(err => message.error(err)),
   onCancel: () => history.goBack(),
   onSubmit: (values) => {
     // eslint-disable-next-line no-param-reassign

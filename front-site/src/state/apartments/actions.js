@@ -46,98 +46,82 @@ export const fetchOwnedApartments = (paginationOptions, userId) => (dispatch, ge
     const filters = getFilters(state, 'ownedApartments') || {};
     const pagination = paginationOptions || getPagination(state);
     const params = generateQueryParams(filters, pagination);
-    getOwnedApartments(params, userId).then((response) => {
+    getOwnedApartments(params, userId).then(response => response.json().then((json) => {
+      if (response.ok) {
+        dispatch(setOwnedApartments(json.payload.data));
+        dispatch(setPage(json.payload.metadata));
+        dispatch(toggleLoading('ownedApartments'));
+        return resolve();
+      }
       dispatch(toggleLoading('ownedApartments'));
-      // eslint-disable-next-line prefer-promise-reject-errors
-      if (response.status === 401) return reject('You are not authorized');
-      return response.json().then((json) => {
-        if (response.ok) {
-          dispatch(setOwnedApartments(json.payload.data));
-          dispatch(setPage(json.payload.metadata));
-          return resolve();
-        }
-        return reject(json.error);
-      });
-    }).catch(() => {
+      return reject(new Error(json.error));
+    })).catch(() => {
       dispatch(toggleLoading('ownedApartments'));
-      reject();
+      reject(new Error('Error occured when communicating with server'));
     });
   });
 
 export const sendPostApartment = (data, userId) => dispatch =>
   new Promise((resolve, reject) => {
     dispatch(toggleLoading('addApartment'));
-    postApartment(data, userId).then((response) => {
+    postApartment(data, userId).then(response => response.json().then((json) => {
+      if (response.ok) {
+        dispatch(toggleLoading('addApartment'));
+        return resolve();
+      }
       dispatch(toggleLoading('addApartment'));
-      // eslint-disable-next-line prefer-promise-reject-errors
-      if (response.status === 401) return reject('You are not authorized');
-      return response.json().then((json) => {
-        if (response.ok) {
-          return resolve();
-        }
-        return reject(json.error);
-      });
-    }).catch(() => {
+      return reject(new Error(json.error));
+    })).catch(() => {
       dispatch(toggleLoading('addApartment'));
-      reject();
+      reject(new Error('Error occured when communicating with server'));
     });
   });
 
 export const sendPutApartment = (data, apartmentId, userId) => dispatch =>
   new Promise((resolve, reject) => {
     dispatch(toggleLoading('editApartment'));
-    putApartment(data, apartmentId, userId).then((response) => {
+    putApartment(data, apartmentId, userId).then(response => response.json().then((json) => {
+      if (response.ok) {
+        dispatch(toggleLoading('editApartment'));
+        return resolve();
+      }
       dispatch(toggleLoading('editApartment'));
-      // eslint-disable-next-line prefer-promise-reject-errors
-      if (response.status === 401) return reject('You are not authorized');
-      return response.json().then((json) => {
-        if (response.ok) {
-          return resolve();
-        }
-        return reject(json.error);
-      });
-    }).catch(() => {
+      return reject(new Error(json.error));
+    })).catch(() => {
       dispatch(toggleLoading('editApartment'));
-      reject();
+      reject(new Error('Error occured when communicating with server'));
     });
   });
 
 export const fetchApartment = (apartmentId, userId) => dispatch =>
   new Promise((resolve, reject) => {
     dispatch(toggleLoading('editApartment'));
-    getApartment(apartmentId, userId).then((response) => {
+    getApartment(apartmentId, userId).then(response => response.json().then((json) => {
+      if (response.ok) {
+        dispatch(setEditApartment(json.payload));
+        dispatch(toggleLoading('editApartment'));
+        return resolve();
+      }
       dispatch(toggleLoading('editApartment'));
-      // eslint-disable-next-line prefer-promise-reject-errors
-      if (response.status === 401) return reject('You are not authorized');
-      return response.json().then((json) => {
-        if (response.ok) {
-          dispatch(setEditApartment(json.payload));
-          return resolve();
-        }
-        return reject(json.error);
-      });
-    }).catch(() => {
+      return reject(new Error(json.error));
+    })).catch(() => {
       dispatch(toggleLoading('editApartment'));
-      reject();
+      reject(new Error('Error occured when communicating with server'));
     });
   });
 
 export const sendDeleteApartment = (apartmentId, userId) => dispatch =>
   new Promise((resolve, reject) => {
     dispatch(toggleLoading('editApartment'));
-    deleteApartment(apartmentId, userId).then((response) => {
+    deleteApartment(apartmentId, userId).then(response => response.json().then((json) => {
+      if (response.ok) {
+        dispatch(toggleLoading('editApartment'));
+        return resolve();
+      }
       dispatch(toggleLoading('editApartment'));
-      // eslint-disable-next-line prefer-promise-reject-errors
-      if (response.status === 401) return reject('You are not authorized');
-      return response.json().then((json) => {
-        if (response.ok) {
-          return resolve();
-        }
-        return reject(json.error);
-      });
-    }).catch(() => {
+      return reject(new Error(json.error));
+    })).catch(() => {
       dispatch(toggleLoading('editApartment'));
-      reject();
     });
   });
 
@@ -148,21 +132,18 @@ export const fetchAvailableApartments = paginationOptions => (dispatch, getState
     const filters = getFilters(state, 'availableApartments') || {};
     const pagination = paginationOptions || getPagination(state);
     const params = generateQueryParams(filters, pagination);
-    getAvailableApartments(params).then((response) => {
+    getAvailableApartments(params).then(response => response.json().then((json) => {
+      if (response.ok) {
+        dispatch(setAvailableApartments(json.payload.data));
+        dispatch(setPage(json.payload.metadata));
+        dispatch(toggleLoading('availableApartments'));
+        return resolve();
+      }
       dispatch(toggleLoading('availableApartments'));
-      // eslint-disable-next-line prefer-promise-reject-errors
-      if (response.status === 401) return reject('You are not authorized');
-      return response.json().then((json) => {
-        if (response.ok) {
-          dispatch(setAvailableApartments(json.payload.data));
-          dispatch(setPage(json.payload.metadata));
-          return resolve();
-        }
-        return reject(json.error);
-      });
-    }).catch(() => {
+      return reject(new Error(json.error));
+    })).catch(() => {
       dispatch(toggleLoading('availableApartments'));
-      reject();
+      reject(new Error('Error occured when communicating with server'));
     });
   });
 
@@ -174,10 +155,11 @@ export const fetchApartmentAddress = (lat, long) => dispatch => new Promise((res
         json.results[0] && json.results[0].formatted_address ?
           json.results[0].formatted_address : '';
         dispatch(setEditApartmentAddress(address));
+        resolve();
       });
     })
-    .catch((err) => {
+    .catch(() => {
       dispatch(setEditApartmentAddress(''));
-      reject(err);
+      reject(new Error('Error occured when communicating with Google API'));
     });
 });

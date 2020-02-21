@@ -74,7 +74,7 @@ exports.addUser = async (req, res, next) => {
     role,
     name,
   });
-  return newUser.save((saveErr) => {
+  return newUser.save((saveErr, user) => {
     if (saveErr) {
       if (saveErr.code === 11000) {
         return validationError(res, 'Email address is already in use!');
@@ -91,9 +91,11 @@ exports.addUser = async (req, res, next) => {
         http://${process.env.APP_URL}/resetPassword/${token}\n\n
         If you did not request this, please ignore this email and no account will be created.\n`,
     };
-    // eslint-disable-next-line consistent-return
+    user.password = undefined;
+    user.passwordResetToken = undefined;
+    user.passwordResetExpires = undefined;
     return utils.sendEmail(mailOptions)
-      .then(() => successResponse(res, `An e-mail has been sent to ${newUser.email} with further instructions.`))
+      .then(() => successResponseWithData(res, `An e-mail has been sent to ${newUser.email} with further instructions.`, user))
       .catch(() => errorResponse(res, 'Password reset token has been generated but could not send an email'));
   });
 };
@@ -165,7 +167,11 @@ exports.editUser = async (req, res, next) => {
     }
     return successResponseWithData(res, 'User updated successfully', {
       data: [{
-        name: user.name, role: user.role, email: user.email, createdAt: user.createdAt,
+        name: user.name,
+        role: user.role,
+        email: user.email,
+        createdAt: user.createdAt,
+        _id: user._id,
       },
       ],
     });
@@ -178,13 +184,12 @@ exports.editUser = async (req, res, next) => {
  */
 
 exports.getUser = (req, res, next) => {
-  let userId = req.user.id;
   // Check if Admin is performing fetch, otherwise return error
   if (!adminRole.includes(req.user.role)) return unauthorizedResponse(res, 'You don\'t have enough permissions');
   // Check if received ID is valid mongo ID
   if (!req.params.id || !utils.validateObjectID(req.params.id)) return validationError(res, 'ID is not a mongo ObjectId');
   // Re-assign correct id
-  userId = req.params.id;
+  const userId = req.params.id;
   return UserSchema.findById({ _id: userId }, (err, user) => {
     if (err) return next(err);
     if (!user) return notFoundResponse(res, 'User with provided ID was not found');
@@ -195,7 +200,7 @@ exports.getUser = (req, res, next) => {
     } = user;
     return successResponseWithData(res, 'User fetched successfully', {
       data: [{
-        name, role, email, createdAt, id: userId,
+        name, role, email, createdAt, _id: userId,
       },
       ],
     });
@@ -323,8 +328,9 @@ exports.bookApartment = (req, res, next) => {
       // Make apartment unavailable
       apartment.isAvailable = false;
       apartment.bookedBy = userId;
-      return apartment.save((saveErr) => {
+      return apartment.save((saveErr, updatedApartment) => {
         if (saveErr) return next(err);
+        updatedApartment.owner = undefined;
         // Add apartment is bookings array of user
         return UserSchema.findByIdAndUpdate(
           userId, { $push: { bookings: apartmentId } }, { new: true },
@@ -332,7 +338,7 @@ exports.bookApartment = (req, res, next) => {
             if (updateErr) return next(err);
             return successResponseWithData(res, 'Apartment has booked succesfully', {
               data: {
-                apartmentId,
+                apartment: updatedApartment,
               },
             });
           },
@@ -401,7 +407,6 @@ exports.addApartment = async (req, res, next) => {
     return validationError(res, 'Please provide all the required fields');
   }
   const { id: userId } = req.params;
-  console.log('req.params', req.params);
   const { _id: callerId } = req.user;
   // Check that id is passed correctly and its a valid mongo ID
   if (!userId || !utils.validateObjectID(userId)) return validationError(res, 'ID is not a valid mongo ObjectId');
@@ -412,10 +417,8 @@ exports.addApartment = async (req, res, next) => {
   }
   // Make sure user has a Client role only
   try {
-    console.log('userId', userId);
     const toUpdate = await UserSchema.findById({ _id: userId });
     if (!toUpdate) return notFoundResponse(res, 'Realtor was not found');
-    console.log('toUpdate', toUpdate);
     if (nonRealtorRole.includes(toUpdate.role)) return validationError(res, 'The person who tried to add apartments is not realtor');
     // Create a new apartment
     const newApartment = new ApartmentSchema({
@@ -438,7 +441,7 @@ exports.addApartment = async (req, res, next) => {
           if (updateErr) return next(err);
           return successResponseWithData(res, 'Apartment has added succesfully', {
             data: {
-              apartmentId: apartment._id,
+              apartment,
             },
           });
         },

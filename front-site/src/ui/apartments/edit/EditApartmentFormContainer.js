@@ -20,7 +20,7 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = (dispatch, { history, intl, match: { params: { userId } } }) => ({
   onWillUnmount: () => dispatch(setEditApartmentAddress('')),
   onDidMount: (id, apartmentId) => {
-    dispatch(fetchApartment(apartmentId, userId));
+    dispatch(fetchApartment(apartmentId, userId)).catch(err => message.error(err));
   },
   onSubmit: (values, apartmentId) => dispatch(sendPutApartment(values, apartmentId))
     .then(() => {
@@ -36,7 +36,8 @@ const mapDispatchToProps = (dispatch, { history, intl, match: { params: { userId
       .catch(err => message.error(err));
   },
   onCancel: () => history.push(userId ? ROUTE_ADMIN_OWNED_APARTMENTS.replace(':userId', userId) : ROUTE_OWNED_APARTMENTS),
-  onMarkerChange: (lat, lng) => dispatch(fetchApartmentAddress(lat, lng)),
+  onMarkerChange: (lat, lng) => dispatch(fetchApartmentAddress(lat, lng)
+    .catch(err => message.error(err))),
   onAddressChange: address => dispatch(setEditApartmentAddress(address)),
 });
 
