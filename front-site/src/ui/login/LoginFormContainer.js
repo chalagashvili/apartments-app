@@ -8,11 +8,11 @@ import { sendPostLogin } from 'state/auth/actions';
 import { getLoading } from 'state/loading/selectors';
 import { generateDashboardRoute } from 'utils/';
 
-const mapStateToProps = state => ({
+export const mapStateToProps = state => ({
   loading: getLoading(state).login,
 });
 
-const mapDispatchToProps = (dispatch, { history, intl }) => ({
+export const mapDispatchToProps = (dispatch, { history, intl }) => ({
   onSubmit: values => dispatch(sendPostLogin(values))
     .then((payload) => {
       message.success(intl.formatMessage({ id: 'app.loginSuccess' }));

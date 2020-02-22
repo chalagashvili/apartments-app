@@ -493,7 +493,9 @@ exports.updateApartment = async (req, res, next) => {
     const toUpdate = await ApartmentSchema.findById({ _id: apartmentId });
     if (!toUpdate) return notFoundResponse(res, 'Apartment was not found');
     // Check if apartment is under ownership of caller, or caller is admin
-    if (toUpdate.owner.toString() !== userId && !adminRole.includes(req.user.role)) return unauthorizedResponse(res, 'Property ownership validation failed');
+    const hasOwnership = toUpdateUser.ownedApartments.map((a) => a.toString())
+      .includes(apartmentId);
+    if (!hasOwnership && !adminRole.includes(req.user.role)) return unauthorizedResponse(res, 'Property ownership validation failed');
     if (name) toUpdate.name = name;
     if (description) toUpdate.description = description;
     if (floorAreaSize) toUpdate.floorAreaSize = floorAreaSize;
@@ -544,7 +546,9 @@ exports.deleteApartment = async (req, res, next) => {
     const toDelete = await ApartmentSchema.findById({ _id: apartmentId });
     if (!toDelete) return notFoundResponse(res, 'Apartment was not found');
     // Check if apartment is under ownership of caller, or caller is admin
-    if (toDelete.owner.toString() !== userId && !adminRole.includes(req.user.role)) return unauthorizedResponse(res, 'Property ownership validation failed');
+    const hasOwnership = toUpdateUser.ownedApartments.map((a) => a.toString())
+      .includes(apartmentId);
+    if (!hasOwnership && !adminRole.includes(req.user.role)) return unauthorizedResponse(res, 'Property ownership validation failed');
     // Check if apartment is already booked
     if (!toDelete.isAvailable && toDelete.bookedBy) {
       await UserSchema.findByIdAndUpdate(

@@ -80,16 +80,10 @@ function removeLinkedDocuments(doc) {
       Apartment.findById({ _id: apartmentId }, (err, apart) => {
         if (!err && apart) {
           if (!apart.isAvailable && apart.bookedBy) {
-            // user.update(
-            //   { _id: apart.bookedBy }, { $pull: { bookings: apartmentId } },
-            // );
-            user.findById(apart.bookedBy, (fErr, toUpdate) => {
-              if (!fErr && toUpdate) {
-                toUpdate.bookings.remove(apartmentId);
-                // eslint-disable-next-line no-underscore-dangle
-                user.findByIdAndUpdate({ _id: toUpdate._id }, toUpdate);
-              }
-            });
+            user.findOneAndUpdate(
+              { _id: mongoose.Types.ObjectId(apart.bookedBy) },
+              { $pull: { bookings: apartmentId } },
+            );
           }
           apart.remove();
         }

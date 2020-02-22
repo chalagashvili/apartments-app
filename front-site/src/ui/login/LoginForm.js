@@ -10,7 +10,7 @@ function hasErrors(fieldsError) {
   return Object.keys(fieldsError).some(field => fieldsError[field]);
 }
 
-class LoginForm extends React.Component {
+export class LoginFormBody extends React.Component {
   componentDidMount() {
     // To disable submit button at the beginning.
     this.props.form.validateFields();
@@ -76,7 +76,7 @@ class LoginForm extends React.Component {
   }
 }
 
-LoginForm.propTypes = {
+LoginFormBody.propTypes = {
   intl: PropTypes.shape({
     formatMessage: PropTypes.func,
   }).isRequired,
@@ -93,8 +93,8 @@ LoginForm.propTypes = {
   loading: PropTypes.bool,
 };
 
-LoginForm.defaultProps = {
+LoginFormBody.defaultProps = {
   loading: false,
 };
 
-export default Form.create({ name: 'normal_login' })(injectIntl(LoginForm));
+export default Form.create({ name: 'normal_login' })(injectIntl(LoginFormBody));
