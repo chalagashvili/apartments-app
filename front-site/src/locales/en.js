@@ -5,6 +5,7 @@ export default {
     'app.prelude': 'Sign In to experience the future or go to Sign Up page to create an account',
     'app.en': 'en',
     'app.hr': 'hr',
+    'app.admin': 'Admin',
     'menu.home': 'Home',
     'menu.signUp': 'Sign Up',
     'app.email': 'E-mail',

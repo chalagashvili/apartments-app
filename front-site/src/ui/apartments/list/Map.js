@@ -11,10 +11,10 @@ class SimpleMap extends PureComponent {
     const longitude = map.center.lng();
     const latitude = map.center.lat();
     if (searchByMap) {
-      onFilterChange('longitude', longitude.toFixed(2));
-      onFilterChange('latitude', latitude.toFixed(2));
+      onFilterChange('longitude', longitude.toFixed(6));
+      onFilterChange('latitude', latitude.toFixed(6));
       // Convert radians to kms (so, below is 50km range)
-      onFilterChange('radius', (50 / 6378).toFixed(6));
+      onFilterChange('radius', (50 / 6378).toFixed(7));
       onFilter();
     }
   }

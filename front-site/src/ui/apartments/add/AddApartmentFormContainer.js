@@ -23,7 +23,7 @@ const mapDispatchToProps = (dispatch, { history, intl, match: { params: { userId
       message.success(intl.formatMessage({ id: 'app.addApartmenSuccess' }));
       history.push(userId ? ROUTE_ADMIN_OWNED_APARTMENTS.replace(':userId', userId) : ROUTE_OWNED_APARTMENTS);
     })
-    .catch(err => message.error(err)),
+    .catch(err => message.error(err.message)),
   onCancel: () => history.push(userId ? ROUTE_ADMIN_OWNED_APARTMENTS.replace(':userId', userId) : ROUTE_OWNED_APARTMENTS),
   onMarkerChange: (lat, lng) => dispatch(fetchApartmentAddress(lat, lng)),
   onAddressChange: address => dispatch(setEditApartmentAddress(address)),

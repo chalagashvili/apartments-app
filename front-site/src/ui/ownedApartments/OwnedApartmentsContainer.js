@@ -23,7 +23,7 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = (dispatch, { history, match: { params: { userId } } }) => ({
   onDidMount: () => {
-    dispatch(fetchOwnedApartments(null, userId)).catch(err => message.error(err));
+    dispatch(fetchOwnedApartments(null, userId)).catch(err => message.error(err.message));
   },
   onWillUnmount: () => {
     dispatch(removeFilter('ownedApartments', 'longitude'));
@@ -32,10 +32,10 @@ const mapDispatchToProps = (dispatch, { history, match: { params: { userId } } }
   },
   onPaginationChange: (page, newPageSize) =>
     dispatch(fetchOwnedApartments({ page, pageSize: newPageSize }, userId))
-      .catch(err => message.error(err)),
+      .catch(err => message.error(err.message)),
   onPageChange: (newPage, pageSize) =>
     dispatch(fetchOwnedApartments({ page: newPage, pageSize }, userId))
-      .catch(err => message.error(err)),
+      .catch(err => message.error(err.message)),
   onEdit: (id) => {
     const routePath = userId ?
       ROUTE_ADMIN_EDIT_APARTMENT.replace(':userId', userId).replace(':apartmentId', id) :
@@ -50,7 +50,8 @@ const mapDispatchToProps = (dispatch, { history, match: { params: { userId } } }
       dispatch(setFilter('ownedApartments', key, val));
     }
   },
-  onFilter: () => dispatch(fetchOwnedApartments(null, userId)).catch(err => message.error(err)),
+  onFilter: () => dispatch(fetchOwnedApartments(null, userId))
+    .catch(err => message.error(err.message)),
 });
 
 export default withRouter(connect(mapStateToProps, mapDispatchToProps)(Apartments));

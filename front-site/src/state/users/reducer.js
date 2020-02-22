@@ -1,4 +1,5 @@
 import { SET_USERS, SET_USER_SINGLE } from 'state/users/types';
+import { USER_LOGOUT } from 'state/auth/types';
 
 const reducer = (state = {}, action = {}) => {
   switch (action.type) {
@@ -12,6 +13,9 @@ const reducer = (state = {}, action = {}) => {
         ...state,
         user: action.payload,
       };
+    case USER_LOGOUT: {
+      return {};
+    }
     default:
       return state;
   }

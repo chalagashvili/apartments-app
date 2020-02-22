@@ -1,6 +1,6 @@
 import { postLogin, postSignUp, postResetPassword } from 'api/auth';
 import { setCookie } from 'utils';
-import { SET_USER_AUTH_INFO, CLEAR_AUTH_INFO } from 'state/auth/types';
+import { SET_USER_AUTH_INFO, CLEAR_AUTH_INFO, USER_LOGOUT } from 'state/auth/types';
 import { toggleLoading } from 'state/loading/actions';
 
 export const setAuth = auth => ({
@@ -10,6 +10,10 @@ export const setAuth = auth => ({
 
 export const clearAuth = () => ({
   type: CLEAR_AUTH_INFO,
+});
+
+export const logout = () => ({
+  type: USER_LOGOUT,
 });
 
 export const sendPostLogin = data => dispatch => new Promise((resolve, reject) => {

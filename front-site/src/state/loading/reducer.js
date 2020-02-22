@@ -1,4 +1,5 @@
 import { TOGGLE_LOADING, TOGGLE_GROUP_ITEM_LOADING } from 'state/loading/types';
+import { USER_LOGOUT } from 'state/auth/types';
 
 const reducer = (state = {}, action = {}) => {
   switch (action.type) {
@@ -23,7 +24,9 @@ const reducer = (state = {}, action = {}) => {
       }
       return state;
     }
-
+    case USER_LOGOUT: {
+      return {};
+    }
     default:
       return state;
   }

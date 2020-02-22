@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import { Form, Icon, Input, Button, Select, Spin } from 'antd';
-import { emailRegexPattern } from 'utils/const';
+import { emailRegexPattern, AdminOnly } from 'utils/const';
 
 const { Option } = Select;
 
@@ -30,7 +30,7 @@ class UserForm extends React.Component {
 
   render() {
     const {
-      intl, form, loading, onCancel,
+      intl, form, loading, onCancel, auth: { role },
     } = this.props;
     const {
       getFieldDecorator, getFieldsError,
@@ -65,6 +65,9 @@ class UserForm extends React.Component {
       <Select style={{ width: '100%' }}>
         <Option value="client"><FormattedMessage id="app.client" /></Option>
         <Option value="realtor"><FormattedMessage id="app.realtor" /></Option>
+        {
+          role && AdminOnly ? <Option value="admin"><FormattedMessage id="app.admin" /></Option> : null
+        }
       </Select>);
 
     // Only show error after a field is touched.
@@ -146,6 +149,9 @@ UserForm.propTypes = {
     }),
   }),
   onDidMount: PropTypes.func,
+  auth: PropTypes.shape({
+    role: PropTypes.string,
+  }),
 };
 
 UserForm.defaultProps = {
@@ -154,6 +160,9 @@ UserForm.defaultProps = {
   onDidMount: () => {},
   match: {
     params: {},
+  },
+  auth: {
+    role: '',
   },
 };
 

@@ -1,4 +1,4 @@
-import { SET_USER_AUTH_INFO, CLEAR_AUTH_INFO } from 'state/auth/types';
+import { SET_USER_AUTH_INFO, CLEAR_AUTH_INFO, USER_LOGOUT } from 'state/auth/types';
 
 const initialState = {
   auth: {
@@ -15,6 +15,9 @@ const reducer = (state = initialState, action = {}) => {
       return action.payload;
     case CLEAR_AUTH_INFO:
       return {};
+    case USER_LOGOUT: {
+      return initialState;
+    }
     default: return state;
   }
 };

@@ -24,7 +24,7 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = (dispatch, { history, match: { params: { userId } } }) => ({
   onDidMount: () => {
-    dispatch(fetchBookings(null, userId)).catch(err => message.error(err));
+    dispatch(fetchBookings(null, userId)).catch(err => message.error(err.message));
   },
   onWillUnmount: () => {
     dispatch(removeFilter('bookings', 'longitude'));
@@ -33,10 +33,10 @@ const mapDispatchToProps = (dispatch, { history, match: { params: { userId } } }
   },
   onPaginationChange: (page, newPageSize) =>
     dispatch(fetchBookings({ page, pageSize: newPageSize }, userId))
-      .catch(err => message.error(err)),
+      .catch(err => message.error(err.message)),
   onPageChange:
   (newPage, pageSize) => dispatch(fetchBookings({ page: newPage, pageSize }, userId))
-    .catch(err => message.error(err)),
+    .catch(err => message.error(err.message)),
   onFilterChange: (key, val) => {
     if (val == null) {
       dispatch(removeFilter('bookings', key));
@@ -45,12 +45,12 @@ const mapDispatchToProps = (dispatch, { history, match: { params: { userId } } }
     }
   },
   onEdit: id => history.push(ROUTE_EDIT_APARTMENT.replace(':apartmentId', id)),
-  onFilter: () => dispatch(fetchBookings(null, userId)).catch(err => message.error(err)),
+  onFilter: () => dispatch(fetchBookings(null, userId)).catch(err => message.error(err.message)),
   onUnBook: (apartmentId) => {
     dispatch(sendDeleteBooking(apartmentId, userId)).then(() => {
       message.success('Succesfully unbooked an apartment!');
-      dispatch(fetchBookings(null, userId)).catch(err => message.error(err));
-    }).catch(err => message.error(err));
+      dispatch(fetchBookings(null, userId)).catch(err => message.error(err.message));
+    }).catch(err => message.error(err.message));
   },
 });
 

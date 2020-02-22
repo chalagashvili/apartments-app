@@ -63,35 +63,52 @@ userSchema.methods.comparePassword = function (candidatePassword, callback) {
   });
 };
 
-function removeLinkedDocuments(doc) {
-  if (doc.role === 'realtor') {
-    Apartment.deleteMany({ _id: { $in: doc.ownedApartments } });
-    // eslint-disable-next-line no-plusplus
-    for (let i = 0; i < doc.ownedApartments.length; i++) {
-      const apartmentId = doc.ownedApartments[i];
-      Apartment.findById({ _id: apartmentId }, (err, apart) => {
-        if (!err) {
-          if (!apart.isAvailable && apart.bookedBy) {
-            userSchema.findByIdAndUpdate(
-              { _id: apart.bookedBy }, { $pull: { bookings: apartmentId } },
-            );
-          }
-        }
-      });
-    }
-  } else if (doc.role === 'client') {
-    Apartment.updateMany(
-      { _id: { $in: doc.bookings } }, { $set: { available: true, bookedBy: null } },
-    );
-  }
-}
-
+// eslint-disable-next-line no-use-before-define
 const cleanUpAfterRoleChange = (doc) => removeLinkedDocuments(doc);
 
+// eslint-disable-next-line no-use-before-define
 userSchema.post('deleteOne', { document: true, query: false }, removeLinkedDocuments);
 
 userSchema.plugin(mongoosePaginate);
 const user = mongoose.model('User', userSchema);
+
+function removeLinkedDocuments(doc) {
+  if (doc.role === 'realtor') {
+    // eslint-disable-next-line no-plusplus
+    for (let i = 0; i < doc.ownedApartments.length; i++) {
+      const apartmentId = doc.ownedApartments[i];
+      Apartment.findById({ _id: apartmentId }, (err, apart) => {
+        if (!err && apart) {
+          if (!apart.isAvailable && apart.bookedBy) {
+            // user.update(
+            //   { _id: apart.bookedBy }, { $pull: { bookings: apartmentId } },
+            // );
+            user.findById(apart.bookedBy, (fErr, toUpdate) => {
+              if (!fErr && toUpdate) {
+                toUpdate.bookings.remove(apartmentId);
+                // eslint-disable-next-line no-underscore-dangle
+                user.findByIdAndUpdate({ _id: toUpdate._id }, toUpdate);
+              }
+            });
+          }
+          apart.remove();
+        }
+      });
+    }
+  } else if (doc.role === 'client') {
+    Apartment.find({ _id: { $in: doc.bookings } }, (err, apartments) => {
+      if (!err && apartments) {
+        // eslint-disable-next-line no-plusplus
+        for (let j = 0; j < apartments.length; j++) {
+          const a = apartments[j];
+          a.isAvailable = true;
+          a.bookedBy = null;
+          a.save();
+        }
+      }
+    });
+  }
+}
 
 module.exports = {
   user,

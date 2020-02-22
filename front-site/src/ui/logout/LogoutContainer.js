@@ -3,7 +3,7 @@ import { withRouter } from 'react-router-dom';
 
 import Logout from 'ui/logout/Logout';
 import { removeCookie } from 'utils';
-import { clearAuth } from 'state/auth/actions';
+import { clearAuth, logout } from 'state/auth/actions';
 import { ROUTE_HOME } from 'app-init/router';
 
 const mapDispatchToProps = (dispatch, { history }) => ({
@@ -12,6 +12,7 @@ const mapDispatchToProps = (dispatch, { history }) => ({
     removeCookie('role');
     removeCookie('email');
     removeCookie('id');
+    dispatch(logout());
     dispatch(clearAuth());
     history.push(ROUTE_HOME);
   },

@@ -16,7 +16,7 @@ const mapDispatchToProps = (dispatch, { history }) => ({
     dispatch(sendPostResetPassword(values, token)).then(() => {
       message.success('Your password has been succesfully set!');
       history.push(ROUTE_HOME);
-    }).catch(err => message.error(err));
+    }).catch(err => message.error(err.message));
   },
 });
 

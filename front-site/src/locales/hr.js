@@ -6,6 +6,7 @@ export default {
     'app.en': 'en',
     'app.hr': 'hr',
     'menu.home': 'Dom',
+    'app.admin': 'Admin',
     'menu.signUp': 'Prijavi se',
     'app.email': 'E-mail',
     'app.password': 'Zaporka',

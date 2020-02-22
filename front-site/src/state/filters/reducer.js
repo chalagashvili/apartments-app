@@ -1,4 +1,5 @@
 import { SET_FILTER, REMOVE_FILTER } from 'state/filters/types';
+import { USER_LOGOUT } from 'state/auth/types';
 
 const reducer = (state = {}, action = {}) => {
   switch (action.type) {
@@ -20,6 +21,9 @@ const reducer = (state = {}, action = {}) => {
         ...state,
         [name]: Object.assign({}, filtersWithoutKey),
       };
+    }
+    case USER_LOGOUT: {
+      return {};
     }
     default: return state;
   }

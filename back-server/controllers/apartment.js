@@ -59,6 +59,8 @@ exports.getAvailableApartments = async (req, res, next) => {
     options,
     (err, results) => {
       if (err) return next(err);
+      // eslint-disable-next-line no-param-reassign
+      results.metadata.page = Math.min(results.metadata.page, results.metadata.lastPage);
       return successResponseWithData(res, 'Apartments fetched successfully', results);
     },
   );

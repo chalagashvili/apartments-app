@@ -24,8 +24,11 @@ const mapDispatchToProps = (dispatch, { history }) => ({
   onEdit: (userId) => { history.push(ROUTE_EDIT_USER.replace(':userId', userId)); },
   onDelete: (userId) => {
     dispatch(sendDeleteUser(userId))
-      .then(() => { dispatch(fetchUsers()); message.success('User has succesfully deleted'); })
-      .catch(err => message.error(err));
+      .then(() => {
+        dispatch(fetchUsers()).catch(err => message.error(err.message));
+        message.success('User has succesfully deleted');
+      })
+      .catch(err => message.error(err.message));
   },
   onCheck: (userId, email, role) => {
     if (role === ClientOnly) {
@@ -35,9 +38,9 @@ const mapDispatchToProps = (dispatch, { history }) => ({
     }
   },
   onPaginationChange: (page, newPageSize) =>
-    dispatch(fetchUsers({ page, pageSize: newPageSize })).catch(err => message.error(err)),
+    dispatch(fetchUsers({ page, pageSize: newPageSize })).catch(err => message.error(err.message)),
   onPageChange: (newPage, pageSize) => dispatch(fetchUsers({ page: newPage, pageSize }))
-    .catch(err => message.error(err)),
+    .catch(err => message.error(err.message)),
 });
 
 export default withRouter(connect(mapStateToProps, mapDispatchToProps)(UsersListTable));

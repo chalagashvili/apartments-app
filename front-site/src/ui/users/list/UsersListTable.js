@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Table, Tag, Divider, Icon, Button, Pagination, Spin } from 'antd';
+import { Table, Tag, Divider, Icon, Button, Pagination, Spin, Popconfirm } from 'antd';
 
 const { Column } = Table;
 
@@ -82,13 +82,21 @@ class UsersListTable extends React.Component {
                     <Icon type="edit" />
                   </Button>
                   <Divider type="vertical" />
-                  <Button
-                    type="danger"
-                    loading={groupLoading[record._id]}
-                    onClick={() => onDelete(record._id)}
+                  <Popconfirm
+                    title="Are you sure delete this user?"
+                    onConfirm={() => onDelete(record._id)}
+                    onCancel={null}
+                    okText="Yes"
+                    cancelText="No"
                   >
-                    <Icon type="delete" />
-                  </Button>
+                    <Button
+                      type="danger"
+                      loading={groupLoading[record._id]}
+                    >
+                      <Icon type="delete" />
+                    </Button>
+                  </Popconfirm>
+
                 </span>)}
             />
           </Table>

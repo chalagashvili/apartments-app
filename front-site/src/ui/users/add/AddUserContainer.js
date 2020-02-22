@@ -6,9 +6,11 @@ import UserForm from 'ui/users/common/UserForm';
 import { getLoading } from 'state/loading/selectors';
 import { ROUTE_USERS } from 'app-init/router';
 import { sendPostNewUser } from 'state/users/actions';
+import { getAuthInfo } from 'state/auth/selectors';
 
 const mapStateToProps = state => ({
   loading: getLoading(state).addUser,
+  auth: getAuthInfo(state),
 });
 
 const mapDispatchToProps = (dispatch, { history }) => ({
@@ -17,7 +19,7 @@ const mapDispatchToProps = (dispatch, { history }) => ({
       message.success('New user has been successfully added');
       history.push(ROUTE_USERS);
     })
-    .catch(err => message.error(err)),
+    .catch(err => message.error(err.message)),
   onCancel: () => history.goBack(),
 });
 

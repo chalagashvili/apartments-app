@@ -18,7 +18,7 @@ const mapDispatchToProps = (dispatch, { history, intl }) => ({
       message.success(intl.formatMessage({ id: 'app.loginSuccess' }));
       history.push(generateDashboardRoute(payload.role));
     })
-    .catch(err => message.error(err)),
+    .catch(err => message.error(err.message)),
 });
 
 export default withRouter(injectIntl(connect(mapStateToProps, mapDispatchToProps)(LoginForm)));

@@ -13,7 +13,7 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = (dispatch, { history }) => ({
-  onDidMount: form => dispatch(fetchProfile(form)).catch(err => message.error(err)),
+  onDidMount: form => dispatch(fetchProfile(form)).catch(err => message.error(err.message)),
   onCancel: () => history.goBack(),
   onSubmit: (values) => {
     // eslint-disable-next-line no-param-reassign
@@ -21,7 +21,7 @@ const mapDispatchToProps = (dispatch, { history }) => ({
     dispatch(sendPutUser(values)).then(() => {
       message.success('User profile succesfully updated!');
     })
-      .catch(err => message.error(err));
+      .catch(err => message.error(err.message));
   },
 });
 

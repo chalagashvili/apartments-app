@@ -15,7 +15,7 @@ const {
 const { cleanUpAfterRoleChange } = require('../models/user');
 
 const {
-  adminRole, nonAdminRole, allRoles, nonRealtorRole,
+  adminRole, nonAdminRole, allRoles, nonRealtorRole, nonClientRole,
 } = require('../services/const');
 
 const UserSchema = require('../models').userSchema;
@@ -65,7 +65,6 @@ exports.addUser = async (req, res, next) => {
 
   const randomTokenBytes = await randomBytesAsync(16);
   const token = randomTokenBytes.toString('hex');
-
   const newUser = new UserSchema({
     email: validator.normalizeEmail(email, { gmail_remove_dots: false }),
     password,
@@ -127,13 +126,6 @@ exports.editUser = async (req, res, next) => {
   const {
     password, confirmPassword, email, role, name,
   } = req.body;
-  /* Check if changing password */
-  if (password) {
-    if (!validator.isLength(password, { min: 8 })) return validationError(res, 'Password length must be >= 8');
-    if (password !== confirmPassword) return validationError(res, 'Password and Confirm Password do not match');
-    // password is good
-    user.password = password;
-  }
   /* Check if changing email */
   if (email) {
     if (!validator.isEmail(email)) return validationError(res, 'Email is invalid');
@@ -158,7 +150,7 @@ exports.editUser = async (req, res, next) => {
   if (name) {
     user.name = name;
   }
-  return user.save((saveErr) => {
+  const saveCb = (saveErr) => {
     if (saveErr) {
       if (saveErr.code === 11000) {
         return validationError(res, 'Email address is already in use');
@@ -175,7 +167,16 @@ exports.editUser = async (req, res, next) => {
       },
       ],
     });
-  });
+  };
+  /* Check if changing password */
+  if (password) {
+    if (!validator.isLength(password, { min: 8 })) return validationError(res, 'Password length must be >= 8');
+    if (password !== confirmPassword) return validationError(res, 'Password and Confirm Password do not match');
+    // password is good
+    user.password = password;
+    return user.save(user, saveCb);
+  }
+  return UserSchema.findByIdAndUpdate({ _id: user._id }, user, saveCb);
 };
 
 /*
@@ -227,6 +228,8 @@ exports.getUsers = async (req, res, next) => {
     options,
     (err, results) => {
       if (err) return next(err);
+      // eslint-disable-next-line no-param-reassign
+      results.metadata.page = Math.min(results.metadata.page, results.metadata.lastPage);
       return successResponseWithData(res, 'Users fetched successfully', results);
     },
   );
@@ -249,6 +252,7 @@ exports.getBookings = (req, res, next) => {
   }
   return UserSchema.findById({ _id: userId }, (error, user) => {
     if (error) return next(error);
+    if (!user) return notFoundResponse(res, 'User was not found with following ID');
     const {
       page = 1, pageSize = 10,
       floorAreaSizeFrom, floorAreaSizeTo,
@@ -295,6 +299,8 @@ exports.getBookings = (req, res, next) => {
       options,
       (err, results) => {
         if (err) return next(err);
+        // eslint-disable-next-line no-param-reassign
+        results.metadata.page = Math.min(results.metadata.page, results.metadata.lastPage);
         return successResponseWithData(res, 'Bookings fetched successfully', results);
       },
     );
@@ -306,7 +312,7 @@ exports.getBookings = (req, res, next) => {
 * Handle logic when a user is booking an apartment, or admin is renting for a user
 */
 
-exports.bookApartment = (req, res, next) => {
+exports.bookApartment = async (req, res, next) => {
   const { id: userId } = req.params;
   const { _id: callerId } = req.user;
   // Check that id is passed correctly and its a valid mongo ID
@@ -319,6 +325,9 @@ exports.bookApartment = (req, res, next) => {
   const { apartmentId } = req.params;
   // Check if received apartmentId is valid mongo ID
   if (!utils.validateObjectID(apartmentId)) return validationError(res, 'apartment ID is not a mongo ObjectId');
+  const toUpdateUser = await UserSchema.findById(userId);
+  if (!toUpdateUser) return notFoundResponse(res, 'User with given ID was not found');
+  if (nonClientRole.includes(toUpdateUser.role)) return unauthorizedResponse(res, 'User with ID has not client role');
   // Check that apartment is available
   return ApartmentSchema.findById({ _id: apartmentId }, (err, apartment) => {
     if (err) return next(err);
@@ -354,7 +363,7 @@ exports.bookApartment = (req, res, next) => {
 * Handle logic when a user is unbooking an apartment, or admin is unbooking it for a user
 */
 
-exports.unbookApartment = (req, res, next) => {
+exports.unbookApartment = async (req, res, next) => {
   const { id: userId } = req.params;
   const { _id: callerId } = req.user;
   // Check that id is passed correctly and its a valid mongo ID
@@ -367,6 +376,9 @@ exports.unbookApartment = (req, res, next) => {
   const { apartmentId } = req.params;
   // Check if received apartmentId is valid mongo ID
   if (!utils.validateObjectID(apartmentId)) return validationError(res, 'ID is not a mongo ObjectId');
+  const toUpdateUser = await UserSchema.findById(userId);
+  if (!toUpdateUser) return notFoundResponse(res, 'User with given ID was not found');
+  if (nonClientRole.includes(toUpdateUser.role)) return unauthorizedResponse(res, 'User with ID has not client role');
   return ApartmentSchema.findById({ _id: apartmentId }, (err, apartment) => {
     if (err) return next(err);
     // Check if apartment exists
@@ -475,6 +487,9 @@ exports.updateApartment = async (req, res, next) => {
     if (!adminRole.includes(req.user.role)) return unauthorizedResponse(res, 'You don\'t have enough permissions');
   }
   try {
+    const toUpdateUser = await UserSchema.findById(userId);
+    if (!toUpdateUser) return notFoundResponse(res, 'User with given ID was not found');
+    if (nonRealtorRole.includes(toUpdateUser.role)) return unauthorizedResponse(res, 'User with ID has not client role');
     const toUpdate = await ApartmentSchema.findById({ _id: apartmentId });
     if (!toUpdate) return notFoundResponse(res, 'Apartment was not found');
     // Check if apartment is under ownership of caller, or caller is admin
@@ -487,7 +502,7 @@ exports.updateApartment = async (req, res, next) => {
     if (location) toUpdate.loc = location;
     if (imageUrl) toUpdate.imageUrl = imageUrl;
     // if changing availability of the apartment to TRUE
-    // we should also remove it from clien's bookings, if it exists
+    // we should also remove it from client's bookings, if it exists
     if (isAvailable != null) {
       if (toUpdate.isAvailable === false && isAvailable === true && toUpdate.bookedBy) {
         await UserSchema.findByIdAndUpdate(
@@ -523,6 +538,9 @@ exports.deleteApartment = async (req, res, next) => {
     if (!adminRole.includes(req.user.role)) return unauthorizedResponse(res, 'You don\'t have enough permissions');
   }
   try {
+    const toUpdateUser = await UserSchema.findById(userId);
+    if (!toUpdateUser) return notFoundResponse(res, 'User with given ID was not found');
+    if (nonRealtorRole.includes(toUpdateUser.role)) return unauthorizedResponse(res, 'User with ID has not realtor role');
     const toDelete = await ApartmentSchema.findById({ _id: apartmentId });
     if (!toDelete) return notFoundResponse(res, 'Apartment was not found');
     // Check if apartment is under ownership of caller, or caller is admin
@@ -601,6 +619,8 @@ exports.getOwnedApartments = async (req, res, next) => {
     options,
     (err, results) => {
       if (err) return next(err);
+      // eslint-disable-next-line no-param-reassign
+      results.metadata.page = Math.min(results.metadata.page, results.metadata.lastPage);
       return successResponseWithData(res, 'Apartments fetched successfully', results);
     },
   );

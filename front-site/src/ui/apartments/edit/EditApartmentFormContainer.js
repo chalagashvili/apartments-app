@@ -20,24 +20,24 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = (dispatch, { history, intl, match: { params: { userId } } }) => ({
   onWillUnmount: () => dispatch(setEditApartmentAddress('')),
   onDidMount: (id, apartmentId) => {
-    dispatch(fetchApartment(apartmentId, userId)).catch(err => message.error(err));
+    dispatch(fetchApartment(apartmentId, userId)).catch(err => message.error(err.message));
   },
-  onSubmit: (values, apartmentId) => dispatch(sendPutApartment(values, apartmentId))
+  onSubmit: (values, apartmentId) => dispatch(sendPutApartment(values, apartmentId, userId))
     .then(() => {
       message.success(intl.formatMessage({ id: 'app.editApartmenSuccess' }));
       history.push(userId ? ROUTE_ADMIN_OWNED_APARTMENTS.replace(':userId', userId) : ROUTE_OWNED_APARTMENTS);
     })
-    .catch(err => message.error(err)),
+    .catch(err => message.error(err.message)),
   onDelete: (apartmentId) => {
-    dispatch(sendDeleteApartment(apartmentId)).then(() => {
+    dispatch(sendDeleteApartment(apartmentId, userId)).then(() => {
       message.success(intl.formatMessage({ id: 'app.editApartmenSuccess' }));
       history.push(userId ? ROUTE_ADMIN_OWNED_APARTMENTS.replace(':userId', userId) : ROUTE_OWNED_APARTMENTS);
     })
-      .catch(err => message.error(err));
+      .catch(err => message.error(err.message));
   },
   onCancel: () => history.push(userId ? ROUTE_ADMIN_OWNED_APARTMENTS.replace(':userId', userId) : ROUTE_OWNED_APARTMENTS),
-  onMarkerChange: (lat, lng) => dispatch(fetchApartmentAddress(lat, lng)
-    .catch(err => message.error(err))),
+  onMarkerChange: (lat, lng) => dispatch(fetchApartmentAddress(lat, lng))
+    .catch(err => message.error(err.message)),
   onAddressChange: address => dispatch(setEditApartmentAddress(address)),
 });
 

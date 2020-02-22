@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { injectIntl, FormattedMessage } from 'react-intl';
-import { Form, Input, Button, Switch, Icon, Spin } from 'antd';
+import { Form, Input, Button, Switch, Icon, Spin, InputNumber, Popconfirm } from 'antd';
 import LocationAutocomplete from 'ui/apartments/common/LocationAutocomplete';
 import LocationPicker from 'ui/apartments/common/LocationPicker';
 import { coordinatesRegexPatter, mapDefaultCenterCoordinates, EDIT_MODE } from 'utils/const';
@@ -92,7 +92,7 @@ class ApartmentForm extends React.Component {
     if (this.state.currentMarkerCoordinates !== nextState.currentMarkerCoordinates) {
       const { longitude, latitude } = nextState.currentMarkerCoordinates;
       setFieldsValue({
-        location: `${latitude.toFixed(2)},${longitude.toFixed(2)}`,
+        location: `${latitude.toFixed(6)},${longitude.toFixed(6)}`,
       });
     }
   }
@@ -175,15 +175,22 @@ class ApartmentForm extends React.Component {
     const availableError = this.generateError('isAvailable');
     const locationError = this.generateError('location');
     const renderDeleteButton = mode === EDIT_MODE ? (
-      <Button
-        type="danger"
-        style={{
+      <Popconfirm
+        title="Are you sure delete this apartment?"
+        onConfirm={() => onDelete(_id)}
+        onCancel={null}
+        okText="Yes"
+        cancelText="No"
+      >
+        <Button
+          type="danger"
+          style={{
           marginLeft: '2rem',
         }}
-        onClick={() => onDelete(_id)}
-      >
-        <FormattedMessage id="app.delete" />
-      </Button>
+        >
+          <FormattedMessage id="app.delete" />
+        </Button>
+      </Popconfirm>
     ) : null;
 
     return (
@@ -206,7 +213,10 @@ class ApartmentForm extends React.Component {
             >
               {getFieldDecorator('floorAreaSize', {
               rules: [{ required: true, message: 'app.inputSize' }],
-            })(<Input type="number" min={0} />)}
+            })(<InputNumber
+              min={0.01}
+              formatter={value => `${value}`}
+            />)}
             </Form.Item>
             <Form.Item
               label={intl.formatMessage({ id: 'app.numberOfRooms' })}
@@ -215,7 +225,11 @@ class ApartmentForm extends React.Component {
             >
               {getFieldDecorator('numberOfRooms', {
               rules: [{ required: true, message: 'app.inputRooms' }],
-            })(<Input type="number" min={0} precision={0} />)}
+            })(<InputNumber
+              min={1}
+              precision={0}
+              formatter={value => `${value}`}
+            />)}
             </Form.Item>
             <Form.Item
               label={intl.formatMessage({ id: 'app.pricePerMonth' })}
@@ -224,7 +238,7 @@ class ApartmentForm extends React.Component {
             >
               {getFieldDecorator('pricePerMonth', {
               rules: [{ required: true, message: 'app.inputPrice' }],
-            })(<Input type="number" min={0} />)}
+            })(<InputNumber min={0.01} formatter={value => `${value}`} />)}
             </Form.Item>
             <Form.Item
               label={intl.formatMessage({ id: 'app.description' })}

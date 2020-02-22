@@ -1,4 +1,5 @@
 import { SET_AVAILABLE_APARTMENTS, SET_OWNED_APARTMENTS, SET_EDIT_APARTMENT_LOCATION, SET_EDIT_APARTMENT, SET_BOOKED_APARTMENTS, SET_EDIT_APARTMENT_ADDRESS } from 'state/apartments/types';
+import { USER_LOGOUT } from 'state/auth/types';
 
 const reducer = (state = {}, action = {}) => {
   switch (action.type) {
@@ -37,6 +38,9 @@ const reducer = (state = {}, action = {}) => {
         ...state,
         editApartmentAddress: action.payload,
       };
+    }
+    case USER_LOGOUT: {
+      return {};
     }
 
     default:

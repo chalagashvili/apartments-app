@@ -8,7 +8,8 @@ import { defaultApartmentImage, RealtorOnly, nonClient, AdminOnly } from 'utils/
 
 
 const ApartmentsList = ({
-  mapView, searchByMap, searchByMapToggle, items, onHover, pagination: { totalItems, page },
+  mapView, searchByMap, searchByMapToggle, items, onHover,
+  pagination: { totalItems, page, pageSize },
   onPageChange, onPaginationChange, pageSizeOptions, auth: { role }, onEdit, onFilterChange,
   onFilter, filters, onBook, groupLoading, onUnBook, onAdd, mode,
 }) => (
@@ -116,6 +117,7 @@ const ApartmentsList = ({
         <Pagination
           current={page}
           defaultCurrent={1}
+          pageSize={pageSize}
           total={totalItems}
           showSizeChanger
           onChange={onPageChange}
@@ -139,6 +141,7 @@ ApartmentsList.propTypes = {
   pagination: PropTypes.shape({
     totalItems: PropTypes.number,
     page: PropTypes.number,
+    pageSize: PropTypes.number,
   }).isRequired,
   onPageChange: PropTypes.func.isRequired,
   onPaginationChange: PropTypes.func.isRequired,

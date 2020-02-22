@@ -44,11 +44,12 @@ exports.signUp = (req, res, next) => {
   if (!validator.isEmail(email)) return validationError(res, 'Email is invalid');
   if (!validator.isLength(password, { min: 6 })) return validationError(res, 'Password length must be >= 6');
 
-  return UserSchema.findOne({ email }, (err, existingUser) => {
+  const normalizedEmail = validator.normalizeEmail(email, { gmail_remove_dots: false });
+  return UserSchema.findOne({ email: normalizedEmail }, (err, existingUser) => {
     if (err) return next(err);
     if (existingUser) return validationError(res, 'Email is already in use');
     const user = new UserSchema({
-      email: validator.normalizeEmail(email, { gmail_remove_dots: false }),
+      email: normalizedEmail,
       password,
       role,
       name,
