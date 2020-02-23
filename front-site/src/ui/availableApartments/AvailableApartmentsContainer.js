@@ -10,7 +10,7 @@ import { getAuthInfo } from 'state/auth/selectors';
 import { removeFilter, setFilter } from 'state/filters/actions';
 import { getFilters } from 'state/filters/selectors';
 import { sendPostBooking } from 'state/users/actions';
-import { ClientOnly } from 'utils/const';
+import { ClientOnly, defaultPagination } from 'utils/const';
 
 const mapStateToProps = state => ({
   apartments: getAvailableApartments(state),
@@ -24,7 +24,7 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => ({
   onDidMount: () => {
-    dispatch(fetchAvailableApartments({ page: 1, pageSize: 10 }))
+    dispatch(fetchAvailableApartments(defaultPagination))
       .catch(err => message.error(err.message));
   },
   onWillUnmount: () => {
@@ -44,12 +44,12 @@ const mapDispatchToProps = dispatch => ({
       dispatch(setFilter('availableApartments', key, val));
     }
   },
-  onFilter: () => dispatch(fetchAvailableApartments({ page: 1, pageSize: 10 }))
+  onFilter: () => dispatch(fetchAvailableApartments(defaultPagination))
     .catch(err => message.error(err.message)),
   onBook: (apartmentId) => {
     dispatch(sendPostBooking(apartmentId)).then(() => {
       message.success('Succesfully booked an apartment! Go to bookings to check it out');
-      dispatch(fetchAvailableApartments({ page: 1, pageSize: 10 }))
+      dispatch(fetchAvailableApartments(defaultPagination))
         .catch(err => message.error(err.message));
     }).catch(err => message.error(err.message));
   },

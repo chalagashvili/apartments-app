@@ -98,3 +98,6 @@ export const mapDefaultCenterCoordinates = {
 
 export const ADD_MODE = 'work-mode-add';
 export const EDIT_MODE = 'work-mode-edit';
+
+export const defaultServerError = 'Error occured when communicating with server';
+export const defaultPagination = { page: 1, pageSize: 10 };

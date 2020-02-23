@@ -8,6 +8,7 @@ import { generateQueryParams } from 'utils/index';
 import { getFilters } from 'state/filters/selectors';
 import { getPagination } from 'state/pagination/selectors';
 import { getAddressByCoordinates } from 'api/services';
+import { defaultServerError } from 'utils/const';
 
 export const setOwnedApartments = apartments => ({
   type: SET_OWNED_APARTMENTS,
@@ -57,7 +58,7 @@ export const fetchOwnedApartments = (paginationOptions, userId) => (dispatch, ge
       return reject(new Error(json.error));
     })).catch(() => {
       dispatch(toggleLoading('ownedApartments'));
-      reject(new Error('Error occured when communicating with server'));
+      reject(new Error(defaultServerError));
     });
   });
 
@@ -73,7 +74,7 @@ export const sendPostApartment = (data, userId) => dispatch =>
       return reject(new Error(json.error));
     })).catch(() => {
       dispatch(toggleLoading('addApartment'));
-      reject(new Error('Error occured when communicating with server'));
+      reject(new Error(defaultServerError));
     });
   });
 
@@ -89,7 +90,7 @@ export const sendPutApartment = (data, apartmentId, userId) => dispatch =>
       return reject(new Error(json.error));
     })).catch(() => {
       dispatch(toggleLoading('editApartment'));
-      reject(new Error('Error occured when communicating with server'));
+      reject(new Error(defaultServerError));
     });
   });
 
@@ -106,7 +107,7 @@ export const fetchApartment = (apartmentId, userId) => dispatch =>
       return reject(new Error(json.error));
     })).catch(() => {
       dispatch(toggleLoading('editApartment'));
-      reject(new Error('Error occured when communicating with server'));
+      reject(new Error(defaultServerError));
     });
   });
 
@@ -122,6 +123,7 @@ export const sendDeleteApartment = (apartmentId, userId) => dispatch =>
       return reject(new Error(json.error));
     })).catch(() => {
       dispatch(toggleLoading('editApartment'));
+      reject(new Error(defaultServerError));
     });
   });
 
@@ -143,7 +145,7 @@ export const fetchAvailableApartments = paginationOptions => (dispatch, getState
       return reject(new Error(json.error));
     })).catch(() => {
       dispatch(toggleLoading('availableApartments'));
-      reject(new Error('Error occured when communicating with server'));
+      reject(new Error(defaultServerError));
     });
   });
 

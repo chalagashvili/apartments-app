@@ -8,7 +8,7 @@ import { getUsersList } from 'state/users/selectors';
 import { getLoading } from 'state/loading/selectors';
 import { getPagination } from 'state/pagination/selectors';
 import { ROUTE_EDIT_USER, ROUTE_ADMIN_OWNED_APARTMENTS, ROUTE_ADMIN_BOOKINGS } from 'app-init/router';
-import { ClientOnly, RealtorOnly } from 'utils/const';
+import { ClientOnly, RealtorOnly, defaultPagination } from 'utils/const';
 
 const mapStateToProps = state => ({
   users: getUsersList(state),
@@ -19,13 +19,13 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = (dispatch, { history }) => ({
   onDidMount: () => {
-    dispatch(fetchUsers({ page: 1, pageSize: 10 })).catch(err => message.error(err.message));
+    dispatch(fetchUsers(defaultPagination)).catch(err => message.error(err.message));
   },
   onEdit: (userId) => { history.push(ROUTE_EDIT_USER.replace(':userId', userId)); },
   onDelete: (userId) => {
     dispatch(sendDeleteUser(userId))
       .then(() => {
-        dispatch(fetchUsers({ page: 1, pageSize: 10 }))
+        dispatch(fetchUsers(defaultPagination))
           .catch(err => message.error(err.message));
         message.success('User has succesfully deleted');
       })

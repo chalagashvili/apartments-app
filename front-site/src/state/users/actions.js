@@ -7,6 +7,7 @@ import { generateQueryParams } from 'utils/index';
 import { setBookedApartments } from 'state/apartments/actions';
 import { setPage } from 'state/pagination/actions';
 import { SET_USERS, SET_USER_SINGLE } from 'state/users/types';
+import { defaultServerError } from 'utils/const';
 
 export const setUsers = users => ({
   type: SET_USERS,
@@ -30,7 +31,7 @@ export const sendPutUser = (data, userId) => dispatch =>
       return reject(new Error(json.error));
     })).catch(() => {
       dispatch(toggleLoading('editProfile'));
-      reject(new Error('Error occured when communicating with server'));
+      reject(new Error(defaultServerError));
     });
   });
 
@@ -46,7 +47,7 @@ export const sendPostBooking = (apartmentId, userId) => dispatch =>
       return reject(new Error(json.error));
     })).catch(() => {
       dispatch(toggleGroupItemLoading(apartmentId, 'book'));
-      reject(new Error('Error occured when communicating with server'));
+      reject(new Error(defaultServerError));
     });
   });
 
@@ -62,7 +63,7 @@ export const sendDeleteBooking = (apartmentId, userId) => dispatch =>
       return reject(new Error(json.error));
     })).catch(() => {
       dispatch(toggleGroupItemLoading(apartmentId, 'book'));
-      reject(new Error('Error occured when communicating with server'));
+      reject(new Error(defaultServerError));
     });
   });
 
@@ -84,7 +85,7 @@ export const fetchBookings = (paginationOptions, userId) => (dispatch, getState)
       return reject(new Error(json.error));
     })).catch(() => {
       dispatch(toggleLoading('bookings'));
-      reject(new Error('Error occured when communicating with server'));
+      reject(new Error(defaultServerError));
     });
   });
 
@@ -107,7 +108,7 @@ export const fetchUsers = paginationOptions => (dispatch, getState) =>
         return reject(new Error(json.error));
       })).catch(() => {
       dispatch(toggleLoading('users'));
-      reject(new Error('Error occured when communicating with server'));
+      reject(new Error(defaultServerError));
     });
   });
 
@@ -123,7 +124,7 @@ export const sendDeleteUser = userId => dispatch =>
       return reject(new Error(json.error));
     })).catch(() => {
       dispatch(toggleGroupItemLoading(userId, 'deleteUser'));
-      reject(new Error('Error occured when communicating with server'));
+      reject(new Error(defaultServerError));
     });
   });
 
@@ -139,7 +140,7 @@ export const sendPostNewUser = data => dispatch =>
       return reject(new Error(json.error));
     })).catch(() => {
       dispatch(toggleLoading('addUser'));
-      reject(new Error('Error occured when communicating with server'));
+      reject(new Error(defaultServerError));
     });
   });
 
@@ -162,6 +163,6 @@ export const fetchUser = (id, form) => dispatch =>
       return reject(new Error(json.error));
     })).catch(() => {
       dispatch(toggleLoading('editProfile'));
-      reject(new Error('Error occured when communicating with server'));
+      reject(new Error(defaultServerError));
     });
   });

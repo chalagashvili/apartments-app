@@ -1,6 +1,7 @@
 import { SET_PROFILE } from 'state/profile/types';
 import { getMe } from 'api/auth';
 import { toggleLoading } from 'state/loading/actions';
+import { defaultServerError } from 'utils/const';
 
 export const setProfile = profile => ({
   type: SET_PROFILE,
@@ -25,6 +26,6 @@ export const fetchProfile = form => dispatch =>
       return reject(new Error(json.error));
     })).catch(() => {
       dispatch(toggleLoading('editProfile'));
-      reject(new Error('Error occured when communicating with server'));
+      reject(new Error(defaultServerError));
     });
   });

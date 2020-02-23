@@ -10,7 +10,7 @@ import { getAuthInfo } from 'state/auth/selectors';
 import { ROUTE_EDIT_APARTMENT, ROUTE_ADMIN_EDIT_APARTMENT, ROUTE_ADMIN_ADD_APARTMENT } from 'app-init/router';
 import { removeFilter, setFilter } from 'state/filters/actions';
 import { getFilters } from 'state/filters/selectors';
-import { RealtorOnly } from 'utils/const';
+import { RealtorOnly, defaultPagination } from 'utils/const';
 
 const mapStateToProps = state => ({
   apartments: getOwnedApartments(state),
@@ -23,7 +23,7 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = (dispatch, { history, match: { params: { userId } } }) => ({
   onDidMount: () => {
-    dispatch(fetchOwnedApartments({ page: 1, pageSize: 10 }, userId))
+    dispatch(fetchOwnedApartments(defaultPagination, userId))
       .catch(err => message.error(err.message));
   },
   onWillUnmount: () => {
@@ -51,7 +51,7 @@ const mapDispatchToProps = (dispatch, { history, match: { params: { userId } } }
       dispatch(setFilter('ownedApartments', key, val));
     }
   },
-  onFilter: () => dispatch(fetchOwnedApartments({ page: 1, pageSize: 10 }, userId))
+  onFilter: () => dispatch(fetchOwnedApartments(defaultPagination, userId))
     .catch(err => message.error(err.message)),
 });
 

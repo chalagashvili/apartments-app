@@ -2,6 +2,7 @@ import { postLogin, postSignUp, postResetPassword } from 'api/auth';
 import { setCookie } from 'utils';
 import { SET_USER_AUTH_INFO, CLEAR_AUTH_INFO, USER_LOGOUT } from 'state/auth/types';
 import { toggleLoading } from 'state/loading/actions';
+import { defaultServerError } from 'utils/const';
 
 export const setAuth = auth => ({
   type: SET_USER_AUTH_INFO,
@@ -49,7 +50,7 @@ export const sendPostLogin = data => dispatch => new Promise((resolve, reject) =
     })
     .catch(() => {
       dispatch(toggleLoading('login'));
-      reject(new Error('Error occured when communicating with server'));
+      reject(new Error(defaultServerError));
     });
 });
 
@@ -82,7 +83,7 @@ export const sendPostSignup = data => dispatch => new Promise((resolve, reject) 
     })
     .catch(() => {
       dispatch(toggleLoading('signup'));
-      reject(new Error('Error occured when communicating with server'));
+      reject(new Error(defaultServerError));
     });
 });
 
@@ -98,6 +99,6 @@ export const sendPostResetPassword = (data, token) => dispatch =>
       return reject(new Error(json.error));
     })).catch(() => {
       dispatch(toggleLoading('resetPassword'));
-      reject(new Error('Error occured when communicating with server'));
+      reject(new Error(defaultServerError));
     });
   });
