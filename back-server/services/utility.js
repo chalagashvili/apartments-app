@@ -12,8 +12,7 @@ exports.tokenForUser = (user) => {
   return jwt.encode({
     sub: user.id,
     iat: timestamp,
-    exp: Math.round(Date.now() + 1000 * 3600 * 12 * 10000000000),
-    // 12 hours @TODO remove last multiplier
+    exp: Math.round(Date.now() + 1000 * 3600 * 12),
   }, process.env.SECRET);
 };
 

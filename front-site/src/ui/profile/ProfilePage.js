@@ -7,7 +7,7 @@ import EditProfileFormContainer from 'ui/profile/EditProfileFormContainer';
 const { Title } = Typography;
 
 const EditProfilePage = () => (
-  <InternalPage className="AddApartmentPage">
+  <InternalPage className="AddApartmentPage" footerDisabled>
     <Title level={3} className="AddApartmentPage__title">
       <FormattedMessage id="app.editProfile" />
     </Title>

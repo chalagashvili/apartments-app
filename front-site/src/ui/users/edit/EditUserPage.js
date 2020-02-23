@@ -7,7 +7,7 @@ import EditUserContainer from 'ui/users/edit/EditUserContainer';
 const { Title } = Typography;
 
 const LoginPage = () => (
-  <InternalPage>
+  <InternalPage footerDisabled>
     <Title level={3} style={{ marginTop: 30 }} className="LoginPage__title">
       <FormattedMessage id="app.editUser" />
     </Title>

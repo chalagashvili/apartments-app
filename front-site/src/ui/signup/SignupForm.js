@@ -143,6 +143,7 @@ class SignupForm extends React.Component {
           <Form.Item label={intl.formatMessage({ id: 'app.role' })} validateStatus={roleError ? 'error' : ''} help={roleError || ''}>
             {
               getFieldDecorator('role', {
+                initialValue: 'client',
                   rules: [
                     { required: true, message: 'app.provideRole' },
                   ],

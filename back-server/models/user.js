@@ -79,11 +79,11 @@ function removeLinkedDocuments(doc) {
       const apartmentId = doc.ownedApartments[i];
       Apartment.findById({ _id: apartmentId }, (err, apart) => {
         if (!err && apart) {
-          if (!apart.isAvailable && apart.bookedBy) {
+          if (!apart.isAvailable) {
             user.findOneAndUpdate(
-              { _id: mongoose.Types.ObjectId(apart.bookedBy) },
+              { bookings: mongoose.Types.ObjectId(apartmentId) },
               { $pull: { bookings: apartmentId } },
-            );
+            ).exec();
           }
           apart.remove();
         }
@@ -96,7 +96,6 @@ function removeLinkedDocuments(doc) {
         for (let j = 0; j < apartments.length; j++) {
           const a = apartments[j];
           a.isAvailable = true;
-          a.bookedBy = null;
           a.save();
         }
       }

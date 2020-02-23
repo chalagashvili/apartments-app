@@ -24,7 +24,6 @@ const { Schema } = mongoose;
 
 const apartmentSchema = new Schema({
   owner: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-  bookedBy: { type: Schema.Types.ObjectId, ref: 'User' },
   isAvailable: { type: Boolean, default: false },
   name: { type: String, required: true },
   description: { type: String, required: true },

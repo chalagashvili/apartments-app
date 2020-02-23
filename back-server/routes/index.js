@@ -5,6 +5,7 @@ require('../services/passport');
 const authControl = controllers.authController;
 const userControl = controllers.userController;
 const apartmentControl = controllers.apartmentController;
+const testControl = controllers.testController;
 const requireAuth = passport.authenticate('jwt', { session: false });
 const requireSignin = passport.authenticate('local', { session: false });
 
@@ -36,4 +37,9 @@ module.exports = (app) => {
   /* Admin routes */
   app.get('/users', requireAuth, userControl.getUsers);
   app.post('/users', requireAuth, userControl.addUser);
+
+  /* Testing ability to reset the DB */
+  if (process.env.NODE_ENV === 'test') {
+    app.delete('/testing/reset', testControl.resetDatabase);
+  }
 };

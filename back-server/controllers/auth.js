@@ -42,7 +42,7 @@ exports.signUp = (req, res, next) => {
   if (!allRoles.includes(role)) return validationError(res, 'Role is invalid');
   if (adminRole.includes(role)) return validationError(res, 'You cannot sign up as admin');
   if (!validator.isEmail(email)) return validationError(res, 'Email is invalid');
-  if (!validator.isLength(password, { min: 6 })) return validationError(res, 'Password length must be >= 6');
+  if (!validator.isLength(password, { min: 8 })) return validationError(res, 'Password length must be >= 8');
 
   const normalizedEmail = validator.normalizeEmail(email, { gmail_remove_dots: false });
   return UserSchema.findOne({ email: normalizedEmail }, (err, existingUser) => {
@@ -117,7 +117,7 @@ exports.forgotPassword = async (req, res, next) => {
 exports.resetPassword = (req, res, next) => {
   const { password, confirmPassword } = req.body;
   const { token } = req.params;
-  if (!validator.isLength(password, { min: 8 })) return validationError(res, 'Password length must be >= 6');
+  if (!validator.isLength(password, { min: 8 })) return validationError(res, 'Password length must be >= 8');
   if (password !== confirmPassword) return validationError(res, 'Passwords do not match');
   if (!validator.isHexadecimal(token)) return validationError(res, 'Invalid token, please retry');
 

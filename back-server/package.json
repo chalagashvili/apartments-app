@@ -5,12 +5,13 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "test": "jest",
-    "coverage": "jest --coverage",
+    "test": "cross-env NODE_ENV=test jest --verbose --runInBand",
+    "coverage": "jest --coverage --runInBand",
     "lint": "eslint \"**/*.js\"",
-    "start": "node index.js",
-    "start-dev": "nodemon index.js",
-    "cover": "eslint \"**/*.js\" && jest --coverage --coverageReporters=text-lcov | coveralls"
+    "start": "cross-env NODE_ENV=production node index.js",
+    "start:dev": "cross-env NODE_ENV=development nodemon index.js",
+    "cover": "eslint \"**/*.js\" && jest --coverage --coverageReporters=text-lcov | coveralls",
+    "start:test": "cross-env NODE_ENV=test node index.js"
   },
   "author": "Irakli Chalagashvili",
   "license": "ISC",
@@ -50,12 +51,17 @@
   "devDependencies": {
     "babel-eslint": "^10.0.3",
     "coveralls": "^3.0.9",
+    "cross-env": "^7.0.0",
     "eslint": "^6.8.0",
     "eslint-config-airbnb-base": "^14.0.0",
     "eslint-plugin-import": "^2.20.0",
     "husky": "^4.2.1",
     "istanbul": "^0.4.5",
     "jest": "^25.1.0",
-    "nodemon": "^2.0.2"
+    "nodemon": "^2.0.2",
+    "supertest": "^4.0.2"
+  },
+  "jest": {
+    "testEnvironment": "node"
   }
 }

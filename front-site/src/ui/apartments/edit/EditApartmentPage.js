@@ -7,7 +7,7 @@ import EditApartmentContainer from 'ui/apartments/edit/EditApartmentFormContaine
 const { Title } = Typography;
 
 const AddApartmentPage = () => (
-  <InternalPage className="AddApartmentPage">
+  <InternalPage className="AddApartmentPage" footerDisabled>
     <Title level={3} className="AddApartmentPage__title">
       <FormattedMessage id="app.editApartment" />
     </Title>

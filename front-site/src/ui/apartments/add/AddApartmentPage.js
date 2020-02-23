@@ -7,7 +7,7 @@ import AddApartmentContainer from 'ui/apartments/add/AddApartmentFormContainer';
 const { Title } = Typography;
 
 const AddApartmentPage = () => (
-  <InternalPage className="AddApartmentPage">
+  <InternalPage className="AddApartmentPage" footerDisabled>
     <Title level={3} className="AddApartmentPage__title">
       <FormattedMessage id="menu.addApartment" />
     </Title>

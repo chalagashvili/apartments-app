@@ -4,6 +4,10 @@ const srcPath = path.resolve(__dirname, 'src');
 module.exports = {
     "parser": "babel-eslint",
     "extends": "airbnb",
+    "globals": {
+        "cy": true,
+        "Cypress": true
+    },
     "rules": {
         "strict": 0,
         "react/jsx-filename-extension": [1, { "extensions": [".js", ".jsx"] }],

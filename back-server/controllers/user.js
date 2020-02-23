@@ -1,5 +1,6 @@
 /* eslint-disable no-underscore-dangle */
 /* eslint-disable no-param-reassign */
+const mongoose = require('mongoose');
 const validator = require('validator');
 const crypto = require('crypto');
 const { promisify } = require('util');
@@ -336,7 +337,6 @@ exports.bookApartment = async (req, res, next) => {
     if (apartment.isAvailable) {
       // Make apartment unavailable
       apartment.isAvailable = false;
-      apartment.bookedBy = userId;
       return apartment.save((saveErr, updatedApartment) => {
         if (saveErr) return next(err);
         updatedApartment.owner = undefined;
@@ -383,9 +383,10 @@ exports.unbookApartment = async (req, res, next) => {
     if (err) return next(err);
     // Check if apartment exists
     if (!apartment) return notFoundResponse(res, 'Apartment with given ID was not found');
-    if (apartment.bookedBy.toString() !== userId) return unauthorizedResponse(res, 'The apartment is not booked by the given user');
+    // Check that apartment is really booked by given user
+    const checkBookValid = toUpdateUser.bookings.map((b) => b.toString()).includes(apartmentId);
+    if (!checkBookValid) return unauthorizedResponse(res, 'The apartment is not booked by the given user');
     apartment.isAvailable = true;
-    apartment.bookedBy = null;
     return apartment.save((saveErr) => {
       if (saveErr) return next(err);
       // Remove apartment from bookings array of user
@@ -506,13 +507,12 @@ exports.updateApartment = async (req, res, next) => {
     // if changing availability of the apartment to TRUE
     // we should also remove it from client's bookings, if it exists
     if (isAvailable != null) {
-      if (toUpdate.isAvailable === false && isAvailable === true && toUpdate.bookedBy) {
-        await UserSchema.findByIdAndUpdate(
-          { _id: toUpdate.bookedBy }, { $pull: { bookings: apartmentId } },
+      if (toUpdate.isAvailable === false && isAvailable === true) {
+        await UserSchema.findOneAndUpdate(
+          { bookings: mongoose.Types.ObjectId(apartmentId) }, { $pull: { bookings: apartmentId } },
         );
       }
       toUpdate.isAvailable = isAvailable;
-      toUpdate.bookedBy = null;
     }
     await toUpdate.save();
     return successResponseWithData(res, ' Apartment has succesfully updated', toUpdate);
@@ -550,11 +550,16 @@ exports.deleteApartment = async (req, res, next) => {
       .includes(apartmentId);
     if (!hasOwnership && !adminRole.includes(req.user.role)) return unauthorizedResponse(res, 'Property ownership validation failed');
     // Check if apartment is already booked
-    if (!toDelete.isAvailable && toDelete.bookedBy) {
-      await UserSchema.findByIdAndUpdate(
-        { _id: toDelete.bookedBy }, { $pull: { bookings: apartmentId } },
+    if (!toDelete.isAvailable) {
+      // Remove from user's bookings
+      await UserSchema.findOneAndUpdate(
+        { bookings: mongoose.Types.ObjectId(apartmentId) }, { $pull: { bookings: apartmentId } },
       );
     }
+    await UserSchema.findOneAndUpdate(
+      { ownedApartments: mongoose.Types.ObjectId(apartmentId) },
+      { $pull: { ownedApartments: apartmentId } },
+    );
     await toDelete.deleteOne();
     return successResponse(res, ' Apartment has succesfully deleted');
   } catch (error) {
