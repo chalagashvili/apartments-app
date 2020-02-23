@@ -1,9 +1,4 @@
 .marker {
-    /* position: absolute;
-    top: 50%;
-    left: 50%; */
-    /* width: 18px;
-    height: 18px; */
     width: 50px;
     height: 28px;
     border-radius: 28px;
@@ -11,9 +6,4 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    /*user-select: none;
-    transform: translate(-50%, -50%);
-    &:hover {
-      z-index: 1;
-    } */
   }

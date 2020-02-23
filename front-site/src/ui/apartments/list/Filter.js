@@ -58,6 +58,7 @@ class Filter extends React.Component {
           <div style={{
           position: 'absolute',
           top: 50,
+          zIndex: 100,
           left: 20,
           backgroundColor: 'white',
           borderRadius: 5,

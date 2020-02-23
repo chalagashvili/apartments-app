@@ -23,7 +23,8 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = (dispatch, { history, match: { params: { userId } } }) => ({
   onDidMount: () => {
-    dispatch(fetchOwnedApartments(null, userId)).catch(err => message.error(err.message));
+    dispatch(fetchOwnedApartments({ page: 1, pageSize: 10 }, userId))
+      .catch(err => message.error(err.message));
   },
   onWillUnmount: () => {
     dispatch(removeFilter('ownedApartments', 'longitude'));
@@ -50,7 +51,7 @@ const mapDispatchToProps = (dispatch, { history, match: { params: { userId } } }
       dispatch(setFilter('ownedApartments', key, val));
     }
   },
-  onFilter: () => dispatch(fetchOwnedApartments(null, userId))
+  onFilter: () => dispatch(fetchOwnedApartments({ page: 1, pageSize: 10 }, userId))
     .catch(err => message.error(err.message)),
 });
 

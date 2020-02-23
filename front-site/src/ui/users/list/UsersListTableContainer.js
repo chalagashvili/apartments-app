@@ -19,13 +19,14 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = (dispatch, { history }) => ({
   onDidMount: () => {
-    dispatch(fetchUsers()).catch(err => message.error(err.message));
+    dispatch(fetchUsers({ page: 1, pageSize: 10 })).catch(err => message.error(err.message));
   },
   onEdit: (userId) => { history.push(ROUTE_EDIT_USER.replace(':userId', userId)); },
   onDelete: (userId) => {
     dispatch(sendDeleteUser(userId))
       .then(() => {
-        dispatch(fetchUsers()).catch(err => message.error(err.message));
+        dispatch(fetchUsers({ page: 1, pageSize: 10 }))
+          .catch(err => message.error(err.message));
         message.success('User has succesfully deleted');
       })
       .catch(err => message.error(err.message));
