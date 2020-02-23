@@ -1,11 +1,11 @@
 const authController = require('./auth');
 const userController = require('./user');
 const apartmentController = require('./apartment');
-const testController = require('./test');
+const testingController = require('./testing');
 
 module.exports = {
   authController,
   userController,
   apartmentController,
-  testController,
+  testingController,
 };
