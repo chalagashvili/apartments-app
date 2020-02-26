@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt-nodejs');
 const mongoosePaginate = require('mongoose-paginate-v2');
+const validator = require('validator');
 const Apartment = require('./apartment');
 
 const customLabels = {
@@ -24,7 +25,15 @@ mongoosePaginate.paginate.options = {
 const { Schema } = mongoose;
 
 const userSchema = new Schema({
-  email: { type: String, unique: true },
+  email: {
+    type: String,
+    unique: true,
+    validate: {
+      validator: validator.isEmail,
+      message: 'Email is invalid',
+      isAsync: false,
+    },
+  },
   role: { type: String, default: 'client', enum: ['client', 'realtor', 'admin'] },
   password: String,
   passwordResetToken: String,
@@ -33,6 +42,13 @@ const userSchema = new Schema({
   bookings: [{ type: Schema.Types.ObjectId, ref: 'Apartment' }],
   ownedApartments: [{ type: Schema.Types.ObjectId, ref: 'Apartment' }],
 }, { timestamps: true });
+
+// Pre hook for `findOneAndUpdate`
+// eslint-disable-next-line func-names
+userSchema.pre('findOneAndUpdate', function (next) {
+  this.options.runValidators = true;
+  next();
+});
 
 // Pre-save hook for hashing + salting with password
 // eslint-disable-next-line func-names

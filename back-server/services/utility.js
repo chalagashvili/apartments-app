@@ -26,7 +26,7 @@ exports.generatePassword = (length = 8) => {
   return retVal;
 };
 
-exports.validateObjectID = (id) => ObjectId.isValid(id);
+exports.convertToMongoId = (value) => ObjectId(value);
 
 exports.sendEmail = ({
   to, fromEmail, subject, text, fromName,

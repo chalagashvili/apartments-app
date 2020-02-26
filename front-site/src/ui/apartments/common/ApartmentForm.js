@@ -74,7 +74,7 @@ class ApartmentForm extends React.Component {
           value: numberOfRooms,
           errors: null,
         },
-        location: {
+        loc: {
           value: loc && loc.coordinates && `${loc.coordinates[1]},${loc.coordinates[0]}`,
           errors: null,
         },
@@ -92,7 +92,7 @@ class ApartmentForm extends React.Component {
     if (this.state.currentMarkerCoordinates !== nextState.currentMarkerCoordinates) {
       const { longitude, latitude } = nextState.currentMarkerCoordinates;
       setFieldsValue({
-        location: `${latitude.toFixed(6)},${longitude.toFixed(6)}`,
+        loc: `${latitude.toFixed(6)},${longitude.toFixed(6)}`,
       });
     }
   }
@@ -123,12 +123,14 @@ class ApartmentForm extends React.Component {
     const { apartment, form, onSubmit } = this.props;
     form.validateFields((err, values) => {
       if (!err) {
-        const coords = values.location.split(',');
+        const coords = values.loc.split(',');
         // eslint-disable-next-line no-param-reassign
-        values.location = {
+        values.loc = {
           type: 'Point',
           coordinates: [parseFloat(coords[1]), parseFloat(coords[0])],
         };
+        // eslint-disable-next-line no-param-reassign
+        values.isAvailable = !!values.isAvailable;
         onSubmit(values, apartment._id);
       }
     });
@@ -173,7 +175,7 @@ class ApartmentForm extends React.Component {
     const roomsError = this.generateError('numberOfRooms');
     const descriptionError = this.generateError('description');
     const availableError = this.generateError('isAvailable');
-    const locationError = this.generateError('location');
+    const locationError = this.generateError('loc');
     const renderDeleteButton = mode === EDIT_MODE ? (
       <Popconfirm
         title="Are you sure delete this apartment?"
@@ -267,7 +269,7 @@ class ApartmentForm extends React.Component {
               validateStatus={locationError ? 'error' : ''}
               help={locationError || ''}
             >
-              {getFieldDecorator('location', {
+              {getFieldDecorator('loc', {
               rules: [{ required: true, whitespace: false, message: 'app.inputEmail' },
               { pattern: coordinatesRegexPatter, message: 'app.validCoordinates' }],
             })(<Input />)}

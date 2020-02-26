@@ -36,7 +36,7 @@ exports.validationError = (res, msg) => {
     ok: 0,
     error: msg,
   };
-  return res.status(400).json(resData);
+  return res.status(422).json(resData);
 };
 
 exports.validationErrorWithData = (res, msg, data) => {
@@ -45,7 +45,7 @@ exports.validationErrorWithData = (res, msg, data) => {
     error: msg,
     payload: data,
   };
-  return res.status(400).json(resData);
+  return res.status(422).json(resData);
 };
 
 exports.unauthorizedResponse = (res, msg) => {

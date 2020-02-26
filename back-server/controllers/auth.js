@@ -1,18 +1,12 @@
 /* eslint-disable no-param-reassign */
 const validator = require('validator');
-const crypto = require('crypto');
-const { promisify } = require('util');
 const utils = require('../services/utility');
 const {
-  errorResponse,
   validationError,
   successResponse,
   successResponseWithData,
 } = require('../services/apiResponse');
 const { allRoles, adminRole } = require('../services/const');
-
-
-const randomBytesAsync = promisify(crypto.randomBytes);
 
 const UserSchema = require('../models').userSchema;
 
@@ -65,49 +59,6 @@ exports.signUp = (req, res, next) => {
       });
     });
   });
-};
-
-/**
- * POST /auth/forgotPassword
- * Generate a random token, then the send user an email with a reset link.
- */
-exports.forgotPassword = async (req, res, next) => {
-  let { email } = req.body;
-  if (!validator.isEmail(email)) return validationError(res, 'Please provide valid email address');
-  email = validator.normalizeEmail(req.body.email, { gmail_remove_dots: false });
-
-  try {
-    const createRandomToken = await randomBytesAsync(16);
-    const token = createRandomToken.toString('hex');
-
-    return UserSchema
-      .findOne({ email: req.body.email })
-      .then((user) => {
-        if (!user) {
-          return validationError(res, 'No user found associated with the given email');
-        }
-        user.passwordResetToken = token;
-        user.passwordResetExpires = Date.now() + 3600000; // 1 hour
-        return user.save((err) => {
-          if (err) return next(err);
-          const mailOptions = {
-            to: user.email,
-            fromEmail: 'no-reply@irakli.com',
-            fromName: 'Estate Company',
-            subject: 'Reset your password on Iraklis Assignment',
-            text: `You are receiving this email because you (or someone else) have requested the reset of the password for your account.\n\n
-              Please click on the following link, or paste this into your browser to complete the process:\n\n
-              http://${process.env.APP_URL}/reset/${token}\n\n
-              If you did not request this, please ignore this email and your password will remain unchanged.\n`,
-          };
-          return utils.sendEmail(mailOptions)
-            .then(() => successResponse(res, `An e-mail has been sent to ${user.email} with further instructions.`))
-            .catch(() => errorResponse(res, 'Password reset token has been generated but could not send an email'));
-        });
-      });
-  } catch (error) {
-    return next(error);
-  }
 };
 
 /**

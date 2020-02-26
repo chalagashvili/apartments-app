@@ -24,13 +24,12 @@ const { Schema } = mongoose;
 
 const apartmentSchema = new Schema({
   owner: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-  isAvailable: { type: Boolean, default: false },
+  isAvailable: { type: Boolean, default: false, required: true },
   name: { type: String, required: true },
   description: { type: String, required: true },
   floorAreaSize: { type: Number, required: true, min: 0 },
   pricePerMonth: { type: Number, required: true, min: 0 },
   numberOfRooms: { type: Int32, required: true, min: 0 },
-  imageUrl: { type: String },
   loc: {
     type: {
       type: String,
@@ -43,6 +42,13 @@ const apartmentSchema = new Schema({
     },
   },
 }, { timestamps: true });
+
+// Pre hook for `findOneAndUpdate`
+// eslint-disable-next-line func-names
+apartmentSchema.pre('findOneAndUpdate', function (next) {
+  this.options.runValidators = true;
+  next();
+});
 
 apartmentSchema.index({ loc: '2dsphere' });
 
