@@ -91,7 +91,7 @@ userSchema.post('deleteOne', { document: true, query: false }, removeLinkedDocum
 // Apply pagination plugin to userSchema
 userSchema.plugin(mongoosePaginate);
 // Apply the uniqueValidator plugin to userSchema.
-userSchema.plugin(uniqueValidator);
+userSchema.plugin(uniqueValidator, { message: 'Email address is already used.' });
 const user = mongoose.model('User', userSchema);
 
 function removeLinkedDocuments(doc) {

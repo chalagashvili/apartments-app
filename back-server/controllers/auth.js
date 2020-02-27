@@ -27,13 +27,10 @@ exports.signIn = (req, res) => successResponseWithData(res, 'Sign in successfull
   Perform signup operation with email and password
 */
 
-exports.signUp = (req, res, next) => {
+exports.signUp = (req, res) => {
   const user = new UserSchema(req.body);
   return user.save((err, savedUser) => {
-    if (err) {
-      if (err.errors) return errorResponse(res, 'Email address already used');
-      return next(err);
-    }
+    if (err) return errorResponse(res, err.message);
     return successResponseWithData(res, 'Sign up successfull', {
       token: utils.tokenForUser(user),
       email: user.email,

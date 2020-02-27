@@ -6,7 +6,6 @@ const { promisify } = require('util');
 const utils = require('../services/utility');
 const {
   errorResponse,
-  validationError,
   successResponse,
   notFoundResponse,
   successResponseWithData,
@@ -42,7 +41,7 @@ exports.deleteUser = async (req, res, next) => {
  * Add user account.
  */
 
-exports.addUser = async (req, res, next) => {
+exports.addUser = async (req, res) => {
   const randomTokenBytes = await randomBytesAsync(16);
   const token = randomTokenBytes.toString('hex');
   const newUser = new UserSchema({
@@ -51,13 +50,8 @@ exports.addUser = async (req, res, next) => {
     passwordResetToken: token,
     passwordResetExpires: Date.now() + 3600000, // 1 hour
   });
-  return newUser.save((saveErr, user) => {
-    if (saveErr) {
-      if (saveErr.code === 11000) {
-        return validationError(res, 'Email address is already in use!');
-      }
-      return next(saveErr);
-    }
+  return newUser.save((err, user) => {
+    if (err) return errorResponse(res, err.message);
     const mailOptions = {
       to: newUser.email,
       fromEmail: 'no-reply@irakli.com',
