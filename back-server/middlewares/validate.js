@@ -10,11 +10,13 @@ const validations = {
     if (adminRole.includes(role)) {
       throw new Error('You cannot sign up as admin');
     }
+    return true;
   }),
   editRole: body('role').custom((role, { req }) => {
     if (!adminRole.includes(req.user.role)) {
       throw new Error('Only admin can make other person admin');
     }
+    return true;
   }),
 };
 
@@ -26,11 +28,11 @@ const validate = (method) => {
     case 'userIdValidation': {
       return [validations.userId];
     }
-    case 'putUser': {
+    case 'editUser': {
       return [validations.userId, validations.password, validations.editRole];
     }
     case 'signUp': {
-      return [validations.password, validations.role];
+      return [validations.password, validations.signupRole];
     }
     default: return [];
   }

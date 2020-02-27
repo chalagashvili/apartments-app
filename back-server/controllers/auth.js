@@ -2,6 +2,7 @@
 /* eslint-disable no-param-reassign */
 const utils = require('../services/utility');
 const {
+  errorResponse,
   validationError,
   successResponse,
   successResponseWithData,
@@ -28,8 +29,11 @@ exports.signIn = (req, res) => successResponseWithData(res, 'Sign in successfull
 
 exports.signUp = (req, res, next) => {
   const user = new UserSchema(req.body);
-  return user.save((saveErr, savedUser) => {
-    if (saveErr) next(saveErr);
+  return user.save((err, savedUser) => {
+    if (err) {
+      if (err.errors) return errorResponse(res, 'Email address already used');
+      return next(err);
+    }
     return successResponseWithData(res, 'Sign up successfull', {
       token: utils.tokenForUser(user),
       email: user.email,
