@@ -9,13 +9,12 @@ const {
   validationError,
   successResponse,
   notFoundResponse,
-  unauthorizedResponse,
   successResponseWithData,
 } = require('../services/apiResponse');
 const { cleanUpAfterRoleChange } = require('../models/user');
 
 const {
-  adminRole, nonAdminRole, nonClientRole,
+  nonAdminRole,
 } = require('../services/const');
 
 const UserSchema = require('../models').userSchema;
@@ -84,23 +83,16 @@ exports.addUser = async (req, res, next) => {
  */
 
 exports.editUser = async (req, res, next) => {
-  const { user, callerIsAdmin } = res.locals;
-  const {
-    password, role,
-  } = req.body;
-  /* Check if changing role */
-  if (user.role !== role && callerIsAdmin) {
+  const { user } = res.locals;
+  const { password, role } = req.body;
+  /* Check if changing role, then we need to do some cleanup */
+  if (user.role !== role) {
     cleanUpAfterRoleChange(user);
     user.bookings = [];
     user.ownedApartments = [];
   }
   const saveCb = (saveErr) => {
-    if (saveErr) {
-      if (saveErr.code === 11000) {
-        return validationError(res, 'Email address is already in use');
-      }
-      return next(saveErr);
-    }
+    if (saveErr) return next(saveErr);
     return successResponseWithData(res, 'User updated successfully', {
       data: [{
         name: user.name,
@@ -108,15 +100,15 @@ exports.editUser = async (req, res, next) => {
         email: user.email,
         createdAt: user.createdAt,
         _id: user._id,
-      },
-      ],
+      }],
     });
   };
-  /* Check if changing password then fire .save to salt and hash new password */
+  /* Check if changing password then fire .save to salt and
+  hash new password instead of regular update */
   if (password) {
     return user.save(req.body, saveCb);
   }
-  return UserSchema.findByIdAndUpdate({ _id: user._id }, req.body, saveCb);
+  return UserSchema.findByIdAndUpdate({ _id: user._id }, req.body, { runValidators: true, context: 'query' }, saveCb);
 };
 
 /*
@@ -168,70 +160,58 @@ exports.getUsers = async (req, res, next) => {
 */
 
 exports.getBookings = (req, res, next) => {
-  const { id: userId } = req.params;
-  const { _id: callerId } = req.user;
-  // Check that id is passed correctly and its a valid mongo ID
-  if (!userId || !utils.validateObjectID(userId)) return validationError(res, 'user ID is not a valid mongo ObjectId');
-  // Check if 3rd person's bookings are accessed
-  if (userId !== callerId.toString()) {
-    // Check if Admin is performing booking for user, otherwise return error
-    if (!adminRole.includes(req.user.role)) return unauthorizedResponse(res, 'You don\'t have enough permissions');
-  }
-  return UserSchema.findById({ _id: userId }, (error, user) => {
-    if (error) return next(error);
-    if (!user) return notFoundResponse(res, 'User was not found with following ID');
-    const {
-      page = 1, pageSize = 10,
-      floorAreaSizeFrom, floorAreaSizeTo,
-      pricePerMonthFrom, pricePerMonthTo,
-      numberOfRoomsFrom, numberOfRoomsTo,
-      longitude, latitude, radius,
-      isAvailable,
-    } = req.query;
-    const filterQuery = { _id: { $in: user.bookings } };
-    if (floorAreaSizeFrom || floorAreaSizeTo) {
-      filterQuery.floorAreaSize = {
-        ...(floorAreaSizeFrom && { $gte: floorAreaSizeFrom }),
-        ...(floorAreaSizeTo && { $lte: floorAreaSizeTo }),
-      };
-    }
-    if (pricePerMonthFrom || pricePerMonthTo) {
-      filterQuery.pricePerMonth = {
-        ...(pricePerMonthFrom && { $gte: pricePerMonthFrom }),
-        ...(pricePerMonthTo && { $lte: pricePerMonthTo }),
-      };
-    }
-    if (numberOfRoomsFrom || numberOfRoomsTo) {
-      filterQuery.numberOfRooms = {
-        ...(numberOfRoomsFrom && { $gte: numberOfRoomsFrom }),
-        ...(numberOfRoomsTo && { $lte: numberOfRoomsTo }),
-      };
-    }
-    if (longitude && latitude && radius) {
-      filterQuery.loc = {
-        $geoWithin: { $centerSphere: [[longitude, latitude], radius] },
-      };
-    }
-    if (isAvailable != null) {
-      filterQuery.isAvailable = isAvailable;
-    }
-    const options = {
-      sort: { createdAt: -1 },
-      page,
-      populate: { path: 'owner', select: 'name email id' },
-      limit: pageSize,
+  const { user } = res.locals;
+  const {
+    page = 1, pageSize = 10,
+    floorAreaSizeFrom, floorAreaSizeTo,
+    pricePerMonthFrom, pricePerMonthTo,
+    numberOfRoomsFrom, numberOfRoomsTo,
+    longitude, latitude, radius,
+    isAvailable,
+  } = req.query;
+  const filterQuery = { _id: { $in: user.bookings } };
+  if (floorAreaSizeFrom || floorAreaSizeTo) {
+    filterQuery.floorAreaSize = {
+      ...(floorAreaSizeFrom && { $gte: floorAreaSizeFrom }),
+      ...(floorAreaSizeTo && { $lte: floorAreaSizeTo }),
     };
-    return ApartmentSchema.paginate(
-      filterQuery,
-      options,
-      (err, results) => {
-        if (err) return next(err);
-        // eslint-disable-next-line no-param-reassign
-        results.metadata.page = Math.min(results.metadata.page, results.metadata.lastPage);
-        return successResponseWithData(res, 'Bookings fetched successfully', results);
-      },
-    );
-  });
+  }
+  if (pricePerMonthFrom || pricePerMonthTo) {
+    filterQuery.pricePerMonth = {
+      ...(pricePerMonthFrom && { $gte: pricePerMonthFrom }),
+      ...(pricePerMonthTo && { $lte: pricePerMonthTo }),
+    };
+  }
+  if (numberOfRoomsFrom || numberOfRoomsTo) {
+    filterQuery.numberOfRooms = {
+      ...(numberOfRoomsFrom && { $gte: numberOfRoomsFrom }),
+      ...(numberOfRoomsTo && { $lte: numberOfRoomsTo }),
+    };
+  }
+  if (longitude && latitude && radius) {
+    filterQuery.loc = {
+      $geoWithin: { $centerSphere: [[longitude, latitude], radius] },
+    };
+  }
+  if (isAvailable != null) {
+    filterQuery.isAvailable = isAvailable;
+  }
+  const options = {
+    sort: { createdAt: -1 },
+    page,
+    populate: { path: 'owner', select: 'name email id' },
+    limit: pageSize,
+  };
+  return ApartmentSchema.paginate(
+    filterQuery,
+    options,
+    (err, results) => {
+      if (err) return next(err);
+      // eslint-disable-next-line no-param-reassign
+      results.metadata.page = Math.min(results.metadata.page, results.metadata.lastPage);
+      return successResponseWithData(res, 'Bookings fetched successfully', results);
+    },
+  );
 };
 
 /*
@@ -240,48 +220,18 @@ exports.getBookings = (req, res, next) => {
 */
 
 exports.bookApartment = async (req, res, next) => {
-  const { id: userId } = req.params;
-  const { _id: callerId } = req.user;
-  // Check that id is passed correctly and its a valid mongo ID
-  if (!userId || !utils.validateObjectID(userId)) return validationError(res, 'user ID is not a valid mongo ObjectId');
-  // Check if 3rd person's bookings are accessed
-  if (userId !== callerId.toString()) {
-    // Check if Admin is performing booking for user, otherwise return error
-    if (!adminRole.includes(req.user.role)) return unauthorizedResponse(res, 'You don\'t have enough permissions');
+  const { user, apartment } = res.locals.user;
+  try {
+    apartment.isAvailable = false;
+    await apartment.save();
+    await UserSchema.findByIdAndUpdate(
+      user._id, { $push: { bookings: apartment._id } },
+    );
+    apartment.owner = undefined;
+    return successResponseWithData(res, 'Apartment has booked succesfully', { data: { apartment } });
+  } catch (error) {
+    return next(error);
   }
-  const { apartmentId } = req.params;
-  // Check if received apartmentId is valid mongo ID
-  if (!utils.validateObjectID(apartmentId)) return validationError(res, 'apartment ID is not a mongo ObjectId');
-  const toUpdateUser = await UserSchema.findById(userId);
-  if (!toUpdateUser) return notFoundResponse(res, 'User with given ID was not found');
-  if (nonClientRole.includes(toUpdateUser.role)) return unauthorizedResponse(res, 'User with ID has not client role');
-  // Check that apartment is available
-  return ApartmentSchema.findById({ _id: apartmentId }, (err, apartment) => {
-    if (err) return next(err);
-    // Check if apartment exists
-    if (!apartment) return notFoundResponse(res, 'Apartment with given ID was not found');
-    if (apartment.isAvailable) {
-      // Make apartment unavailable
-      apartment.isAvailable = false;
-      return apartment.save((saveErr, updatedApartment) => {
-        if (saveErr) return next(err);
-        updatedApartment.owner = undefined;
-        // Add apartment is bookings array of user
-        return UserSchema.findByIdAndUpdate(
-          userId, { $push: { bookings: apartmentId } }, { new: true },
-          (updateErr) => {
-            if (updateErr) return next(err);
-            return successResponseWithData(res, 'Apartment has booked succesfully', {
-              data: {
-                apartment: updatedApartment,
-              },
-            });
-          },
-        );
-      });
-    }
-    return validationError(res, 'The apartment you are trying to book is already booked');
-  });
 };
 
 /*
@@ -290,45 +240,15 @@ exports.bookApartment = async (req, res, next) => {
 */
 
 exports.unbookApartment = async (req, res, next) => {
-  const { id: userId } = req.params;
-  const { _id: callerId } = req.user;
-  // Check that id is passed correctly and its a valid mongo ID
-  if (!userId || !utils.validateObjectID(userId)) return validationError(res, 'ID is not a valid mongo ObjectId');
-  // Check if 3rd person's bookings are accessed
-  if (userId !== callerId.toString()) {
-    // Check if Admin is performing operation, otherwise return error
-    if (!adminRole.includes(req.user.role)) return unauthorizedResponse(res, 'You don\'t have enough permissions');
-  }
-  const { apartmentId } = req.params;
-  // Check if received apartmentId is valid mongo ID
-  if (!utils.validateObjectID(apartmentId)) return validationError(res, 'ID is not a mongo ObjectId');
-  const toUpdateUser = await UserSchema.findById(userId);
-  if (!toUpdateUser) return notFoundResponse(res, 'User with given ID was not found');
-  if (nonClientRole.includes(toUpdateUser.role)) return unauthorizedResponse(res, 'User with ID has not client role');
-  return ApartmentSchema.findById({ _id: apartmentId }, (err, apartment) => {
-    if (err) return next(err);
-    // Check if apartment exists
-    if (!apartment) return notFoundResponse(res, 'Apartment with given ID was not found');
-    // Check that apartment is really booked by given user
-    const checkBookValid = toUpdateUser.bookings.map((b) => b.toString()).includes(apartmentId);
-    if (!checkBookValid) return unauthorizedResponse(res, 'The apartment is not booked by the given user');
+  const { user, apartment } = res.locals;
+  try {
     apartment.isAvailable = true;
-    return apartment.save((saveErr) => {
-      if (saveErr) return next(err);
-      // Remove apartment from bookings array of user
-      return UserSchema.findByIdAndUpdate(
-        userId, { $pull: { bookings: apartmentId } }, { new: true },
-        (updateErr) => {
-          if (updateErr) return next(err);
-          return successResponseWithData(res, 'Apartment has unbooked succesfully', {
-            data: {
-              apartmentId,
-            },
-          });
-        },
-      );
-    });
-  });
+    await apartment.save();
+    await UserSchema.findByIdAndUpdate(user._id, { $pull: { bookings: apartment._id } });
+    return successResponseWithData(res, 'Apartment has unbooked succesfully', { data: { apartmentId: apartment._id } });
+  } catch (error) {
+    return next(error);
+  }
 };
 
 /*

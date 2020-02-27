@@ -18,7 +18,6 @@ exports.verifyAccess = (allowedRoles) => (req, res, next) => {
     if (!adminRole.includes(callerRole)) {
       return unauthorizedResponse(res, notEnoughPermissionsErrorText);
     }
-    res.locals.callerIsAdmin = true;
   }
   // Check if user's role is included in allowed roles
   if (!allowedRoles.includes(callerRole)) {

@@ -9,10 +9,12 @@ const testingControl = controllers.testingController;
 const requireAuth = passport.authenticate('jwt', { session: false });
 const requireSignin = passport.authenticate('local', { session: false });
 const {
-  nonClientRole, realtorOnlyRole, adminRole, nonAdminRole,
+  nonClientRole, realtorOnlyRole, adminRole, nonAdminRole, nonRealtorRole,
+  clientOnlyRole,
 } = require('../services/const');
-const { findUserWithRole } = require('../middlewares/findUserWithRole');
-const { findApartmentWithRealtor } = require('../middlewares/findApartmentWithRealtor');
+const {
+  findUserWithRole, findApartmentWithRealtor, findApartmentWithClient, findAvailableApartment,
+} = require('../middlewares/finderHelpers');
 const { validate } = require('../middlewares/validate');
 
 const { validateResults } = require('../middlewares/validateResults');
@@ -25,17 +27,21 @@ module.exports = (app) => {
   app.get('/auth/me', requireAuth, authControl.getPersonalInfo);
 
   /* Client routes */
-  app.get('/users/:id/bookings', requireAuth, userControl.getBookings);
-  app.post('/users/:id/bookings/:apartmentId', requireAuth, userControl.bookApartment);
-  app.delete('/users/:id/bookings/:apartmentId', requireAuth, userControl.unbookApartment);
-  app.get('/apartments', requireAuth, apartmentControl.getAvailableApartments);
+  app.get('/users/:id/bookings', [requireAuth, verifyAccess(nonRealtorRole)], userControl.getBookings);
+  app.post('/users/:id/bookings/:apartmentId', [requireAuth, validate('deleteBooking'),
+    validateResults, verifyAccess(nonRealtorRole), findUserWithRole(clientOnlyRole)],
+  findAvailableApartment, userControl.bookApartment);
+  app.delete('/users/:userId/bookings/:apartmentId', [requireAuth, validate('deleteBooking'),
+    validateResults, verifyAccess(nonRealtorRole), findUserWithRole(clientOnlyRole),
+    findApartmentWithClient],
+  userControl.unbookApartment);
+  app.get('/apartments', [requireAuth, verifyAccess(nonRealtorRole)], apartmentControl.getAvailableApartments);
 
   /* Realtor routes */
   app.get('/users/:userId/apartments', [requireAuth, validate('getWithUserId'),
     validateResults, verifyAccess(nonClientRole)], userControl.getOwnedApartments);
-  app.get('/users/:userId/apartments/:apartmentId', [requireAuth, validate('getApartment'),
-    validateResults, verifyAccess(nonClientRole)],
-  userControl.getSingleApartment);
+  app.get('/users/:userId/apartments/:apartmentId', [requireAuth, verifyAccess(nonClientRole)],
+    userControl.getSingleApartment);
   app.post('/users/:userId/apartments', [requireAuth, validate('postApartment'),
     validateResults, verifyAccess(nonClientRole)],
   userControl.addApartment);

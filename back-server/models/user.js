@@ -2,7 +2,9 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcrypt-nodejs');
 const mongoosePaginate = require('mongoose-paginate-v2');
 const validator = require('validator');
+const uniqueValidator = require('mongoose-unique-validator');
 const Apartment = require('./apartment');
+const { allRoles } = require('../services/const');
 
 const customLabels = {
   totalDocs: 'totalItems',
@@ -28,13 +30,14 @@ const userSchema = new Schema({
   email: {
     type: String,
     unique: true,
+    uniqueCaseInsensitive: true,
     validate: {
       validator: validator.isEmail,
       message: 'Email is invalid',
       isAsync: false,
     },
   },
-  role: { type: String, default: 'client', enum: ['client', 'realtor', 'admin'] },
+  role: { type: String, default: 'client', enum: allRoles },
   password: String,
   passwordResetToken: String,
   passwordResetExpires: Date,
@@ -85,7 +88,10 @@ const cleanUpAfterRoleChange = (doc) => removeLinkedDocuments(doc);
 // eslint-disable-next-line no-use-before-define
 userSchema.post('deleteOne', { document: true, query: false }, removeLinkedDocuments);
 
+// Apply pagination plugin to userSchema
 userSchema.plugin(mongoosePaginate);
+// Apply the uniqueValidator plugin to userSchema.
+userSchema.plugin(uniqueValidator);
 const user = mongoose.model('User', userSchema);
 
 function removeLinkedDocuments(doc) {

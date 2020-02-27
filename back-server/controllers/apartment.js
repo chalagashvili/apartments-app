@@ -1,10 +1,6 @@
 const {
   successResponseWithData,
-  unauthorizedResponse,
 } = require('../services/apiResponse');
-const {
-  nonRealtorRole,
-} = require('../services/const');
 const ApartmentSchema = require('../models').apartmentSchema;
 
 /*
@@ -13,8 +9,6 @@ const ApartmentSchema = require('../models').apartmentSchema;
  */
 
 exports.getAvailableApartments = async (req, res, next) => {
-  // Make sure realtors cant access this API
-  if (!nonRealtorRole.includes(req.user.role)) return unauthorizedResponse(res, 'You don\'t have enough permissions');
   const {
     page = 1, pageSize = 10,
     floorAreaSizeFrom, floorAreaSizeTo,
