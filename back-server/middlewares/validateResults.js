@@ -1,7 +1,5 @@
 const { matchedData, validationResult } = require('express-validator');
-const {
-  validationError,
-} = require('../services/apiResponse');
+const { validationError } = require('../services/apiResponse');
 
 const validateResults = (req, res, next) => {
   const errors = validationResult(req);

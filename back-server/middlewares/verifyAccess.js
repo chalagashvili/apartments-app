@@ -1,9 +1,5 @@
-const {
-  unauthorizedResponse,
-} = require('../services/apiResponse');
-const {
-  adminRole, notEnoughPermissionsErrorText,
-} = require('../services/const');
+const { unauthorizedResponse } = require('../services/apiResponse');
+const { adminRole, notEnoughPermissionsErrorText } = require('../services/const');
 
 /*
   Middleware for authorization verification

@@ -10,12 +10,9 @@ const {
   notFoundResponse,
   successResponseWithData,
 } = require('../services/apiResponse');
+const { findFilteredApartments } = require('./apartment');
 const { cleanUpAfterRoleChange } = require('../models/user');
-
-const {
-  nonAdminRole,
-} = require('../services/const');
-
+const { regularRoles } = require('../services/const');
 const UserSchema = require('../models').userSchema;
 const ApartmentSchema = require('../models').apartmentSchema;
 
@@ -118,8 +115,7 @@ exports.getUser = async (req, res) => {
   return successResponseWithData(res, 'User fetched successfully', {
     data: [{
       name, role, email, createdAt, _id,
-    },
-    ],
+    }],
   });
 };
 
@@ -137,7 +133,7 @@ exports.getUsers = async (req, res, next) => {
     limit: pageSize,
   };
   return UserSchema.paginate(
-    { role: { $in: nonAdminRole } },
+    { role: { $in: regularRoles } },
     options,
     (err, results) => {
       if (err) return next(err);
@@ -155,57 +151,8 @@ exports.getUsers = async (req, res, next) => {
 
 exports.getBookings = (req, res, next) => {
   const { user } = res.locals;
-  const {
-    page = 1, pageSize = 10,
-    floorAreaSizeFrom, floorAreaSizeTo,
-    pricePerMonthFrom, pricePerMonthTo,
-    numberOfRoomsFrom, numberOfRoomsTo,
-    longitude, latitude, radius,
-    isAvailable,
-  } = req.query;
-  const filterQuery = { _id: { $in: user.bookings } };
-  if (floorAreaSizeFrom || floorAreaSizeTo) {
-    filterQuery.floorAreaSize = {
-      ...(floorAreaSizeFrom && { $gte: floorAreaSizeFrom }),
-      ...(floorAreaSizeTo && { $lte: floorAreaSizeTo }),
-    };
-  }
-  if (pricePerMonthFrom || pricePerMonthTo) {
-    filterQuery.pricePerMonth = {
-      ...(pricePerMonthFrom && { $gte: pricePerMonthFrom }),
-      ...(pricePerMonthTo && { $lte: pricePerMonthTo }),
-    };
-  }
-  if (numberOfRoomsFrom || numberOfRoomsTo) {
-    filterQuery.numberOfRooms = {
-      ...(numberOfRoomsFrom && { $gte: numberOfRoomsFrom }),
-      ...(numberOfRoomsTo && { $lte: numberOfRoomsTo }),
-    };
-  }
-  if (longitude && latitude && radius) {
-    filterQuery.loc = {
-      $geoWithin: { $centerSphere: [[longitude, latitude], radius] },
-    };
-  }
-  if (isAvailable != null) {
-    filterQuery.isAvailable = isAvailable;
-  }
-  const options = {
-    sort: { createdAt: -1 },
-    page,
-    populate: { path: 'owner', select: 'name email id' },
-    limit: pageSize,
-  };
-  return ApartmentSchema.paginate(
-    filterQuery,
-    options,
-    (err, results) => {
-      if (err) return next(err);
-      // eslint-disable-next-line no-param-reassign
-      results.metadata.page = Math.min(results.metadata.page, results.metadata.lastPage);
-      return successResponseWithData(res, 'Bookings fetched successfully', results);
-    },
-  );
+  res.locals.filterQuery = { _id: { $in: user.bookings } };
+  return findFilteredApartments(req, res, next);
 };
 
 /*
@@ -218,9 +165,7 @@ exports.bookApartment = async (req, res, next) => {
   try {
     apartment.isAvailable = false;
     await apartment.save();
-    await UserSchema.findByIdAndUpdate(
-      user._id, { $push: { bookings: apartment._id } },
-    );
+    await UserSchema.findByIdAndUpdate(user._id, { $push: { bookings: apartment._id } });
     apartment.owner = undefined;
     return successResponseWithData(res, 'Apartment has booked succesfully', { data: { apartment } });
   } catch (error) {
@@ -255,21 +200,15 @@ exports.addApartment = async (req, res, next) => {
   const toUpdate = res.locals.user;
   // Create a new apartment
   const newApartment = new ApartmentSchema({ ...req.body, owner: toUpdate._id });
-  // Assign this apartment to the realtor
-  return newApartment.save((err, apartment) => {
-    if (err) return next(err);
-    return UserSchema.findByIdAndUpdate(
-      userId, { $push: { ownedApartments: apartment._id } }, { new: true },
-      (updateErr) => {
-        if (updateErr) return next(err);
-        return successResponseWithData(res, 'Apartment has added succesfully', {
-          data: {
-            apartment,
-          },
-        });
-      },
+  try {
+    const apartment = await newApartment.save();
+    await UserSchema.findByIdAndUpdate(
+      userId, { $push: { ownedApartments: apartment._id } },
     );
-  });
+    return successResponseWithData(res, 'Apartment has added succesfully', { data: { apartment } });
+  } catch (error) {
+    return next(error);
+  }
 };
 
 /*
@@ -329,58 +268,8 @@ exports.deleteApartment = async (req, res, next) => {
  */
 
 exports.getOwnedApartments = async (req, res, next) => {
-  const { userId } = req.params;
-  const {
-    page = 1, pageSize = 10,
-    floorAreaSizeFrom, floorAreaSizeTo,
-    pricePerMonthFrom, pricePerMonthTo,
-    numberOfRoomsFrom, numberOfRoomsTo,
-    longitude, latitude, radius,
-    isAvailable,
-  } = req.query;
-  const filterQuery = { owner: userId };
-  if (floorAreaSizeFrom || floorAreaSizeTo) {
-    filterQuery.floorAreaSize = {
-      ...(floorAreaSizeFrom && { $gte: floorAreaSizeFrom }),
-      ...(floorAreaSizeTo && { $lte: floorAreaSizeTo }),
-    };
-  }
-  if (pricePerMonthFrom || pricePerMonthTo) {
-    filterQuery.pricePerMonth = {
-      ...(pricePerMonthFrom && { $gte: pricePerMonthFrom }),
-      ...(pricePerMonthTo && { $lte: pricePerMonthTo }),
-    };
-  }
-  if (numberOfRoomsFrom || numberOfRoomsTo) {
-    filterQuery.numberOfRooms = {
-      ...(numberOfRoomsFrom && { $gte: numberOfRoomsFrom }),
-      ...(numberOfRoomsTo && { $lte: numberOfRoomsTo }),
-    };
-  }
-  if (longitude && latitude && radius) {
-    filterQuery.loc = {
-      $geoWithin: { $centerSphere: [[longitude, latitude], radius] },
-    };
-  }
-  if (isAvailable != null) {
-    filterQuery.isAvailable = isAvailable;
-  }
-  const options = {
-    sort: { createdAt: -1 },
-    populate: { path: 'owner', select: 'name email id' },
-    page,
-    limit: pageSize,
-  };
-  return ApartmentSchema.paginate(
-    filterQuery,
-    options,
-    (err, results) => {
-      if (err) return next(err);
-      // eslint-disable-next-line no-param-reassign
-      results.metadata.page = Math.min(results.metadata.page, results.metadata.lastPage);
-      return successResponseWithData(res, 'Apartments fetched successfully', results);
-    },
-  );
+  res.locals.filterQuery = { owner: req.params.userId };
+  return findFilteredApartments(req, res, next);
 };
 
 /*

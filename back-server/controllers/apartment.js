@@ -1,14 +1,8 @@
-const {
-  successResponseWithData,
-} = require('../services/apiResponse');
+const { successResponseWithData } = require('../services/apiResponse');
 const ApartmentSchema = require('../models').apartmentSchema;
 
-/*
- * GET /apartments'
- * Fetch all available apartments
- */
-
-exports.getAvailableApartments = async (req, res, next) => {
+exports.findFilteredApartments = (req, res, next) => {
+  const { filterQuery } = res.locals;
   const {
     page = 1, pageSize = 10,
     floorAreaSizeFrom, floorAreaSizeTo,
@@ -16,9 +10,6 @@ exports.getAvailableApartments = async (req, res, next) => {
     numberOfRoomsFrom, numberOfRoomsTo,
     longitude, latitude, radius,
   } = req.query;
-  const filterQuery = {
-    isAvailable: true,
-  };
   if (floorAreaSizeFrom || floorAreaSizeTo) {
     filterQuery.floorAreaSize = {
       ...(floorAreaSizeFrom && { $gte: floorAreaSizeFrom }),
@@ -45,7 +36,7 @@ exports.getAvailableApartments = async (req, res, next) => {
   const options = {
     sort: { createdAt: -1 },
     page,
-    populate: 'owner',
+    populate: { path: 'owner', select: 'name email id' },
     limit: pageSize,
   };
   return ApartmentSchema.paginate(
@@ -58,4 +49,15 @@ exports.getAvailableApartments = async (req, res, next) => {
       return successResponseWithData(res, 'Apartments fetched successfully', results);
     },
   );
+};
+
+
+/*
+ * GET /apartments'
+ * Fetch all available apartments
+ */
+
+exports.getAvailableApartments = async (req, res, next) => {
+  res.locals.filterQuery = { isAvailable: true };
+  return this.findFilteredApartments(req, res, next);
 };

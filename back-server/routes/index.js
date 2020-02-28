@@ -9,8 +9,8 @@ const testingControl = controllers.testingController;
 const requireAuth = passport.authenticate('jwt', { session: false });
 const requireSignin = passport.authenticate('local', { session: false });
 const {
-  nonClientRole, realtorOnlyRole, adminRole, nonAdminRole, nonRealtorRole,
-  clientOnlyRole,
+  apartmentRoles, realtorRole, adminRole, regularRoles, bookerRoles,
+  clientRole,
 } = require('../services/const');
 const {
   findUserWithRole, findApartmentWithRealtor, findApartmentWithClient, findAvailableApartment,
@@ -27,42 +27,42 @@ module.exports = (app) => {
   app.get('/auth/me', requireAuth, authControl.getPersonalInfo);
 
   /* Client routes */
-  app.get('/users/:id/bookings', [requireAuth, verifyAccess(nonRealtorRole)], userControl.getBookings);
+  app.get('/users/:id/bookings', [requireAuth, verifyAccess(bookerRoles)], userControl.getBookings);
   app.post('/users/:id/bookings/:apartmentId', [requireAuth, validate('userAndApartmentIdsValidation'),
-    validateResults, verifyAccess(nonRealtorRole), findUserWithRole(clientOnlyRole)],
+    validateResults, verifyAccess(bookerRoles), findUserWithRole(clientRole)],
   findAvailableApartment, userControl.bookApartment);
   app.delete('/users/:userId/bookings/:apartmentId', [requireAuth, validate('userAndApartmentIdsValidation'),
-    validateResults, verifyAccess(nonRealtorRole), findUserWithRole(clientOnlyRole),
+    validateResults, verifyAccess(bookerRoles), findUserWithRole(clientRole),
     findApartmentWithClient],
   userControl.unbookApartment);
-  app.get('/apartments', [requireAuth, verifyAccess(nonRealtorRole)], apartmentControl.getAvailableApartments);
+  app.get('/apartments', [requireAuth, verifyAccess(bookerRoles)], apartmentControl.getAvailableApartments);
 
   /* Realtor routes */
   app.get('/users/:userId/apartments', [requireAuth, validate('userIdValidation'),
-    validateResults, verifyAccess(nonClientRole)], userControl.getOwnedApartments);
+    validateResults, verifyAccess(apartmentRoles)], userControl.getOwnedApartments);
   app.get('/users/:userId/apartments/:apartmentId', [requireAuth, validate('userAndApartmentIdsValidation'),
-    verifyAccess(nonClientRole)], userControl.getSingleApartment);
+    verifyAccess(apartmentRoles)], userControl.getSingleApartment);
   app.post('/users/:userId/apartments', [requireAuth,
-    validate('userIdValidation'), validateResults, verifyAccess(nonClientRole)],
+    validate('userIdValidation'), validateResults, verifyAccess(apartmentRoles)],
   userControl.addApartment);
   app.put('/users/:userId/apartments/:apartmentId', [requireAuth, validate('userAndApartmentIdsValidation'),
-    validateResults, verifyAccess(nonClientRole), findUserWithRole(realtorOnlyRole),
+    validateResults, verifyAccess(apartmentRoles), findUserWithRole(realtorRole),
     findApartmentWithRealtor],
   userControl.updateApartment);
   app.delete('/users/:userId/apartments/:apartmentId', [requireAuth, validate('userAndApartmentIdsValidation'),
-    validateResults, verifyAccess(nonClientRole), findUserWithRole(realtorOnlyRole),
+    validateResults, verifyAccess(apartmentRoles), findUserWithRole(realtorRole),
     findApartmentWithRealtor],
   userControl.deleteApartment);
 
   /* Admin routes */
   app.get('/users/:userId', [requireAuth, validate('userIdValidation'), verifyAccess(adminRole),
-    findUserWithRole(nonAdminRole)],
+    findUserWithRole(regularRoles)],
   userControl.getUser);
   app.put('/users/:userId', [requireAuth, validate('editUser'), verifyAccess(adminRole),
-    findUserWithRole(nonAdminRole)],
+    findUserWithRole(regularRoles)],
   userControl.editUser);
   app.delete('/users/:userId', [requireAuth, validate('userIdValidation'), verifyAccess(adminRole),
-    findUserWithRole(nonAdminRole)],
+    findUserWithRole(regularRoles)],
   userControl.deleteUser);
   app.get('/users', [requireAuth, verifyAccess(adminRole)], userControl.getUsers);
   app.post('/users', [requireAuth, verifyAccess(adminRole)], userControl.addUser);

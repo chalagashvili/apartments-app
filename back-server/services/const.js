@@ -1,11 +1,10 @@
-exports.allRoles = ['client', 'realtor', 'admin'];
-exports.clientRole = ['client', 'realtor', 'admin'];
-exports.realtorRole = ['realtor', 'admin'];
+exports.clientRole = ['client'];
+exports.realtorRole = ['realtor'];
 exports.adminRole = ['admin'];
-exports.nonAdminRole = ['client', 'realtor'];
-exports.nonClientRole = ['realtor', 'admin'];
-exports.nonRealtorRole = ['client', 'admin'];
-exports.realtorOnlyRole = ['realtor'];
+exports.allRoles = [...this.adminRole, ...this.clientRole, ...this.realtorRole];
+exports.regularRoles = [...this.clientRole, this.realtorRole];
+exports.bookerRoles = [...this.adminRole, ...this.clientRole];
+exports.apartmentRoles = [...this.adminRole, ...this.realtorRole];
 
 exports.notEnoughPermissionsErrorText = 'You do not have enough permissions to perform operation';
 exports.userWasNotFoundErrorText = 'User was not found';

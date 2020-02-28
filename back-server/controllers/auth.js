@@ -7,7 +7,6 @@ const {
   successResponse,
   successResponseWithData,
 } = require('../services/apiResponse');
-
 const UserSchema = require('../models').userSchema;
 
 /*
