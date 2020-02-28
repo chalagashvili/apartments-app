@@ -7,7 +7,7 @@ exports.findApartmentWithClient = async (req, res, next) => {
   try {
     const { apartmentId } = req.params;
     const { user } = res.locals;
-    const apartment = await ApartmentSchema.findById({
+    const apartment = await ApartmentSchema.findOne({
       $and: [{ _id: apartmentId },
         { _id: { $in: user.bookings } }],
     });
@@ -22,7 +22,7 @@ exports.findApartmentWithClient = async (req, res, next) => {
 exports.findApartmentWithRealtor = async (req, res, next) => {
   try {
     const { userId, apartmentId } = req.params;
-    const apartment = await ApartmentSchema.findById({ _id: apartmentId, owner: userId });
+    const apartment = await ApartmentSchema.findOne({ _id: apartmentId, owner: userId });
     if (!apartment) return notFoundResponse(res, apartmentWasNotFoundErrorText);
     res.locals.apartment = apartment;
     return next();

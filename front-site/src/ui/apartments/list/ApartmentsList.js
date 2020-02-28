@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import { Pagination, Icon, Button } from 'antd';
 import moment from 'moment';
 import Filter from 'ui/apartments/list/Filter';
-import { defaultApartmentImage, RealtorOnly, nonClient, AdminOnly } from 'utils/const';
+import { defaultApartmentImage, RealtorOnly, nonClient, AdminOnly, ClientOnly } from 'utils/const';
 
 
 const ApartmentsList = ({
@@ -51,7 +51,7 @@ const ApartmentsList = ({
           </div>
           <div className="apartment__infoWrapper" >
             {
-            nonClient.includes(role) ? (
+            nonClient.includes(role) && mode !== ClientOnly ? (
               <button
                 className="apartment-list-edit-button"
                 onClick={() => onEdit(apartment._id)}

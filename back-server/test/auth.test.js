@@ -46,7 +46,7 @@ describe('Test authentication logic', () => {
         role: 'client',
         name: 'Irakli',
       })
-      .expect(400)
+      .expect(500)
       .expect('Content-Type', /application\/json/);
     done();
   });

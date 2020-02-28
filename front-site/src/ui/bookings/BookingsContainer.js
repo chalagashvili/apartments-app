@@ -9,7 +9,7 @@ import { getAuthInfo } from 'state/auth/selectors';
 import { removeFilter, setFilter } from 'state/filters/actions';
 import { getFilters } from 'state/filters/selectors';
 import { fetchBookings, sendDeleteBooking } from 'state/users/actions';
-import { ROUTE_EDIT_APARTMENT } from 'app-init/router';
+// import { ROUTE_EDIT_APARTMENT, ROUTE_ADMIN_EDIT_APARTMENT } from 'app-init/router';
 import { ClientOnly, defaultPagination } from 'utils/const';
 
 const mapStateToProps = state => ({
@@ -22,7 +22,7 @@ const mapStateToProps = state => ({
   mode: ClientOnly,
 });
 
-const mapDispatchToProps = (dispatch, { history, match: { params: { userId } } }) => ({
+const mapDispatchToProps = (dispatch, { match: { params: { userId } } }) => ({
   onDidMount: () => {
     dispatch(fetchBookings(defaultPagination, userId))
       .catch(err => message.error(err.message));
@@ -45,7 +45,13 @@ const mapDispatchToProps = (dispatch, { history, match: { params: { userId } } }
       dispatch(setFilter('bookings', key, val));
     }
   },
-  onEdit: id => history.push(ROUTE_EDIT_APARTMENT.replace(':apartmentId', id)),
+  // onEdit: id => history.push(ROUTE_EDIT_APARTMENT.replace(':apartmentId', id)),
+  // onEdit: (id) => {
+  //   const routePath = userId ?
+  //     ROUTE_ADMIN_EDIT_APARTMENT.replace(':userId', userId).replace(':apartmentId', id) :
+  //     ROUTE_EDIT_APARTMENT.replace(':apartmentId', id);
+  //   history.push(routePath);
+  // },
   onFilter: () => dispatch(fetchBookings(defaultPagination, userId))
     .catch(err => message.error(err.message)),
   onUnBook: (apartmentId) => {

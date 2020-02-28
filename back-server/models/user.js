@@ -56,17 +56,19 @@ userSchema.pre('findOneAndUpdate', function (next) {
 
 // Pre-save hook for hashing + salting with password
 // eslint-disable-next-line func-names
-userSchema.pre('save', function (next) {
+userSchema.pre(['save', 'updateOne'], function (next) {
   const user = this;
+  const { _update = {} } = this;
   bcrypt.genSalt(10, (err, salt) => {
     if (err) {
       return next(err);
     }
-    return bcrypt.hash(user.password, salt, null, (hashErr, hash) => {
+    return bcrypt.hash(_update.password || user.password, salt, null, (hashErr, hash) => {
       if (hashErr) {
         return next(hashErr);
       }
       user.password = hash;
+      _update.password = hash;
       return next();
     });
   });

@@ -148,7 +148,7 @@ describe('Test users logic', () => {
           numberOfRooms: 5,
           isAvailable: true,
           pricePerMonth: 800,
-          location: { coordinates: [40, 41], type: 'Point' },
+          loc: { coordinates: [40, 41], type: 'Point' },
         })
         .expect(200)
         .expect('Content-Type', /application\/json/);

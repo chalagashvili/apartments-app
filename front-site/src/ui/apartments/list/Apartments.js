@@ -86,6 +86,7 @@ class Apartments extends React.PureComponent {
             groupLoading={groupLoading}
             onFilter={onFilter}
             onEdit={onEdit}
+            mode={mode}
             pagination={pagination}
             searchByMap={searchByMap}
             onFilterChange={onFilterChange}

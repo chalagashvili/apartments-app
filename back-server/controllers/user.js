@@ -73,17 +73,23 @@ exports.addUser = async (req, res) => {
  * Update existing user
  */
 
-exports.editUser = async (req, res, next) => {
+exports.editUser = async (req, res) => {
   const { user } = res.locals;
   const { password, role } = req.body;
-  /* Check if changing role, then we need to do some cleanup */
-  if (user.role !== role) {
-    cleanUpAfterRoleChange(user);
-    user.bookings = [];
-    user.ownedApartments = [];
-  }
-  const saveCb = (saveErr) => {
-    if (saveErr) return next(saveErr);
+  try {
+    /* Check if changing role, then we need to do some cleanup */
+    if (user.role !== role) {
+      cleanUpAfterRoleChange(user);
+      req.body.bookings = [];
+      req.body.ownedApartments = [];
+    }
+    /* Check if changing password then fire .save to salt and
+      hash new password instead of regular update */
+    if (password) {
+      await UserSchema.updateOne({ _id: user._id }, req.body, { runValidators: true, context: 'query' });
+    } else {
+      await UserSchema.findByIdAndUpdate({ _id: user._id }, req.body, { runValidators: true, context: 'query' });
+    }
     return successResponseWithData(res, 'User updated successfully', {
       data: [{
         name: user.name,
@@ -93,13 +99,9 @@ exports.editUser = async (req, res, next) => {
         _id: user._id,
       }],
     });
-  };
-  /* Check if changing password then fire .save to salt and
-  hash new password instead of regular update */
-  if (password) {
-    return user.save(req.body, saveCb);
+  } catch (error) {
+    return errorResponse(res, error.message);
   }
-  return UserSchema.findByIdAndUpdate({ _id: user._id }, req.body, { runValidators: true, context: 'query' }, saveCb);
 };
 
 /*
@@ -161,7 +163,7 @@ exports.getBookings = (req, res, next) => {
 */
 
 exports.bookApartment = async (req, res, next) => {
-  const { user, apartment } = res.locals.user;
+  const { user, apartment } = res.locals;
   try {
     apartment.isAvailable = false;
     await apartment.save();

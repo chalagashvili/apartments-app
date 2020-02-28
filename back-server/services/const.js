@@ -2,7 +2,7 @@ exports.clientRole = ['client'];
 exports.realtorRole = ['realtor'];
 exports.adminRole = ['admin'];
 exports.allRoles = [...this.adminRole, ...this.clientRole, ...this.realtorRole];
-exports.regularRoles = [...this.clientRole, this.realtorRole];
+exports.regularRoles = [...this.clientRole, ...this.realtorRole];
 exports.bookerRoles = [...this.adminRole, ...this.clientRole];
 exports.apartmentRoles = [...this.adminRole, ...this.realtorRole];
 

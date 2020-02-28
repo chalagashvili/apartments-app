@@ -56,7 +56,7 @@ describe('Real Estate App E2E testing ', () => {
     cy.get('input[id=apartmentForm_pricePerMonth]').type(3500);
     cy.get('input[id=apartmentForm_description]').type('A very good place to live in');
     cy.get('button[id=apartmentForm_isAvailable]').click();
-    cy.get('input[id=apartmentForm_location]').type('41,45');
+    cy.get('input[id=apartmentForm_loc]').type('41,45');
     cy.get('button[type=submit]').click();
   });
   it('Shows list of apartments', () => {

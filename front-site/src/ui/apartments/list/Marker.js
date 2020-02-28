@@ -3,13 +3,13 @@ import moment from 'moment';
 import { Icon, Button } from 'antd';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
-import { defaultApartmentImage, nonClient, RealtorOnly } from 'utils/const';
+import { defaultApartmentImage, nonClient, RealtorOnly, ClientOnly } from 'utils/const';
 import 'ui/apartments/list/Marker.css';
 
 const Marker = (props) => {
   const {
     name, active, onClick, item, selectedItem, auth: { role }, onEdit,
-    onBook, groupLoading, onUnBook,
+    onBook, groupLoading, onUnBook, mode,
   } = props;
   return (
     <div
@@ -50,7 +50,7 @@ const Marker = (props) => {
             />
             <div style={{ padding: '15px 20px 20px' }} >
               {
-                nonClient.includes(role) ? (
+                nonClient.includes(role) && mode !== ClientOnly ? (
                   <button
                     className="apartment-edit-button"
                     onClick={() => onEdit(item._id)}
@@ -182,6 +182,7 @@ Marker.propTypes = {
   onBook: PropTypes.func,
   onUnBook: PropTypes.func,
   groupLoading: PropTypes.shape({}),
+  mode: PropTypes.string.isRequired,
 };
 
 Marker.defaultProps = {
