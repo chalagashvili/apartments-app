@@ -1,6 +1,7 @@
 const Int32 = require('mongoose-int32');
 const mongoose = require('mongoose');
 const mongoosePaginate = require('mongoose-paginate-v2');
+const UserSchema = require('./user').user;
 
 const customLabels = {
   totalDocs: 'totalItems',
@@ -43,11 +44,18 @@ const apartmentSchema = new Schema({
   },
 }, { timestamps: true });
 
-// Pre hook for `findOneAndUpdate`
-// eslint-disable-next-line func-names
 apartmentSchema.pre('findOneAndUpdate', function (next) {
   this.options.runValidators = true;
   next();
+});
+
+apartmentSchema.post('deleteOne', { document: true, query: false }, async (doc) => {
+  try {
+    const apartmentId = doc._id;
+    await UserSchema.updateMany({ bookings: apartmentId }, { $pull: { bookings: apartmentId } });
+  } catch (error) {
+    console.error(error);
+  }
 });
 
 apartmentSchema.index({ loc: '2dsphere' });

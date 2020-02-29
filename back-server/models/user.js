@@ -1,10 +1,9 @@
 const mongoose = require('mongoose');
-const bcrypt = require('bcrypt-nodejs');
+const bcrypt = require('bcrypt');
 const mongoosePaginate = require('mongoose-paginate-v2');
 const validator = require('validator');
 const uniqueValidator = require('mongoose-unique-validator');
-const Apartment = require('./apartment');
-const { allRoles } = require('../services/const');
+const { allRoles, clientRole, realtorRole } = require('../services/const');
 
 const customLabels = {
   totalDocs: 'totalItems',
@@ -47,42 +46,34 @@ const userSchema = new Schema({
   ownedApartments: [{ type: Schema.Types.ObjectId, ref: 'Apartment' }],
 }, { timestamps: true });
 
-// Pre hook for `findOneAndUpdate`
-// eslint-disable-next-line func-names
 userSchema.pre('findOneAndUpdate', function (next) {
   this.options.runValidators = true;
   next();
 });
 
 // Pre-save hook for hashing + salting with password
-// eslint-disable-next-line func-names
-userSchema.pre(['save', 'updateOne'], function (next) {
-  const user = this;
-  const { _update = {} } = this;
-  bcrypt.genSalt(10, (err, salt) => {
-    if (err) {
-      return next(err);
-    }
-    return bcrypt.hash(_update.password || user.password, salt, null, (hashErr, hash) => {
-      if (hashErr) {
-        return next(hashErr);
-      }
-      user.password = hash;
-      _update.password = hash;
-      return next();
-    });
-  });
+userSchema.pre(['save', 'updateOne'], async function (next) {
+  try {
+    const user = this;
+    const { _update = {} } = this;
+    const salt = await bcrypt.genSalt(10);
+    const hash = await bcrypt.hash(_update.password || user.password, salt);
+    user.password = hash;
+    _update.password = hash;
+    next();
+  } catch (error) {
+    next(error);
+  }
 });
 
 // Compare provided password with salted one
-// eslint-disable-next-line func-names
-userSchema.methods.comparePassword = function (candidatePassword, callback) {
-  bcrypt.compare(candidatePassword, this.password, (err, isMatch) => {
-    if (err) {
-      return callback(err);
-    }
-    return callback(null, isMatch);
-  });
+userSchema.methods.comparePassword = async function (candidatePassword) {
+  try {
+    const match = await bcrypt.compare(candidatePassword, this.password);
+    return match;
+  } catch (error) {
+    throw new Error(error);
+  }
 };
 
 // eslint-disable-next-line no-use-before-define
@@ -97,38 +88,25 @@ userSchema.plugin(mongoosePaginate);
 userSchema.plugin(uniqueValidator, { message: 'Email address is already used.' });
 const user = mongoose.model('User', userSchema);
 
-function removeLinkedDocuments(doc) {
-  if (doc.role === 'realtor') {
-    // eslint-disable-next-line no-plusplus
-    for (let i = 0; i < doc.ownedApartments.length; i++) {
-      const apartmentId = doc.ownedApartments[i];
-      Apartment.findById({ _id: apartmentId }, (err, apart) => {
-        if (!err && apart) {
-          if (!apart.isAvailable) {
-            user.findOneAndUpdate(
-              { bookings: mongoose.Types.ObjectId(apartmentId) },
-              { $pull: { bookings: apartmentId } },
-            ).exec();
-          }
-          apart.remove();
-        }
-      });
-    }
-  } else if (doc.role === 'client') {
-    Apartment.find({ _id: { $in: doc.bookings } }, (err, apartments) => {
-      if (!err && apartments) {
-        // eslint-disable-next-line no-plusplus
-        for (let j = 0; j < apartments.length; j++) {
-          const a = apartments[j];
-          a.isAvailable = true;
-          a.save();
-        }
-      }
-    });
-  }
-}
-
 module.exports = {
   user,
   cleanUpAfterRoleChange,
 };
+
+const ApartmentSchema = require('./apartment');
+
+async function removeLinkedDocuments(doc) {
+  try {
+    if (realtorRole.includes(doc.role)) {
+      user.updateMany(
+        { bookings: { $in: doc.ownedApartments } },
+        { $pull: { bookings: { $in: doc.ownedApartments } } }, { multi: true },
+      ).exec();
+      ApartmentSchema.deleteMany({ _id: { $in: doc.ownedApartments } }).exec();
+    } else if (clientRole.includes(doc.role)) {
+      ApartmentSchema.updateMany({ _id: { $in: doc.bookings } }, { isAvailable: true }).exec();
+    }
+  } catch (error) {
+    console.error(error);
+  }
+}

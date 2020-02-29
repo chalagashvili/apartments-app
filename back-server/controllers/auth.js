@@ -1,5 +1,3 @@
-/* eslint-disable no-underscore-dangle */
-/* eslint-disable no-param-reassign */
 const utils = require('../services/utility');
 const {
   errorResponse,
@@ -26,17 +24,19 @@ exports.signIn = (req, res) => successResponseWithData(res, 'Sign in successfull
   Perform signup operation with email and password
 */
 
-exports.signUp = (req, res) => {
-  const user = new UserSchema(req.body);
-  return user.save((err, savedUser) => {
-    if (err) return errorResponse(res, err.message);
+exports.signUp = async (req, res) => {
+  try {
+    let user = new UserSchema(req.body);
+    user = await user.save();
     return successResponseWithData(res, 'Sign up successfull', {
       token: utils.tokenForUser(user),
       email: user.email,
       role: user.role,
-      id: savedUser._id,
+      id: user._id,
     });
-  });
+  } catch (error) {
+    return errorResponse(res, error.message);
+  }
 };
 
 /**
@@ -46,13 +46,13 @@ exports.signUp = (req, res) => {
 exports.resetPassword = (req, res, next) => UserSchema
   .findOne({ passwordResetToken: req.params.token })
   .where('passwordResetExpires').gt(Date.now())
-  .then((user) => {
+  .then(async (user) => {
     if (!user) return validationError(res, 'Password reset token is invalid or has expired');
     user.password = req.body.password;
     user.passwordResetToken = undefined;
     user.passwordResetExpires = undefined;
-    return user.save((err) => {
-      if (err) return next(err);
+    try {
+      await user.save();
       const mailOptions = {
         to: user.email,
         fromEmail: 'no-reply@irakli.com',
@@ -60,10 +60,11 @@ exports.resetPassword = (req, res, next) => UserSchema
         subject: 'Your Iraklis Assignment password has been changed',
         text: `Hello,\n\nThis is a confirmation that the password for your account ${user.email} has just been changed.\n`,
       };
-      return utils.sendEmail(mailOptions)
-        .then(() => successResponse(res, 'Password has been successfully reset!'))
-        .catch(() => successResponse(res, 'Password has been reset, but confirmation email was not send.'));
-    });
+      await utils.sendEmail(mailOptions);
+      return successResponse(res, 'Password has been successfully reset!');
+    } catch (error) {
+      return next(error);
+    }
   });
 
 /*

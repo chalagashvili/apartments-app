@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
@@ -14,7 +13,20 @@ const { errorResponse, notFoundResponse } = require('./services/apiResponse');
 
 const app = express();
 
-const dbUrl = process.env.NODE_ENV === 'test' ? process.env.TEST_DATABASE_URL : process.env.DATABASE_URL;
+let dbUrl = '';
+switch (process.env.NODE_ENV) {
+  case 'test':
+    dbUrl = process.env.TEST_DATABASE_URL;
+    break;
+  case 'development':
+    dbUrl = process.env.DEV_DATABASE_URL;
+    break;
+  case 'production':
+    dbUrl = process.env.PROD_DATABASE_URL;
+    break;
+  default:
+    dbUrl = process.env.DEV_DATABASE_URL;
+}
 
 mongoose.connect(dbUrl, { useNewUrlParser: true, useUnifiedTopology: true });
 mongoose.set('useNewUrlParser', true);
@@ -48,7 +60,7 @@ router(app);
 app.disable('x-powered-by');
 /* Handle Application Errors */
 // eslint-disable-next-line no-unused-vars
-app.use((err, req, res, _next) => {
+app.use((err, req, res, next) => {
   console.error(err.stack);
   errorResponse(res, 'Something went wrong, try again!');
 });

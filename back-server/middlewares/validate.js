@@ -2,22 +2,32 @@ const { param, body } = require('express-validator');
 const { adminRole } = require('../services/const');
 
 const validations = {
-  userId: param('userId').exists().withMessage('User ID does not exist or is invalid').isMongoId()
+  userId: param('userId')
+    .exists()
+    .withMessage('User ID does not exist')
+    .isMongoId()
     .withMessage('User ID is not valid mongo ID'),
-  apartmentId: param('apartmentId', 'Apartment ID does not exist or is invalid').exists().isMongoId(),
-  password: body('password', 'Password length must be >= 8').exists().isLength({ min: 8 }),
-  signupRole: body('role').custom((role) => {
-    if (adminRole.includes(role)) {
-      throw new Error('You cannot sign up as admin');
-    }
-    return true;
-  }),
-  editRole: body('role').custom((role, { req }) => {
-    if (!adminRole.includes(req.user.role)) {
-      throw new Error('Only admin can make other person admin');
-    }
-    return true;
-  }),
+  apartmentId: param('apartmentId', 'Apartment ID does not exist or is invalid')
+    .exists()
+    .withMessage('Apartment ID does not exist')
+    .isMongoId()
+    .withMessage('Apartment ID is invalid'),
+  password: body('password', 'Password length must be >= 8')
+    .optional()
+    .isLength({ min: 8 }),
+  signupRole: body('role')
+    .custom((role) => {
+      if (adminRole.includes(role)) {
+        throw new Error('You cannot sign up as admin');
+      } return true;
+    }),
+  editRole: body('role')
+    .custom((role, { req }) => {
+      if (!adminRole.includes(req.user.role)) {
+        throw new Error('Only admin can make other person admin');
+      }
+      return true;
+    }),
 };
 
 const validate = (method) => {

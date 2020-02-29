@@ -1,5 +1,3 @@
-/* eslint-disable no-underscore-dangle */
-/* eslint-disable no-param-reassign */
 const mongoose = require('mongoose');
 const crypto = require('crypto');
 const { promisify } = require('util');
@@ -7,7 +5,6 @@ const utils = require('../services/utility');
 const {
   errorResponse,
   successResponse,
-  notFoundResponse,
   successResponseWithData,
 } = require('../services/apiResponse');
 const { findFilteredApartments } = require('./apartment');
@@ -38,17 +35,17 @@ exports.deleteUser = async (req, res, next) => {
  * Add user account.
  */
 
-exports.addUser = async (req, res) => {
-  const randomTokenBytes = await randomBytesAsync(16);
-  const token = randomTokenBytes.toString('hex');
-  const newUser = new UserSchema({
-    ...req.body,
-    password: utils.generatePassword(),
-    passwordResetToken: token,
-    passwordResetExpires: Date.now() + 3600000, // 1 hour
-  });
-  return newUser.save((err, user) => {
-    if (err) return errorResponse(res, err.message);
+exports.addUser = async (req, res, next) => {
+  try {
+    const randomTokenBytes = await randomBytesAsync(16);
+    const token = randomTokenBytes.toString('hex');
+    const newUser = new UserSchema({
+      ...req.body,
+      password: utils.generatePassword(),
+      passwordResetToken: token,
+      passwordResetExpires: Date.now() + 3600000, // 1 hour
+    });
+    const user = await newUser.save();
     const mailOptions = {
       to: newUser.email,
       fromEmail: 'no-reply@irakli.com',
@@ -62,10 +59,11 @@ exports.addUser = async (req, res) => {
     user.password = undefined;
     user.passwordResetToken = undefined;
     user.passwordResetExpires = undefined;
-    return utils.sendEmail(mailOptions)
-      .then(() => successResponseWithData(res, `An e-mail has been sent to ${newUser.email} with further instructions.`, user))
-      .catch(() => errorResponse(res, 'Password reset token has been generated but could not send an email'));
-  });
+    await utils.sendEmail(mailOptions);
+    return successResponseWithData(res, `An e-mail has been sent to ${newUser.email} with further instructions.`, user);
+  } catch (error) {
+    return next(error);
+  }
 };
 
 /*
@@ -127,23 +125,23 @@ exports.getUser = async (req, res) => {
  */
 
 exports.getUsers = async (req, res, next) => {
-  const { page = 1, pageSize = 10 } = req.query;
-  const options = {
-    select: 'createdAt name email role',
-    sort: { createdAt: -1 },
-    page,
-    limit: pageSize,
-  };
-  return UserSchema.paginate(
-    { role: { $in: regularRoles } },
-    options,
-    (err, results) => {
-      if (err) return next(err);
-      // eslint-disable-next-line no-param-reassign
-      results.metadata.page = Math.min(results.metadata.page, results.metadata.lastPage);
-      return successResponseWithData(res, 'Users fetched successfully', results);
-    },
-  );
+  try {
+    const { page = 1, pageSize = 10 } = req.query;
+    const options = {
+      select: 'createdAt name email role',
+      sort: { createdAt: -1 },
+      page,
+      limit: pageSize,
+    };
+    const results = await UserSchema.paginate(
+      { role: { $in: regularRoles } },
+      options,
+    );
+    results.metadata.page = Math.min(results.metadata.page, results.metadata.lastPage);
+    return successResponseWithData(res, 'Users fetched successfully', results);
+  } catch (error) {
+    return next(error);
+  }
 };
 
 /*
@@ -151,10 +149,14 @@ exports.getUsers = async (req, res, next) => {
 * Handle logic when fetching specific user's bookings list
 */
 
-exports.getBookings = (req, res, next) => {
-  const { user } = res.locals;
-  res.locals.filterQuery = { _id: { $in: user.bookings } };
-  return findFilteredApartments(req, res, next);
+exports.getBookings = async (req, res, next) => {
+  try {
+    const { user } = res.locals;
+    const results = await findFilteredApartments(req, { _id: { $in: user.bookings } });
+    return successResponseWithData(res, 'Apartments fetched successfully', results);
+  } catch (error) {
+    return next(error);
+  }
 };
 
 /*
@@ -200,7 +202,6 @@ exports.unbookApartment = async (req, res, next) => {
 exports.addApartment = async (req, res, next) => {
   const { userId } = req.params;
   const toUpdate = res.locals.user;
-  // Create a new apartment
   const newApartment = new ApartmentSchema({ ...req.body, owner: toUpdate._id });
   try {
     const apartment = await newApartment.save();
@@ -270,19 +271,19 @@ exports.deleteApartment = async (req, res, next) => {
  */
 
 exports.getOwnedApartments = async (req, res, next) => {
-  res.locals.filterQuery = { owner: req.params.userId };
-  return findFilteredApartments(req, res, next);
+  try {
+    const results = await findFilteredApartments(req, { owner: req.params.userId });
+    return successResponseWithData(res, 'Apartments fetched successfully', results);
+  } catch (error) {
+    return next(error);
+  }
 };
 
 /*
  * GET /users/:id/apartments/:apartmentId'
  * Fetch specific apartment of realtor
  */
-exports.getSingleApartment = (req, res, next) => {
-  const { apartmentId } = req.params;
-  return ApartmentSchema.findById({ _id: apartmentId }, (err, apartment) => {
-    if (err) return next(err);
-    if (!apartment) return notFoundResponse(res, 'No apartment found for that id');
-    return successResponseWithData(res, 'Apartment found successfully', apartment);
-  });
+exports.getSingleApartment = (req, res) => {
+  const { apartment } = res.locals;
+  return successResponseWithData(res, 'Apartment found successfully', apartment);
 };

@@ -1,8 +1,7 @@
 const { successResponseWithData } = require('../services/apiResponse');
 const ApartmentSchema = require('../models').apartmentSchema;
 
-exports.findFilteredApartments = (req, res, next) => {
-  const { filterQuery } = res.locals;
+exports.findFilteredApartments = async (req, filterQuery) => {
   const {
     page = 1, pageSize = 10,
     floorAreaSizeFrom, floorAreaSizeTo,
@@ -39,16 +38,9 @@ exports.findFilteredApartments = (req, res, next) => {
     populate: { path: 'owner', select: 'name email id' },
     limit: pageSize,
   };
-  return ApartmentSchema.paginate(
-    filterQuery,
-    options,
-    (err, results) => {
-      if (err) return next(err);
-      // eslint-disable-next-line no-param-reassign
-      results.metadata.page = Math.min(results.metadata.page, results.metadata.lastPage);
-      return successResponseWithData(res, 'Apartments fetched successfully', results);
-    },
-  );
+  const results = await ApartmentSchema.paginate(filterQuery, options);
+  results.metadata.page = Math.min(results.metadata.page, results.metadata.lastPage);
+  return results;
 };
 
 
@@ -58,6 +50,10 @@ exports.findFilteredApartments = (req, res, next) => {
  */
 
 exports.getAvailableApartments = async (req, res, next) => {
-  res.locals.filterQuery = { isAvailable: true };
-  return this.findFilteredApartments(req, res, next);
+  try {
+    const results = await this.findFilteredApartments(req, { isAvailable: true });
+    return successResponseWithData(res, 'Apartments fetched successfully', results);
+  } catch (error) {
+    return next(error);
+  }
 };

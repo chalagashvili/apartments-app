@@ -33,13 +33,11 @@ exports.createUser = async (email, password, role, name) => {
     name,
   });
   const saved = await user.save();
-  // eslint-disable-next-line no-underscore-dangle
   return saved._id;
 };
 
 exports.addApartment = async (data) => {
   const apartment = new ApartmentSchema(data);
   const saved = await apartment.save();
-  // eslint-disable-next-line no-underscore-dangle
   return saved._id;
 };

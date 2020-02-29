@@ -93,7 +93,6 @@ describe('Test users logic', () => {
         const results = res.body.payload.data;
         expect(results.length)
           .toEqual(initialApartments.length);
-        // eslint-disable-next-line no-underscore-dangle
         bookingApartmentId = results[0]._id;
       };
       await api
@@ -163,7 +162,6 @@ describe('Test users logic', () => {
         .expect(200)
         .expect('Content-Type', /application\/json/)
         .expect((res) => {
-          // eslint-disable-next-line no-underscore-dangle
           toUpdateId = res.body.payload.data[0]._id;
         });
       await api
@@ -191,7 +189,6 @@ describe('Test users logic', () => {
         .expect(200)
         .expect('Content-Type', /application\/json/)
         .expect((res) => {
-          // eslint-disable-next-line no-underscore-dangle
           toDeleteId = res.body.payload.data[0]._id;
         });
       await api
